@@ -48,7 +48,7 @@
         android:stateListAnimator="@anim/button_elevation"
         tools:ignore="RtlCompat" />
 
-    <edu.spu.teamroot.voicecloud.WordCloudScrollView
+    <edu.spu.teamroot.voicecloud.TwoDScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/WordCloudScrollView"

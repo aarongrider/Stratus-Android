@@ -16,5 +16,10 @@
         android:background="@drawable/oval"
         tools:ignore="RtlCompat" />
 
+    <edu.spu.teamroot.voicecloud.TwoDScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/WordCloudScrollView"
+        android:layout_gravity="center_horizontal" />
 
 </FrameLayout>

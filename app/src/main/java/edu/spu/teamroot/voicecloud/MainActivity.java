@@ -3,12 +3,16 @@ package edu.spu.teamroot.voicecloud;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
 import android.widget.Button;
@@ -16,11 +20,20 @@ import android.widget.LinearLayout;
 import android.widget.HorizontalScrollView;
 
 public class MainActivity extends ActionBarActivity {
+    static Toast lastToast;
 
     ImageButton mainButton;
     ImageButton resetButton;
     ImageButton menuButton;
-    WordCloudScrollView scrollView;
+
+    TwoDScrollView scrollView;
+    RelativeLayout rl;
+
+    private static float MIN_ZOOM = 1f;
+    private static float MAX_ZOOM = 5f;
+
+    private float scaleFactor = 1f;
+    private ScaleGestureDetector scaleDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,26 +65,37 @@ public class MainActivity extends ActionBarActivity {
         });
 
         // Get scroll view
-        scrollView = (WordCloudScrollView)findViewById(R.id.WordCloudScrollView);
+        scrollView = (TwoDScrollView)findViewById(R.id.WordCloudScrollView);
 
-        // Create a LinearLayout element
-        LinearLayout linearLayout = new LinearLayout(this);
-        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-        linearLayout.setGravity(Gravity.CENTER_VERTICAL);
+        // Create a RelativeLayout element
+        rl = new RelativeLayout(this);
+
+        // Add the RelativeLayout element to the ScrollView
+        scrollView.addView(rl);
 
         // Add a bunch of buttons for testing
-        Button button;
-        for (int i = 0; i < 30; i++)
+        for (int i = 0; i < 40; i++)
         {
-            button = new Button(this);
-            button.setTextSize(30);
-            button.setText("Some text");
-            linearLayout.addView(button);
+            Button button = new Button(this);
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12 + (Math.round(Math.random() * 100) % 50));
+            button.setText("Button" + Integer.toString(i));
+
+            button.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (lastToast != null) lastToast.cancel();
+                    lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
+                    lastToast.show();
+                    return false;
+                }
+            });
+
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = toPx(20 + (Math.round(Math.random() * 100)) * 10);
+            params.topMargin = toPx(20 + i * 55);
+
+            rl.addView(button, params);
         }
-
-        // Add the LinearLayout element to the ScrollView
-        scrollView.addView(linearLayout);
-
     }
 
 
@@ -95,5 +119,13 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private int toPx(float dp) {
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()));
+    }
+
+    private int toDp(float px) {
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, getResources().getDisplayMetrics()));
     }
 }
