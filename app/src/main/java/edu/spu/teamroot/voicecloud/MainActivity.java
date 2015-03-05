@@ -13,7 +13,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -83,7 +85,7 @@ public class MainActivity extends ActionBarActivity {
         rl = new RelativeLayout(this);
 
         // Add the RelativeLayout element to the ScrollView
-        scrollView.addView(rl);
+        scrollView.addView(rl, toPx(1000), toPx(1000));
 
         makeButton("Hello", 60, 20, 300);
 
@@ -123,7 +125,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void randomButtons() {
-
         // Add a bunch of buttons for testing
         for (int i = 0; i < 40; i++)
         {
@@ -134,7 +135,6 @@ public class MainActivity extends ActionBarActivity {
             // Create new color filter and set button background color
             PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
             button.getBackground().setColorFilter(filter);
-
 
             button.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -156,7 +156,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void makeButton(String name, int size, int x, int y) {
-
         Button button = new Button(this);
         button.setTextSize(size);
         button.setText(name);
@@ -179,22 +178,26 @@ public class MainActivity extends ActionBarActivity {
         params.leftMargin = toPx(x);
         params.topMargin = toPx(y);
 
-        // Add animation
+        // Create animation
+        ScaleAnimation scaleAnim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
+        scaleAnim.setInterpolator(new SpringInterpolator());
+
+        scaleAnim.setDuration(1000);
+        scaleAnim.setStartOffset(500);
 
         rl.addView(button, params);
 
+        // Animate the button
+        button.setAnimation(scaleAnim);
+        button.animate();
     }
 
     public int getRandomAccentColor() {
-
-        String color = "";
-
         // Randomly select a fact
         Random randomGenerator = new Random();  // Construct a new Random number generator
         int randomNumber = randomGenerator.nextInt(accentColors.length);
 
-        color = accentColors[randomNumber];
-        int colorAsInt = Color.parseColor(color);
+        int colorAsInt = Color.parseColor(accentColors[randomNumber]);
 
         return colorAsInt;
 
