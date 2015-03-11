@@ -87,10 +87,11 @@ public class MainActivity extends ActionBarActivity {
         // Add the RelativeLayout element to the ScrollView
         scrollView.addView(rl, toPx(1000), toPx(1000));
 
-        makeButton("Hello", 60, 20, 300);
+        // Make buttons
+        //makeButton("Hello", 60, 20, 300);
 
         // Create random buttons
-        //randomButtons();
+        randomButtons();
     }
 
 
@@ -128,29 +129,14 @@ public class MainActivity extends ActionBarActivity {
         // Add a bunch of buttons for testing
         for (int i = 0; i < 40; i++)
         {
-            Button button = new Button(this);
-            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12 + (Math.round(Math.random() * 100) % 50));
-            button.setText("Button" + Integer.toString(i));
+            Random randomGenerator = new Random();  // Construct a new Random number generator
+            int size = randomGenerator.nextInt(150);
 
-            // Create new color filter and set button background color
-            PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
-            button.getBackground().setColorFilter(filter);
+            int x = toPx(20 + (Math.round(Math.random() * 100)) * 10);
+            int y = toPx(20 + i * 55);
 
-            button.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (lastToast != null) lastToast.cancel();
-                    lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
-                    lastToast.show();
-                    return false;
-                }
-            });
-
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-            params.leftMargin = toPx(20 + (Math.round(Math.random() * 100)) * 10);
-            params.topMargin = toPx(20 + i * 55);
-
-            rl.addView(button, params);
+            String buttonName = String.format("Button %s", i);
+            makeButton(buttonName, size, x, y);
         }
 
     }
