@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
@@ -37,6 +38,7 @@ import android.widget.HorizontalScrollView;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -227,10 +229,24 @@ public class MainActivity extends ActionBarActivity {
 
         String[] values = new String[] { "Count", "Google", "Send to Quizlet"};
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
-                R.layout.word_action_row, R.id.label, values);
 
-        listView.setAdapter(arrayAdapter);
+        ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> curItemMap;
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.drawable.ic_launcher));
+        curItemMap.put("label", "Count");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.drawable.ic_reset_white_36dp));
+        curItemMap.put("label", "Google");
+        dataList.add(curItemMap);
+
+        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.word_action_row, R.id.label, values);
+        SimpleAdapter simpleAdapter = new SimpleAdapter(this, dataList, R.layout.word_action_row, new String[] {"icon", "label"}, new int[] {R.id.icon, R.id.label});
+
+        listView.setAdapter(simpleAdapter);
 
         // set the custom dialog components - text, image and button
         //TextView text = (TextView) dialog.findViewById(R.id.text);
