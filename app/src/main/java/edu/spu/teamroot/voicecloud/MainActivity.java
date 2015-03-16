@@ -207,7 +207,7 @@ public class MainActivity extends ActionBarActivity {
         // custom dialog
         final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.word_action_dialog);
-        dialog.setTitle("Title");
+        dialog.setTitle(button.getText());
 
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
 
