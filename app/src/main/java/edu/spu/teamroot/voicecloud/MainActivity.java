@@ -161,16 +161,14 @@ public class MainActivity extends ActionBarActivity {
         PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
         button.getBackground().setColorFilter(filter);
 
-        button.setOnTouchListener(new View.OnTouchListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onClick(View v) {
                 //if (lastToast != null) lastToast.cancel();
                 //lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
                 //lastToast.show();
 
                 openAlert(v, button);
-
-                return false;
             }
         });
 
