@@ -1,6 +1,10 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.animation.ObjectAnimator;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -16,15 +20,22 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.HorizontalScrollView;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
@@ -88,10 +99,10 @@ public class MainActivity extends ActionBarActivity {
         scrollView.addView(rl, toPx(1000), toPx(1000));
 
         // Make buttons
-        //makeButton("Hello", 60, 20, 300);
+        makeButton("Hello", 60, 20, 300);
 
         // Create random buttons
-        randomButtons();
+        //randomButtons();
     }
 
 
@@ -142,7 +153,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public void makeButton(String name, int size, int x, int y) {
-        Button button = new Button(this);
+        final Button button = new Button(this);
         button.setTextSize(size);
         button.setText(name);
 
@@ -153,9 +164,12 @@ public class MainActivity extends ActionBarActivity {
         button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (lastToast != null) lastToast.cancel();
-                lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
-                lastToast.show();
+                //if (lastToast != null) lastToast.cancel();
+                //lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
+                //lastToast.show();
+
+                openAlert(v, button);
+
                 return false;
             }
         });
@@ -188,4 +202,38 @@ public class MainActivity extends ActionBarActivity {
         return colorAsInt;
 
     }
+
+    private void openAlert(View view, Button button) {
+        // custom dialog
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.word_action_dialog);
+        dialog.setTitle("Title");
+
+        ListView listView = (ListView) dialog.findViewById(R.id.listView);
+
+        String[] values = new String[] { "Count", "Google", "Send to Quizlet"};
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this,
+                R.layout.word_action_row, R.id.label, values);
+
+        listView.setAdapter(arrayAdapter);
+
+        // set the custom dialog components - text, image and button
+        //TextView text = (TextView) dialog.findViewById(R.id.text);
+        //text.setText("Android custom dialog example!");
+        //ImageView image = (ImageView) dialog.findViewById(R.id.image);
+        //image.setImageResource(R.drawable.ic_launcher);
+
+//        Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        // if button is clicked, close the custom dialog
+//        dialogButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dialog.dismiss();
+//            }
+//        });
+
+        dialog.show();
+    }
+
 }
