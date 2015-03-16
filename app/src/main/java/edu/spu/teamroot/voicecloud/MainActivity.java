@@ -5,11 +5,13 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -37,6 +39,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 public class MainActivity extends ActionBarActivity {
     static Toast lastToast;
@@ -96,13 +99,23 @@ public class MainActivity extends ActionBarActivity {
         rl = new RelativeLayout(this);
 
         // Add the RelativeLayout element to the ScrollView
-        scrollView.addView(rl, toPx(1000), toPx(1000));
+        int scrollViewWidth = 1000;
+        int scrollViewHeight = 1000;
+        scrollView.addView(rl, toPx(scrollViewWidth), toPx(scrollViewHeight));
+
+        // Move to center of the ScrollView
+        scrollView.scrollToWhenReady(scrollViewWidth / 2, scrollViewHeight / 2);
 
         // Make buttons
-        makeButton("Hello", 60, 20, 300);
+        // Name, Size, X, Y, Delay in Sec
+        makeButton("Team", 70, 100, 360, 1);
+        makeButton("Root", 50, 250, 465, 5);
+        makeButton("Washingtonian", 40, 310, 400, 10);
+        makeButton("Geotastic", 20, 310, 360, 15);
+        makeButton("Awesome", 40, 220, 295, 20);
+        makeButton("Weltz", 70, 400, 465, 25);
+        makeButton("Ok", 100, 435, 255, 30);
 
-        // Create random buttons
-        //randomButtons();
     }
 
 
@@ -147,12 +160,12 @@ public class MainActivity extends ActionBarActivity {
             int y = toPx(20 + i * 55);
 
             String buttonName = String.format("Button %s", i);
-            makeButton(buttonName, size, x, y);
+            makeButton(buttonName, size, x, y, 500);
         }
 
     }
 
-    public void makeButton(String name, int size, int x, int y) {
+    public void makeButton(String name, int size, int x, int y, int delay) {
         final Button button = new Button(this);
         button.setTextSize(size);
         button.setText(name);
@@ -181,7 +194,9 @@ public class MainActivity extends ActionBarActivity {
         scaleAnim.setInterpolator(new SpringInterpolator());
 
         scaleAnim.setDuration(1000);
-        scaleAnim.setStartOffset(500);
+
+        int offset = delay * 1000;
+        scaleAnim.setStartOffset(offset);
 
         rl.addView(button, params);
 
@@ -203,9 +218,10 @@ public class MainActivity extends ActionBarActivity {
 
     private void openAlert(View view, Button button) {
         // custom dialog
-        final Dialog dialog = new Dialog(MainActivity.this);
+        final Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog);
         dialog.setContentView(R.layout.word_action_dialog);
-        dialog.setTitle(button.getText());
+        String dialogTitle = "\"" + button.getText() + "\" Actions";
+        dialog.setTitle(dialogTitle);
 
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
 

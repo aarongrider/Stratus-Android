@@ -26,6 +26,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -34,6 +35,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -108,6 +110,13 @@ public class TwoDScrollView extends FrameLayout {
     private int mMinimumVelocity;
     private int mMaximumVelocity;
 
+    /**
+     * For scroll with guarentees
+     */
+    private int desiredScrollX = -1;
+    private int desiredScrollY = -1;
+    private ViewTreeObserver.OnGlobalLayoutListener gol;
+
     public TwoDScrollView(Context context) {
         super(context);
         initTwoDScrollView();
@@ -179,9 +188,7 @@ public class TwoDScrollView extends FrameLayout {
      * @return The maximum amount this scroll view will scroll in response to
      *   an arrow event.
      */
-    public int getMaxScrollAmountVertical() {
-        return (int) (MAX_SCROLL_FACTOR * getHeight());
-    }
+    public int getMaxScrollAmountVertical() { return (int) (MAX_SCROLL_FACTOR * getHeight()); }
     public int getMaxScrollAmountHorizontal() {
         return (int) (MAX_SCROLL_FACTOR * getWidth());
     }
@@ -1094,6 +1101,40 @@ public class TwoDScrollView extends FrameLayout {
             y = clamp(y, getHeight() - getPaddingBottom() - getPaddingTop(), child.getHeight());
             if (x != getScrollX() || y != getScrollY()) {
                 super.scrollTo(x, y);
+            }
+        }
+    }
+
+    public void scrollToWhenReady(int __x, int __y) {
+        // REALLY Scrolls to a position
+        // When adding items to a scrollView, you can't immediately scroll to it - it takes a while
+        // for the new addition to cycle back and update the scrollView's max scroll... so we have
+        // to wait and re-set as necessary
+
+        scrollTo(__x, __y);
+
+        desiredScrollX = -1;
+        desiredScrollY = -1;
+
+        if (getScrollX() != __x || getScrollY() != __y) {
+            // Didn't scroll properly: will create an event to try scrolling again later
+
+            if (getScrollX() != __x) desiredScrollX = __x;
+            if (getScrollY() != __y) desiredScrollY = __y;
+
+            if (gol == null) {
+                gol = new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        int nx = desiredScrollX == -1 ? getScrollX() : desiredScrollX;
+                        int ny = desiredScrollY == -1 ? getScrollY() : desiredScrollY;
+                        desiredScrollX = -1;
+                        desiredScrollY = -1;
+                        scrollTo(nx, ny);
+                    }
+                };
+
+                getViewTreeObserver().addOnGlobalLayoutListener(gol);
             }
         }
     }
