@@ -1,50 +1,30 @@
 package edu.spu.teamroot.voicecloud;
 
-import android.animation.ObjectAnimator;
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Animatable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
-import android.widget.ArrayAdapter;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.HorizontalScrollView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
-import java.util.StringTokenizer;
 
 public class MainActivity extends ActionBarActivity {
     static Toast lastToast;
@@ -83,10 +63,24 @@ public class MainActivity extends ActionBarActivity {
                 ImageButton button = (ImageButton)v;
                 if (isRunning) {
                     isRunning = false; // Now we are paused
-                    button.setImageResource(R.mipmap.play_icon);
+                    //button.setImageResource(R.mipmap.play_icon);
+
+                    button.setImageResource(R.drawable.avd_pause2play);
+
+                    Animatable anim = (Animatable)button.getDrawable();
+                    if (anim != null) {
+                        anim.start();
+                    }
                 } else {
                     isRunning = true; // Now we are running
-                    button.setImageResource(R.mipmap.pause_icon);
+                    //button.setImageResource(R.mipmap.pause_icon);
+
+                    button.setImageResource(R.drawable.avd_play2pause);
+
+                    Animatable anim = (Animatable)button.getDrawable();
+                    if (anim != null) {
+                        anim.start();
+                    }
                 }
             }
         });

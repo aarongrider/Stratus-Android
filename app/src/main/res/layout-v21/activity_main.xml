@@ -14,11 +14,13 @@
         android:layout_marginBottom="@dimen/main_button_margin"
         android:tint="@android:color/white"
         android:background="@drawable/oval_ripple"
-        android:src="@mipmap/pause_icon"
+        android:src="@drawable/vc_pause"
+        android:scaleType="fitXY"
         android:elevation="@dimen/elevation_low"
         android:stateListAnimator="@anim/button_elevation"
         tools:ignore="RtlCompat"
-        android:longClickable="true" />
+        android:longClickable="true"
+        android:padding="20dp" />
 
     <ImageButton
         android:id="@+id/reset_button"
