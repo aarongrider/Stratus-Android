@@ -1,6 +1,7 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.animation.ObjectAnimator;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.ScaleAnimation;
@@ -81,10 +83,10 @@ public class MainActivity extends ActionBarActivity {
                 ImageButton button = (ImageButton)v;
                 if (isRunning) {
                     isRunning = false; // Now we are paused
-                    button.setImageResource(R.drawable.play_icon);
+                    button.setImageResource(R.mipmap.play_icon);
                 } else {
                     isRunning = true; // Now we are running
-                    button.setImageResource(R.drawable.pause_icon);
+                    button.setImageResource(R.mipmap.pause_icon);
                 }
             }
         });

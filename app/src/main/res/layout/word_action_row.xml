@@ -30,7 +30,9 @@
             android:layout_alignWithParentIfMissing="false"
             android:layout_centerInParent="true"
             android:textSize="20dp"
-            android:textColor="@color/primary">
+            android:textColor="@color/primary"
+            android:paddingRight="1dp"
+            android:paddingBottom="2dp">
         </TextView>
 
     </RelativeLayout>
