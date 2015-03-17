@@ -15,6 +15,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -27,6 +28,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SimpleAdapter;
@@ -53,6 +55,8 @@ public class MainActivity extends ActionBarActivity {
     TwoDScrollView scrollView;
     RelativeLayout rl;
 
+    boolean isRunning = true;
+
     public String[] accentColors = {
             "#20a760", // green
             "#3d83f7", // blue
@@ -74,7 +78,15 @@ public class MainActivity extends ActionBarActivity {
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Play", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Play", Toast.LENGTH_SHORT).show();
+                ImageButton button = (ImageButton)v;
+                if (isRunning) {
+                    isRunning = false; // Now we are paused
+                    button.setImageResource(R.drawable.ic_play_arrow_grey300_48dp);
+                } else {
+                    isRunning = true; // Now we are running
+                    button.setImageResource(R.drawable.ic_pause_grey300_48dp);
+                }
             }
         });
 
@@ -82,7 +94,7 @@ public class MainActivity extends ActionBarActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -90,7 +102,11 @@ public class MainActivity extends ActionBarActivity {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Menu", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Menu", Toast.LENGTH_SHORT).show();
+
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.inflate(R.menu.menu_main);
+                popup.show();
             }
         });
 
@@ -119,7 +135,6 @@ public class MainActivity extends ActionBarActivity {
         makeButton("Ok", 100, 435, 255, 30);
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -171,6 +186,7 @@ public class MainActivity extends ActionBarActivity {
         final Button button = new Button(this);
         button.setTextSize(size);
         button.setText(name);
+        button.setTextColor(getResources().getColor(android.R.color.white));
 
         // Create new color filter and set button background color
         PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
@@ -220,7 +236,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void openAlert(View view, Button button) {
         // custom dialog
-        final Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog);
+        final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.word_action_dialog);
         String dialogTitle = "\"" + button.getText() + "\" Actions";
         dialog.setTitle(dialogTitle);
@@ -228,7 +244,6 @@ public class MainActivity extends ActionBarActivity {
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
 
         String[] values = new String[] { "Count", "Google", "Send to Quizlet"};
-
 
         ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> curItemMap;
