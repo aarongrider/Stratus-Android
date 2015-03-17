@@ -3,17 +3,37 @@
               android:layout_width="fill_parent"
               android:layout_height="wrap_content" >
 
-    <ImageView
-        android:id="@+id/icon"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/ic_launcher"
-        android:layout_marginBottom="10dp"
-        >
-    </ImageView>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_launcher"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+        </ImageView>
+
+        <TextView
+            android:id="@+id/iconText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_centerInParent="true"
+            android:textSize="20dp"
+            android:textColor="@color/primary">
+        </TextView>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/label"

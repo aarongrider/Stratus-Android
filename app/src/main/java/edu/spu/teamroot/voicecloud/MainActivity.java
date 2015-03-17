@@ -222,46 +222,53 @@ public class MainActivity extends ActionBarActivity {
         // custom dialog
         final Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog);
         dialog.setContentView(R.layout.word_action_dialog);
-        String dialogTitle = "\"" + button.getText() + "\" Actions";
+        String dialogTitle = "\"" + button.getText() + "\"";
         dialog.setTitle(dialogTitle);
 
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
-
-        String[] values = new String[] { "Count", "Google", "Send to Quizlet"};
-
 
         ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
         HashMap<String, String> curItemMap;
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.drawable.ic_launcher));
-        curItemMap.put("label", "Count");
+        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("iconText", "12");
+        curItemMap.put("label", "Occurrences");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.drawable.ic_reset_white_36dp));
-        curItemMap.put("label", "Google");
+        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("iconText", "6");
+        curItemMap.put("label", "Occurrences Per Minute");
         dataList.add(curItemMap);
 
-        //ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, R.layout.word_action_row, R.id.label, values);
-        SimpleAdapter simpleAdapter = new SimpleAdapter(this, dataList, R.layout.word_action_row, new String[] {"icon", "label"}, new int[] {R.id.icon, R.id.label});
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Search with Google");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Lookup on Wikipedia");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Remove from Word Cloud");
+        dataList.add(curItemMap);
+
+        //curItemMap = new HashMap<>();
+        //curItemMap.put("icon", String.valueOf(R.mipmap.quizlet_icon));
+        //curItemMap.put("iconText", "");
+        //curItemMap.put("label", "Send to Quizlet");
+        //dataList.add(curItemMap);
+
+        SimpleAdapter simpleAdapter = new SimpleAdapter(this, dataList, R.layout.word_action_row, new String[] {"icon", "iconText", "label"}, new int[] {R.id.icon, R.id.iconText ,R.id.label});
 
         listView.setAdapter(simpleAdapter);
-
-        // set the custom dialog components - text, image and button
-        //TextView text = (TextView) dialog.findViewById(R.id.text);
-        //text.setText("Android custom dialog example!");
-        //ImageView image = (ImageView) dialog.findViewById(R.id.image);
-        //image.setImageResource(R.drawable.ic_launcher);
-
-//        Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
-        // if button is clicked, close the custom dialog
-//        dialogButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                dialog.dismiss();
-//            }
-//        });
 
         dialog.show();
     }

@@ -6,6 +6,6 @@
     <dimen name="round_button_diameter">65dp</dimen>
     <dimen name="main_button_margin">20dp</dimen>
     <dimen name="option_button_margin">25dp</dimen>
-    <dimen name="elevation_low">1dp</dimen>
-    <dimen name="elevation_high">8dp</dimen>
+    <dimen name="elevation_low">4dp</dimen>
+    <dimen name="elevation_high">12dp</dimen>
 </resources>
