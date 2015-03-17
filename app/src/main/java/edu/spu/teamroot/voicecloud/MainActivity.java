@@ -27,6 +27,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SimpleAdapter;
@@ -53,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
     TwoDScrollView scrollView;
     RelativeLayout rl;
 
+    boolean isRunning = true;
+
     public String[] accentColors = {
             "#20a760", // green
             "#3d83f7", // blue
@@ -74,7 +77,15 @@ public class MainActivity extends ActionBarActivity {
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Play", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Play", Toast.LENGTH_SHORT).show();
+                ImageButton button = (ImageButton)v;
+                if (isRunning) {
+                    isRunning = false; // Now we are paused
+                    button.setImageResource(R.drawable.play_icon);
+                } else {
+                    isRunning = true; // Now we are running
+                    button.setImageResource(R.drawable.pause_icon);
+                }
             }
         });
 
@@ -82,7 +93,10 @@ public class MainActivity extends ActionBarActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
             }
         });
 
@@ -90,7 +104,11 @@ public class MainActivity extends ActionBarActivity {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Menu", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Menu", Toast.LENGTH_SHORT).show();
+
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.inflate(R.menu.menu_main);
+                popup.show();
             }
         });
 
@@ -171,6 +189,7 @@ public class MainActivity extends ActionBarActivity {
         final Button button = new Button(this);
         button.setTextSize(size);
         button.setText(name);
+        button.setTextColor(getResources().getColor(android.R.color.white));
 
         // Create new color filter and set button background color
         PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
@@ -220,7 +239,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void openAlert(View view, Button button) {
         // custom dialog
-        final Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog);
+        final Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.word_action_dialog);
         String dialogTitle = "\"" + button.getText() + "\"";
         dialog.setTitle(dialogTitle);
