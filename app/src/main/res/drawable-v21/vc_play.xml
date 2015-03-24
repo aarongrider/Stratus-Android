@@ -5,8 +5,8 @@
     android:viewportWidth="8" >
     <group
         android:name="rotationGroup"
-        android:pivotX="0.5"
-        android:pivotY="0.5"
+        android:pivotX="4"
+        android:pivotY="4"
         android:rotation="0.0" >
         <path
             android:name="v"

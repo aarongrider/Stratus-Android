@@ -5,13 +5,13 @@
     android:viewportWidth="8" >
     <group
         android:name="rotationGroup"
-        android:pivotX="0.5"
-        android:pivotY="0.5"
-        android:rotation="0.0" >
+        android:pivotX="4"
+        android:pivotY="4"
+        android:rotation="-90.0" >
         <path
             android:name="v"
             android:fillColor="#FFFFFF"
-            android:pathData="M0,0 L3,0 3,8 0,8
-                              M5,0 L8,0 8,8 5,8Z" />
+            android:pathData="M0,0 L8,0 8,3 0,3
+                              M0,5 L8,5 8,8 0,8Z" />
     </group>
 </vector>

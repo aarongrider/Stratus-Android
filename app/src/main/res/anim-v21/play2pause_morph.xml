@@ -5,7 +5,7 @@
         android:propertyName="pathData"
         android:valueFrom="M2,0 L8,4 8,4 2,4
                            M2,4 L8,4 8,4 2,8Z"
-          android:valueTo="M8,0 L8,8 5,8 5,0
-                           M3,0 L3,8 0,8 0,0Z"
+          android:valueTo="M0,0 L8,0 8,3 0,3
+                           M0,5 L8,5 8,8 0,8Z"
         android:valueType="pathType" />
 </set>
