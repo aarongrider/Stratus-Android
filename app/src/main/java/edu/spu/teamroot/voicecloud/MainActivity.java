@@ -27,14 +27,17 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
-    static Toast lastToast;
+    private static Toast lastToast;
 
-    ImageButton mainButton;
-    ImageButton resetButton;
-    ImageButton menuButton;
+    private ImageButton mainButton;
+    private ImageButton resetButton;
+    private ImageButton menuButton;
 
-    TwoDScrollView scrollView;
-    RelativeLayout rl;
+    private TwoDScrollView scrollView;
+    private RelativeLayout rl;
+
+    public WordCloud wordCloud;
+    public Blacklist blacklist;
 
     boolean isRunning = true;
 
@@ -132,6 +135,10 @@ public class MainActivity extends ActionBarActivity {
         makeButton("Weltz", 70, 400, 465, 25);
         makeButton("Ok", 100, 435, 255, 30);
 
+
+        // Create new instances
+        wordCloud = new WordCloud(rl);
+        blacklist = new Blacklist();
     }
 
 
@@ -157,11 +164,11 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private int toPx(float dp) {
+    public int toPx(float dp) {
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()));
     }
 
-    private int toDp(float px) {
+    public int toDp(float px) {
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, getResources().getDisplayMetrics()));
     }
 
