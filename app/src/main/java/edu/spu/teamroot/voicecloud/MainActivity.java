@@ -1,13 +1,23 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Animatable;
+import android.os.Build;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.RemoteException;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.os.Messenger;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,11 +29,13 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
@@ -38,6 +50,39 @@ public class MainActivity extends ActionBarActivity {
 
     boolean isRunning = true;
 
+    // Speech Recognition Service (SRS)
+    //private int mBindFlag;
+    private Messenger mServiceMessenger;
+    //private SpeechRecognitionService speechRecognitionService = new SpeechRecognitionService();
+
+    // Create service connection
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+
+            mServiceMessenger = new Messenger(service);
+            Message msg = new Message();
+            msg.what = SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING;
+
+            try
+            {
+                mServiceMessenger.send(msg);
+            }
+            catch (RemoteException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name)
+        {
+            mServiceMessenger = null;
+        }
+
+    };
+
     public String[] accentColors = {
             "#20a760", // green
             "#3d83f7", // blue
@@ -49,6 +94,8 @@ public class MainActivity extends ActionBarActivity {
 
     private float scaleFactor = 1f;
     private ScaleGestureDetector scaleDetector;
+
+    private TextView outputText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +179,31 @@ public class MainActivity extends ActionBarActivity {
         makeButton("Weltz", 70, 400, 465, 25);
         makeButton("Ok", 100, 435, 255, 30);
 
+        // Start SRS
+        //Intent service = new Intent(this, SpeechRecognitionService.class);
+        //this.startService(service);
+        //mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (mServiceMessenger != null) {
+            //unbindService(mServiceConnection);
+            mServiceMessenger = null;
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 
@@ -287,5 +359,6 @@ public class MainActivity extends ActionBarActivity {
 
         dialog.show();
     }
+
 
 }
