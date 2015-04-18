@@ -1,7 +1,6 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
@@ -10,6 +9,7 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -17,30 +17,32 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
-import java.util.logging.Handler;
 
 /**
  * Created by aarongrider on 4/16/15.
  */
+
 public class SpeechRecognitionService extends Service {
 
-    protected AudioManager mAudioManager;
+    protected static AudioManager mAudioManager;
     protected SpeechRecognizer mSpeechRecognizer;
     protected Intent mSpeechRecognizerIntent;
-    protected final Messenger mServerMessenger = new Messenger(new android.os.Handler());
+    protected final Messenger mServerMessenger = new Messenger(new IncomingHandler(this));
 
     protected boolean mIsListening;
     protected volatile boolean mIsCountDownOn;
+    private static boolean mIsStreamSolo;
 
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
     static final int MSG_RECOGNIZER_CANCEL = 2;
+    private static final String TAG = null;
 
     @Override
     public void onCreate()
     {
         super.onCreate();
 
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
         mSpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -48,14 +50,64 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
     }
 
-    // Count down timer for Jelly Bean work around
-    protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000)
-    {
+    protected static class IncomingHandler extends Handler {
+        private WeakReference<SpeechRecognitionService> mtarget;
+
+        IncomingHandler(SpeechRecognitionService target)
+        {
+            mtarget = new WeakReference<SpeechRecognitionService>(target);
+        }
+
+        @Override
+        public void handleMessage(Message msg)
+        {
+            //MainActivity.methodText.setText("handleMessage");
+
+            final SpeechRecognitionService target = mtarget.get();
+
+            switch (msg.what)
+            {
+                case MSG_RECOGNIZER_START_LISTENING:
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                    {
+                        // Turn off beep sound
+                        if (!mIsStreamSolo)
+                        {
+                            //mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+                            mIsStreamSolo = true;
+                        }
+                    }
+                    if (!target.mIsListening)
+                    {
+                        Log.d(TAG, "Start listening");
+                        target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
+                        target.mIsListening = true;
+                    }
+                    break;
+
+                case MSG_RECOGNIZER_CANCEL:
+
+                    if (mIsStreamSolo)
+                    {
+                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
+                        mIsStreamSolo = false;
+                    }
+
+                    Log.d(TAG, "Canceled Recognizer");
+                    target.mSpeechRecognizer.cancel();
+                    target.mIsListening = false;
+                    break;
+            }
+        }
+    }
+
+    // Countdown timer for Jelly Bean work around
+    protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000) {
 
         @Override
         public void onTick(long millisUntilFinished)
         {
-            // TODO Auto-generated method stub
 
         }
 
@@ -78,8 +130,7 @@ public class SpeechRecognitionService extends Service {
     };
 
     @Override
-    public void onDestroy()
-    {
+    public void onDestroy() {
         super.onDestroy();
 
         if (mIsCountDownOn)
@@ -95,7 +146,7 @@ public class SpeechRecognitionService extends Service {
     protected class SpeechRecognitionListener implements RecognitionListener
     {
 
-        private static final String TAG = "SpeechRecognitionListener";
+        private static final String TAG = "RecognitionListener";
 
         @Override
         public void onBeginningOfSpeech()
@@ -106,7 +157,8 @@ public class SpeechRecognitionService extends Service {
                 mIsCountDownOn = false;
                 mNoSpeechCountDown.cancel();
             }
-            //Log.d(TAG, "onBeginingOfSpeech"); //$NON-NLS-1$
+
+            Log.d(TAG, "onBeginingOfSpeech");
         }
 
         @Override
@@ -118,7 +170,7 @@ public class SpeechRecognitionService extends Service {
         @Override
         public void onEndOfSpeech()
         {
-            //Log.d(TAG, "onEndOfSpeech"); //$NON-NLS-1$
+            Log.d(TAG, "onEndOfSpeech");
         }
 
         @Override
@@ -139,7 +191,7 @@ public class SpeechRecognitionService extends Service {
             {
 
             }
-            //Log.d(TAG, "error = " + error); //$NON-NLS-1$
+            Log.d(TAG, "error = " + error);
         }
 
         @Override
@@ -168,7 +220,12 @@ public class SpeechRecognitionService extends Service {
         @Override
         public void onResults(Bundle results)
         {
-            //Log.d(TAG, "onResults"); //$NON-NLS-1$
+            Log.d(TAG, "onResults");
+
+            for (String key: results.keySet())
+            {
+                Log.d ("myApplication", key + " is a key in the bundle");
+            }
 
         }
 
@@ -181,7 +238,10 @@ public class SpeechRecognitionService extends Service {
     }
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
+
+        Log.d("speech", "onBind");
+
         return mServerMessenger.getBinder();
     }
 }

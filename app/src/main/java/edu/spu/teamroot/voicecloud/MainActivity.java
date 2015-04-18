@@ -18,6 +18,7 @@ import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.os.Messenger;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,12 +52,11 @@ public class MainActivity extends ActionBarActivity {
     boolean isRunning = true;
 
     // Speech Recognition Service (SRS)
-    //private int mBindFlag;
+    private Intent service;
+    private int mBindFlag;
     private Messenger mServiceMessenger;
-    //private SpeechRecognitionService speechRecognitionService = new SpeechRecognitionService();
-
-    // Create service connection
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service)
         {
@@ -179,17 +179,17 @@ public class MainActivity extends ActionBarActivity {
         makeButton("Weltz", 70, 400, 465, 25);
         makeButton("Ok", 100, 435, 255, 30);
 
-        // Start SRS
-        //Intent service = new Intent(this, SpeechRecognitionService.class);
-        //this.startService(service);
-        //mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
+        // Start SpeechRecognitionService
+        service = new Intent(this, SpeechRecognitionService.class);
+        this.startService(service);
+        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
 
     @Override
@@ -197,7 +197,7 @@ public class MainActivity extends ActionBarActivity {
         super.onStop();
 
         if (mServiceMessenger != null) {
-            //unbindService(mServiceConnection);
+            unbindService(mServiceConnection);
             mServiceMessenger = null;
         }
     }
