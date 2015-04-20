@@ -13,7 +13,8 @@ public class WordGroup {
     public ArrayList<WordGroup> children;
 
     public WordGroup() {
-
+        bounds = new Rect();
+        children = new ArrayList<>();
     }
 
     public void moveBy(int dx, int dy) {
@@ -22,6 +23,7 @@ public class WordGroup {
 
     public void moveTo(int x, int y) {
         bounds.offsetTo(x, y);
+        // TODO -- Move children too!
     }
 
     public Rect getBounds() {
@@ -29,10 +31,12 @@ public class WordGroup {
     }
 
     public void addChild(WordGroup child) {
-
+        children.add(child);
+        child.parent = this;
+        // TODO -- is there more to do, like updating bounds?
     }
 
     public void repositionChild(WordGroup child) {
-
+        // TODO -- do spiral positioning algorithm; also update bounds?
     }
 }
