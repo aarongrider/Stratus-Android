@@ -137,8 +137,8 @@ public class MainActivity extends ActionBarActivity {
 
 
         // Create new instances
-        wordCloud = new WordCloud(rl);
-        blacklist = new Blacklist();
+        wordCloud = WordCloud.createInstance(getApplicationContext(), rl);
+        blacklist = Blacklist.createInstance();
     }
 
 

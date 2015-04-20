@@ -2,14 +2,49 @@ package edu.spu.teamroot.voicecloud;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Blacklist {
+    /*
+     * Static members
+     */
+
+    private static Blacklist instance;
+
+    /*
+     * Static methods
+     */
+
+    public static Blacklist createInstance() {
+        if (instance == null) {
+            instance = new Blacklist();
+        }
+
+        return instance;
+    }
+
+    public static Blacklist getInstance() {
+        return instance;
+    }
+
+    /*
+     * Member variables
+     */
+
     // String -- word name, Integer -- hit count
     private Map<String, Integer> excludeList;
 
-    public Blacklist() {
+    /*
+     * Constructors
+     */
 
+    private Blacklist() {
+        excludeList = new TreeMap<>();
     }
+
+    /*
+     * Methods
+     */
 
     // Returns an iterator to the exclusion list.
     public Iterator getIterator() {
