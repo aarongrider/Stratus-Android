@@ -17,6 +17,9 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by aarongrider on 4/16/15.
@@ -27,15 +30,24 @@ public class SpeechRecognitionService extends Service {
     protected static AudioManager mAudioManager;
     protected SpeechRecognizer mSpeechRecognizer;
     protected Intent mSpeechRecognizerIntent;
-    protected final Messenger mServerMessenger = new Messenger(new IncomingHandler(this));
+    protected final Messenger mServerMessenger = new Messenger(new VoiceHandler(this));
 
-    protected boolean mIsListening;
-    protected volatile boolean mIsCountDownOn;
+    public boolean mIsListening = false;
     private static boolean mIsStreamSolo;
 
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
     static final int MSG_RECOGNIZER_CANCEL = 2;
     private static final String TAG = null;
+
+    private Timer speechTimeout = null;
+
+    public class SilenceTimer extends TimerTask {
+
+        @Override
+        public void run() {
+            //onError(SpeechRecognizer.ERROR_SPEECH_TIMEOUT);
+        }
+    }
 
     @Override
     public void onCreate()
@@ -50,10 +62,10 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
     }
 
-    protected static class IncomingHandler extends Handler {
+    public static class VoiceHandler extends Handler {
         private WeakReference<SpeechRecognitionService> mtarget;
 
-        IncomingHandler(SpeechRecognitionService target)
+        VoiceHandler(SpeechRecognitionService target)
         {
             mtarget = new WeakReference<SpeechRecognitionService>(target);
         }
@@ -61,7 +73,6 @@ public class SpeechRecognitionService extends Service {
         @Override
         public void handleMessage(Message msg)
         {
-            //MainActivity.methodText.setText("handleMessage");
 
             final SpeechRecognitionService target = mtarget.get();
 
@@ -74,7 +85,7 @@ public class SpeechRecognitionService extends Service {
                         // Turn off beep sound
                         if (!mIsStreamSolo)
                         {
-                            //mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
                             mIsStreamSolo = true;
                         }
                     }
@@ -82,7 +93,6 @@ public class SpeechRecognitionService extends Service {
                     {
                         Log.d(TAG, "Start listening");
                         target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
-                        target.mIsListening = true;
                     }
                     break;
 
@@ -102,131 +112,139 @@ public class SpeechRecognitionService extends Service {
         }
     }
 
-    // Countdown timer for Jelly Bean work around
-    protected CountDownTimer mNoSpeechCountDown = new CountDownTimer(5000, 5000) {
-
-        @Override
-        public void onTick(long millisUntilFinished)
-        {
-
-        }
-
-        @Override
-        public void onFinish()
-        {
-            mIsCountDownOn = false;
-            Message message = Message.obtain(null, MSG_RECOGNIZER_CANCEL);
-            try
-            {
-                mServerMessenger.send(message);
-                message = Message.obtain(null, MSG_RECOGNIZER_START_LISTENING);
-                mServerMessenger.send(message);
-            }
-            catch (RemoteException e)
-            {
-
-            }
-        }
-    };
-
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (mIsCountDownOn)
-        {
-            mNoSpeechCountDown.cancel();
-        }
         if (mSpeechRecognizer != null)
         {
             mSpeechRecognizer.destroy();
         }
     }
 
+    public void startVoiceRecognitionCycle() {
+        Message startMessage = Message.obtain(null, MSG_RECOGNIZER_START_LISTENING);
+        try {
+            mServerMessenger.send(startMessage);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
     protected class SpeechRecognitionListener implements RecognitionListener
     {
 
-        private static final String TAG = "RecognitionListener";
+        @Override
+        public void onReadyForSpeech(Bundle params) {
+            Log.d(TAG, "onReadyForSpeech");
+
+            speechTimeout = new Timer();
+            speechTimeout.schedule(new SilenceTimer(), 3000);
+        }
 
         @Override
-        public void onBeginningOfSpeech()
-        {
-            // speech input will be processed, so there is no need for count down anymore
-            if (mIsCountDownOn)
-            {
-                mIsCountDownOn = false;
-                mNoSpeechCountDown.cancel();
-            }
+        public void onBeginningOfSpeech() {
+            Log.d(TAG, "onBeginningOfSpeech");
 
-            Log.d(TAG, "onBeginingOfSpeech");
+            speechTimeout.cancel();
         }
 
         @Override
         public void onBufferReceived(byte[] buffer)
         {
-
+            Log.d(TAG, "onBufferReceived");
         }
 
         @Override
         public void onEndOfSpeech()
         {
             Log.d(TAG, "onEndOfSpeech");
+
+            // Restart new dictation cycle
+            startVoiceRecognitionCycle();
         }
 
         @Override
-        public void onError(int error)
-        {
-            if (mIsCountDownOn)
+        public void onError(int error) {
+            String message;
+            boolean restart = true;
+            switch (error)
             {
-                mIsCountDownOn = false;
-                mNoSpeechCountDown.cancel();
+                case SpeechRecognizer.ERROR_AUDIO:
+                    message = "Audio recording error";
+                    break;
+                case SpeechRecognizer.ERROR_CLIENT:
+                    message = "Client side error";
+                    restart = false;
+                    break;
+                case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                    message = "Insufficient permissions";
+                    restart = false;
+                    break;
+                case SpeechRecognizer.ERROR_NETWORK:
+                    message = "Network error";
+                    break;
+                case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                    message = "Network timeout";
+                    break;
+                case SpeechRecognizer.ERROR_NO_MATCH:
+                    message = "No match";
+                    break;
+                case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                    message = "RecognitionService busy";
+                    break;
+                case SpeechRecognizer.ERROR_SERVER:
+                    message = "error from server";
+                    break;
+                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                    message = "No speech input";
+                    break;
+                default:
+                    message = "Not recognised";
+                    break;
             }
-            mIsListening = false;
-            Message message = Message.obtain(null, MSG_RECOGNIZER_START_LISTENING);
-            try
-            {
-                mServerMessenger.send(message);
-            }
-            catch (RemoteException e)
-            {
+            Log.d(TAG,"onError code:" + error + " message: " + message);
 
+            // Cancel any current recognition processes and start over
+            Message stopMessage = Message.obtain(null, MSG_RECOGNIZER_CANCEL);
+
+            try {
+                mServerMessenger.send(stopMessage);
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
-            Log.d(TAG, "error = " + error);
+
+            if (restart) {
+                startVoiceRecognitionCycle();
+            }
         }
 
         @Override
         public void onEvent(int eventType, Bundle params)
         {
-
+            Log.d(TAG,"onEvent");
         }
 
         @Override
         public void onPartialResults(Bundle partialResults)
         {
-
-        }
-
-        @Override
-        public void onReadyForSpeech(Bundle params)
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            {
-                mIsCountDownOn = true;
-                mNoSpeechCountDown.start();
-                mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
-            }
+            Log.d(TAG,"onPartialResults");
         }
 
         @Override
         public void onResults(Bundle results)
         {
-            Log.d(TAG, "onResults");
 
-            for (String key: results.keySet())
-            {
-                Log.d ("myApplication", key + " is a key in the bundle");
+            StringBuilder scores = new StringBuilder();
+            for (int i = 0; i < results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES).length; i++) {
+                scores.append(results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i] + " ");
             }
+            Log.d(TAG,"onResults: " + results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) + " scores: " + scores.toString());
 
+            // Return to the container activity dictation results
+            if (results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
+                //mCallback.onResults(this, results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
+            }
         }
 
         @Override

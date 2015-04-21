@@ -1,7 +1,7 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,11 +14,9 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.os.Messenger;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,7 +34,6 @@ import android.widget.Button;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends ActionBarActivity {
@@ -50,38 +47,6 @@ public class MainActivity extends ActionBarActivity {
     RelativeLayout rl;
 
     boolean isRunning = true;
-
-    // Speech Recognition Service (SRS)
-    private Intent service;
-    private int mBindFlag;
-    private Messenger mServiceMessenger;
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service)
-        {
-
-            mServiceMessenger = new Messenger(service);
-            Message msg = new Message();
-            msg.what = SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING;
-
-            try
-            {
-                mServiceMessenger.send(msg);
-            }
-            catch (RemoteException e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name)
-        {
-            mServiceMessenger = null;
-        }
-
-    };
 
     public String[] accentColors = {
             "#20a760", // green
@@ -97,10 +62,56 @@ public class MainActivity extends ActionBarActivity {
 
     private TextView outputText;
 
+    private int mBindFlag;
+    private Messenger mServiceMessenger;
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            mServiceMessenger = new Messenger(service);
+            Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
+
+            try {
+                mServiceMessenger.send(startMessage);
+            }
+            catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mServiceMessenger = null;
+        }
+
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (mServiceMessenger != null) {
+            unbindService(mServiceConnection);
+            mServiceMessenger = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Start SpeechRecognitionService
+        final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
+        this.startService(speechRecognitionService);
+        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
 
         mainButton = (ImageButton)findViewById(R.id.main_button);
         mainButton.setOnClickListener(new View.OnClickListener() {
@@ -112,6 +123,14 @@ public class MainActivity extends ActionBarActivity {
                     isRunning = false; // Now we are paused
                     //button.setImageResource(R.mipmap.play_icon);
 
+                    // Stop listening
+                    Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_CANCEL);
+                    try {
+                        mServiceMessenger.send(stopMessage);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
                     button.setImageResource(R.drawable.avd_pause2play);
 
                     Animatable anim = (Animatable)button.getDrawable();
@@ -121,6 +140,12 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     isRunning = true; // Now we are running
                     //button.setImageResource(R.mipmap.pause_icon);
+                    Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
+                    try {
+                        mServiceMessenger.send(startMessage);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
 
                     button.setImageResource(R.drawable.avd_play2pause);
 
@@ -179,27 +204,8 @@ public class MainActivity extends ActionBarActivity {
         makeButton("Weltz", 70, 400, 465, 25);
         makeButton("Ok", 100, 435, 255, 30);
 
-        // Start SpeechRecognitionService
-        service = new Intent(this, SpeechRecognitionService.class);
-        this.startService(service);
-        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
+        setOutputText("");
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (mServiceMessenger != null) {
-            unbindService(mServiceConnection);
-            mServiceMessenger = null;
-        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -235,6 +241,11 @@ public class MainActivity extends ActionBarActivity {
 
     private int toDp(float px) {
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, getResources().getDisplayMetrics()));
+    }
+
+    public void setOutputText(String text) {
+        outputText = (TextView)findViewById(R.id.speech_output);
+        outputText.setText(text);
     }
 
     public void randomButtons() {
