@@ -9,7 +9,7 @@ public class UnitConverter {
      */
 
     private static UnitConverter instance;
-    private static Context context;
+    private Context context;
 
     /*
      * Static methods
@@ -49,5 +49,13 @@ public class UnitConverter {
 
     public int toDp(float px) {
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, context.getResources().getDisplayMetrics()));
+    }
+
+    public float toPxFloat(float dp) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
+    }
+
+    public float toDpFloat(float px) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, context.getResources().getDisplayMetrics());
     }
 }
