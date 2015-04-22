@@ -1,9 +1,8 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.view.View;
-import android.widget.Button;
+import android.graphics.Rect;
+import android.util.Pair;
 import android.widget.RelativeLayout;
 
 import java.util.Deque;
@@ -17,8 +16,8 @@ public class WordCloud {
      */
 
     private static WordCloud instance;
-    private static Context context;
-    private static RelativeLayout layout; // The layout containing all word views
+    public static Context context;
+    public static RelativeLayout layout; // The layout containing all word views
 
     /*
      * Static methods
@@ -59,6 +58,9 @@ public class WordCloud {
         freeGroups = new LinkedList<>();
         groupSize = 0;
         wordTreeRoot = new WordGroup();
+
+        // TODO: Is there a better way to initialize the bounds?
+        wordTreeRoot.bounds = new Rect(0, 0, layout.getWidth(), layout.getHeight());
     }
 
     /*
@@ -73,23 +75,16 @@ public class WordCloud {
         Word word = wordList.get(name);
 
         if (word == null) {
-            // Create a new word
-            Button button = new Button(context);
-            button.setVisibility(View.INVISIBLE);
-            button.setText(name);
-            button.setTextColor(context.getResources().getColor(android.R.color.white));
-
-            // This will also set the initial size of the word
-            word = new Word(name, count, button);
+            // This will also create a new button and set the initial size of the word
+            word = new Word(name, count);
 
             addWord(word);
-            updateWord(word);
         } else {
             // Increment only the count
             word.incrementCount(count);
-
-            updateWord(word);
         }
+
+        updateWord(word);
     }
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
@@ -117,10 +112,8 @@ public class WordCloud {
                 }
             }
 
-            // Create new word group
+            // Create new word group and link to tree hierarchy
             WordGroup newGroup = new WordGroup();
-
-            // Link up word group hierarchy
             newGroup.addChild(word);
             wordTreeRoot.addChild(newGroup);
 
@@ -142,29 +135,31 @@ public class WordCloud {
 
     // Repositions a word inside a group.
     private void updateWord(Word word) {
-        // Do spiraly stuff
-        /*
         // Reposition word in parent group
         word.parent.repositionChild(word);
 
         // Now, reposition parent groups within the root
-        root.repositionGroup(word.parent);
-         */
-
-        // On moving a word, also animate it using moveTo!
-        // Note: This should be already done by reposition child...
+        wordTreeRoot.repositionChild(word.parent);
     }
 
     // Removes a word, deleting it from the word cloud.
     public void removeWord(Word word) {
-        // TODO
-        // Also add back to free groups
+        WordGroup group = word.parent;
+
+        wordList.remove(word.getName()); // Remove from word list
+        word.delete(); // This will remove from tree and delete button
+
+        // Add parent to list of free groups
+        if (group.children.size() < groupSize && !freeGroups.contains(group)) {
+            freeGroups.addFirst(group);
+        }
     }
 
     // Clears the word cloud.
     public void clear() {
-        // TODO
-        // Keep group structure
+        for (Map.Entry entry : wordList.entrySet()) {
+            removeWord((Word)entry.getValue());
+        }
     }
 
     public boolean isWordInCloud(String name) {
