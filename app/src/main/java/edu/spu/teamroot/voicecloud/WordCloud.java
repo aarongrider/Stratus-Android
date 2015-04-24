@@ -2,10 +2,12 @@ package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.util.Log;
 import android.util.Pair;
 import android.widget.RelativeLayout;
 
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -34,6 +36,9 @@ public class WordCloud {
     public static WordCloud getInstance() {
         return instance;
     }
+    public static void deleteInstance() {
+        instance = null;
+    }
 
     /*
      * Member variables
@@ -59,8 +64,20 @@ public class WordCloud {
         groupSize = 0;
         wordTreeRoot = new WordGroup();
 
-        // TODO: Is there a better way to initialize the bounds?
-        wordTreeRoot.bounds = new Rect(0, 0, layout.getWidth(), layout.getHeight());
+        int width, height;
+
+        if (layout.getWidth() == 0 && layout.getHeight() == 0) {
+            // The layout does not have a size... it likely has not been drawn yet.
+            // We can use the layout params to get the initial size at least
+            width = UnitConverter.getInstance().toDp(layout.getLayoutParams().width);
+            height = UnitConverter.getInstance().toDp(layout.getLayoutParams().height);
+        } else {
+            width = UnitConverter.getInstance().toDp(layout.getWidth());
+            height = UnitConverter.getInstance().toDp(layout.getHeight());
+        }
+
+        wordTreeRoot.setBounds(new Rect(0, 0, width, height));
+        Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
     }
 
     /*
@@ -72,6 +89,8 @@ public class WordCloud {
     }
 
     public void processWord(String name, int count) {
+        // TODO: Check blacklist for word
+
         Word word = wordList.get(name);
 
         if (word == null) {
@@ -85,6 +104,7 @@ public class WordCloud {
         }
 
         updateWord(word);
+        word.show(); // Make sure the word is shown (can be hidden on create)
     }
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
@@ -144,9 +164,16 @@ public class WordCloud {
 
     // Removes a word, deleting it from the word cloud.
     public void removeWord(Word word) {
+        removeWord(word, false);
+    }
+
+    private void removeWord(Word word, boolean deleteFromList) {
         WordGroup group = word.parent;
 
-        wordList.remove(word.getName()); // Remove from word list
+        if (deleteFromList) {
+            wordList.remove(word.getName()); // Remove from word list
+        }
+
         word.delete(); // This will remove from tree and delete button
 
         // Add parent to list of free groups
@@ -157,8 +184,15 @@ public class WordCloud {
 
     // Clears the word cloud.
     public void clear() {
-        for (Map.Entry entry : wordList.entrySet()) {
-            removeWord((Word)entry.getValue());
+        Iterator it = wordList.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+
+            // Do not remove it from the list here... this will cause an exception!
+            removeWord((Word)pair.getValue(), false);
+
+            it.remove(); // Proper way to delete when using iterators
         }
     }
 

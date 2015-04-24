@@ -3,6 +3,7 @@ package edu.spu.teamroot.voicecloud;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.ScaleAnimation;
@@ -21,13 +22,14 @@ public class Word extends WordGroup {
 
         this.name = name;
         this.count = count;
-        this.button = createButton(name);
+
+        button = createButton(name);
 
         // Add the button to the word cloud layout
         layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         layoutParams.topMargin = 0;
         layoutParams.leftMargin = 0;
-        WordCloud.layout.addView(this.button, layoutParams);
+        WordCloud.layout.addView(button, layoutParams);
 
         refreshSize(false);
     }
@@ -55,6 +57,37 @@ public class Word extends WordGroup {
         layoutParams = null;
     }
 
+    public void show() {
+        show(button.getVisibility() == View.INVISIBLE);
+    }
+
+    public void show(boolean animate) {
+        button.setVisibility(View.VISIBLE);
+
+        if (animate) {
+            ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
+            anim.setInterpolator(new SpringInterpolator());
+
+            anim.setDuration(1000);
+
+            button.clearAnimation();
+            button.setAnimation(anim);
+            button.animate();
+        }
+    }
+
+    public void hide() {
+        hide(button.getVisibility() == View.VISIBLE);
+    }
+
+    public void hide(boolean animate) {
+        button.setVisibility(View.INVISIBLE);
+
+        if (animate) {
+            // TODO: Animate with fade-out
+        }
+    }
+
     public String getName() {
         return name;
     }
@@ -79,10 +112,30 @@ public class Word extends WordGroup {
 
         // Calculate new size based on count
         button.setTextSize(getTextSize(count));
+        Log.d(name, "Count: " + count + " Size: " + getTextSize(count));
 
-        bounds.set(bounds.left, bounds.top,
-                bounds.left + UnitConverter.getInstance().toDp(button.getWidth()),
-                bounds.right + UnitConverter.getInstance().toDp(button.getHeight()));
+        // TODO: Calculate new color based on count (or part of speech)
+
+        if (button.getWidth() == 0 && button.getHeight() == 0) {
+            // The button has likely not been drawn in the View yet...
+            // We need to fallback and get a calculated size based on the layout
+            button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
+
+            bounds.set(bounds.left, bounds.top,
+                    bounds.left + UnitConverter.getInstance().toDp(button.getMeasuredWidth()),
+                    bounds.right + UnitConverter.getInstance().toDp(button.getMeasuredHeight()));
+        } else {
+            bounds.set(bounds.left, bounds.top,
+                    bounds.left + UnitConverter.getInstance().toDp(button.getWidth()),
+                    bounds.right + UnitConverter.getInstance().toDp(button.getHeight()));
+        }
+
+        Log.d(name, "Bounds: " + bounds.toString());
+
+        center.x = bounds.centerX();
+        center.y = bounds.centerY();
+
+        Log.d(name, "Center: " + center.toString());
 
         if (animate) {
             float prevX = (float)oldBounds.width() / bounds.width();
@@ -110,10 +163,14 @@ public class Word extends WordGroup {
     }
 
     private void moveBy(int dx, int dy, boolean animate) {
+        center.offset(dx, dy);
         bounds.offset(dx, dy);
 
         layoutParams.leftMargin = UnitConverter.getInstance().toPx(bounds.left);
         layoutParams.topMargin = UnitConverter.getInstance().toPx(bounds.top);
+
+        Log.d(name, "moveBy: (" + dx + "," + dy + ") Bounds: " + bounds.toString());
+        Log.d(name, "moveBy: (" + dx + "," + dy + ") Center: " + center.toString());
 
         if (animate) {
             // TODO: Animate movement
@@ -127,13 +184,9 @@ public class Word extends WordGroup {
     }
 
     private void moveTo(int x, int y, boolean animate) {
-        bounds.offsetTo(x, y);
+        int dx = x - center.x;
+        int dy = y - center.y;
 
-        layoutParams.leftMargin = UnitConverter.getInstance().toPx(bounds.left);
-        layoutParams.topMargin = UnitConverter.getInstance().toPx(bounds.top);
-
-        if (animate) {
-            // TODO: Animate movement
-        }
+        moveBy(dx, dy, animate);
     }
 }

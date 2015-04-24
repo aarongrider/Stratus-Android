@@ -16,13 +16,15 @@ public class WordGroup {
 
     private Precision precision;
 
+    protected Point center;
     protected Rect bounds;
 
     protected WordGroup parent;
     protected ArrayList<WordGroup> children;
 
     public WordGroup() {
-        precision = Precision.FAVOR_EXISTING;
+        precision = Precision.COARSE;
+        center = new Point();
         bounds = new Rect();
         parent = null;
         children = new ArrayList<>();
@@ -30,6 +32,7 @@ public class WordGroup {
 
     // Moves the group and all its children by a specified delta.
     public void moveBy(int dx, int dy) {
+        center.offset(dx, dy);
         bounds.offset(dx, dy);
 
         // Move all children
@@ -40,21 +43,33 @@ public class WordGroup {
 
     // Moves the group and all its children to a specified point.
     public void moveTo(int x, int y) {
-        int dx = x - bounds.left;
-        int dy = y - bounds.top;
+        int dx = x - center.x; // TODO: This used to be offsetting the bounds' top-left corner
+        int dy = y - center.y;
 
         moveBy(dx, dy);
     }
 
+    // Sets the initial bounds of the group. This should only be called once.
+    public void setBounds(Rect rect) {
+        bounds = new Rect(rect);
+        center.x = bounds.centerX();
+        center.y = bounds.centerY();
+    }
+
+    // Returns a copy of the group's bounds.
     public Rect getBounds() {
-        return new Rect(bounds); // Return a copy of bounds
+        return new Rect(bounds);
+    }
+
+    // Returns a copy of the group's center point.
+    // (Note: this is not the same as the center of the group's bounds)
+    public Point getCenter() {
+        return new Point(center);
     }
 
     public void addChild(WordGroup child) {
         children.add(child);
         child.parent = this;
-
-        bounds.union(child.bounds);
     }
 
     public boolean removeChild(WordGroup child) {
@@ -75,37 +90,37 @@ public class WordGroup {
         double position = 0;
         double angle = 0;
 
-        // TODO: The center will move around... idk if we can get a fixed center AND bounds
-        // TODO: We might be able to keep track of center and move it along with the bounds
-        int groupCenterX = bounds.centerX();
-        int groupCenterY = bounds.centerY();
+        //int groupCenterX = bounds.centerX();
+        //int groupCenterY = bounds.centerY();
 
         int x, y;
 
         do {
             double radius = Math.pow(position + 1, 0.1);
-            angle += Math.asin(0.1 / radius);
+            angle += Math.asin(1 / radius);
 
-            x = (int)(Math.cos(angle) * (radius * position)) + groupCenterX;
-            y = (int)(Math.sin(angle) * (radius * position)) + groupCenterY;
+            x = (int)(Math.cos(angle) * (radius * position)) + center.x;
+            y = (int)(Math.sin(angle) * (radius * position)) + center.y;
 
-            position += 0.1;
+            position += 1;
         } while (isChildOverlap(child, x, y));
 
         child.moveTo(x, y);
 
-        // Update bounds
-        bounds.setEmpty();
+        // Update bounds (do not update if root)
+        if (parent != null) {
+            bounds.setEmpty();
 
-        for (WordGroup group : children) {
-            bounds.union(group.bounds);
+            for (WordGroup group : children) {
+                bounds.union(group.bounds);
+            }
         }
     }
 
     // Checks if a group is overlapping any other groups at the specified location.
     private boolean isChildOverlap(WordGroup group, int x, int y) {
-        int dx = x - group.bounds.left;
-        int dy = y - group.bounds.top;
+        int dx = x - group.center.x; // TODO: Used to be bounds
+        int dy = y - group.center.y;
 
         // Get group's potential new position
         Rect checkBounds = group.getBounds();

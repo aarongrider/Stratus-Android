@@ -26,6 +26,9 @@ public class Blacklist {
     public static Blacklist getInstance() {
         return instance;
     }
+    public static void deleteInstance() {
+        instance = null;
+    }
 
     /*
      * Member variables
