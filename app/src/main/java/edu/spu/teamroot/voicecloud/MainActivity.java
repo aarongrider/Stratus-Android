@@ -1,6 +1,7 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -8,6 +9,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Animatable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,15 +35,17 @@ public class MainActivity extends ActionBarActivity {
     private ImageButton resetButton;
     private ImageButton menuButton;
 
+    private Context context = this;
+
     private TwoDScrollView scrollView;
     private RelativeLayout rl;
 
-    public WordCloud wordCloud;
-    public Blacklist blacklist;
+    private WordCloud wordCloud;
+    private Blacklist blacklist;
 
-    boolean isRunning = true;
+    private boolean isRunning = true;
 
-    public String[] accentColors = {
+    private String[] accentColors = {
             "#20a760", // green
             "#3d83f7", // blue
             "#dc4339", // red
@@ -57,6 +61,9 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Create UnitConverter
+        UnitConverter.createInstance(this);
 
         mainButton = (ImageButton)findViewById(R.id.main_button);
         mainButton.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +100,12 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 //Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
+
+                wordCloud.clear();
+                WordCloud.deleteInstance();
+                Blacklist.deleteInstance();
+                UnitConverter.deleteInstance();
+
                 Intent intent = getIntent();
                 finish();
                 startActivity(intent);
@@ -120,27 +133,74 @@ public class MainActivity extends ActionBarActivity {
         // Add the RelativeLayout element to the ScrollView
         int scrollViewWidth = 1000;
         int scrollViewHeight = 1000;
-        scrollView.addView(rl, toPx(scrollViewWidth), toPx(scrollViewHeight));
+        scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
         // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(scrollViewWidth / 2, scrollViewHeight / 2);
+        //scrollView.scrollToWhenReady(scrollViewWidth / 2, scrollViewHeight / 2);
 
         // Make buttons
         // Name, Size, X, Y, Delay in Sec
-        makeButton("Team", 70, 100, 360, 1);
-        makeButton("Root", 50, 250, 465, 5);
-        makeButton("Washingtonian", 40, 310, 400, 10);
-        makeButton("Geotastic", 20, 310, 360, 15);
-        makeButton("Awesome", 40, 220, 295, 20);
-        makeButton("Weltz", 70, 400, 465, 25);
-        makeButton("Ok", 100, 435, 255, 30);
-
+        //makeButton("Team", 70, 100, 360, 1);
+        //makeButton("Root", 50, 250, 465, 5);
+        //makeButton("Washingtonian", 40, 310, 400, 10);
+        //makeButton("Geotastic", 20, 310, 360, 15);
+        //makeButton("Awesome", 40, 220, 295, 20);
+        //makeButton("Weltz", 70, 400, 465, 25);
+        //makeButton("Ok", 100, 435, 255, 30);
 
         // Create new instances
-        wordCloud = new WordCloud(rl);
-        blacklist = new Blacklist();
-    }
+        blacklist = Blacklist.createInstance();
+        wordCloud = WordCloud.createInstance(context, rl);
 
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Team", 35);
+            }
+        }, 2000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Root", 25);
+            }
+        }, 4000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Washingtonian", 20);
+            }
+        }, 6000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Geotastic", 10);
+            }
+        }, 8000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Awesome", 20);
+            }
+        }, 10000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Weltz", 35);
+            }
+        }, 12000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Ok", 50);
+            }
+        }, 14000);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -164,14 +224,6 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public int toPx(float dp) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()));
-    }
-
-    public int toDp(float px) {
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, getResources().getDisplayMetrics()));
-    }
-
     public void randomButtons() {
         // Add a bunch of buttons for testing
         for (int i = 0; i < 40; i++)
@@ -179,8 +231,8 @@ public class MainActivity extends ActionBarActivity {
             Random randomGenerator = new Random();  // Construct a new Random number generator
             int size = randomGenerator.nextInt(150);
 
-            int x = toPx(20 + (Math.round(Math.random() * 100)) * 10);
-            int y = toPx(20 + i * 55);
+            int x = UnitConverter.getInstance().toPx(20 + (Math.round(Math.random() * 100)) * 10);
+            int y = UnitConverter.getInstance().toPx(20 + i * 55);
 
             String buttonName = String.format("Button %s", i);
             makeButton(buttonName, size, x, y, 500);
@@ -210,8 +262,8 @@ public class MainActivity extends ActionBarActivity {
         });
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        params.leftMargin = toPx(x);
-        params.topMargin = toPx(y);
+        params.leftMargin = UnitConverter.getInstance().toPx(x);
+        params.topMargin = UnitConverter.getInstance().toPx(y);
 
         // Create animation
         ScaleAnimation scaleAnim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
