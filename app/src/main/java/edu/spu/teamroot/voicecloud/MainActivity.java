@@ -157,49 +157,49 @@ public class MainActivity extends ActionBarActivity {
             public void run() {
                 wordCloud.processWord("Team", 35);
             }
-        }, 1000);
+        }, 2000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Root", 25);
             }
-        }, 2000);
+        }, 4000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Washingtonian", 20);
             }
-        }, 3000);
+        }, 6000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Geotastic", 10);
             }
-        }, 4000);
+        }, 8000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Awesome", 20);
             }
-        }, 5000);
+        }, 10000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Weltz", 35);
             }
-        }, 6000);
+        }, 12000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
                 wordCloud.processWord("Ok", 50);
             }
-        }, 7000);
+        }, 14000);
     }
 
     @Override

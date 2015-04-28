@@ -6,7 +6,11 @@ import android.graphics.Rect;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
@@ -143,8 +147,8 @@ public class Word extends WordGroup {
 
             ScaleAnimation anim = new ScaleAnimation(prevX, 1.0f, prevY, 1.0f);
             anim.setInterpolator(new SpringInterpolator());
+
             anim.setDuration(500);
-            anim.setStartOffset(100);
 
             button.clearAnimation();
             button.setAnimation(anim);
@@ -166,15 +170,23 @@ public class Word extends WordGroup {
         center.offset(dx, dy);
         bounds.offset(dx, dy);
 
+        if (animate) {
+            TranslateAnimation anim = new TranslateAnimation(0, 0,
+                    UnitConverter.getInstance().toPx(dx), UnitConverter.getInstance().toPx(dy));
+            anim.setInterpolator(new LinearInterpolator());
+
+            anim.setDuration(1000);
+
+            button.clearAnimation();
+            button.setAnimation(anim);
+            button.animate();
+        }
+
         layoutParams.leftMargin = UnitConverter.getInstance().toPx(bounds.left);
         layoutParams.topMargin = UnitConverter.getInstance().toPx(bounds.top);
 
         Log.d(name, "moveBy: (" + dx + "," + dy + ") Bounds: " + bounds.toString());
         Log.d(name, "moveBy: (" + dx + "," + dy + ") Center: " + center.toString());
-
-        if (animate) {
-            // TODO: Animate movement
-        }
     }
 
     @Override

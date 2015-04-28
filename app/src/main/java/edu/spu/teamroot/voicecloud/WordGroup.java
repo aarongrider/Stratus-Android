@@ -43,7 +43,7 @@ public class WordGroup {
 
     // Moves the group and all its children to a specified point.
     public void moveTo(int x, int y) {
-        int dx = x - center.x; // TODO: This used to be offsetting the bounds' top-left corner
+        int dx = x - center.x;
         int dy = y - center.y;
 
         moveBy(dx, dy);
@@ -90,9 +90,6 @@ public class WordGroup {
         double position = 0;
         double angle = 0;
 
-        //int groupCenterX = bounds.centerX();
-        //int groupCenterY = bounds.centerY();
-
         int x, y;
 
         do {
@@ -119,7 +116,7 @@ public class WordGroup {
 
     // Checks if a group is overlapping any other groups at the specified location.
     private boolean isChildOverlap(WordGroup group, int x, int y) {
-        int dx = x - group.center.x; // TODO: Used to be bounds
+        int dx = x - group.center.x;
         int dy = y - group.center.y;
 
         // Get group's potential new position
