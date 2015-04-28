@@ -1,12 +1,19 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.Dialog;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Animatable;
+import android.os.Build;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +28,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Button;
 
@@ -57,10 +65,58 @@ public class MainActivity extends ActionBarActivity {
     private float scaleFactor = 1f;
     private ScaleGestureDetector scaleDetector;
 
+    private TextView outputText;
+
+    private int mBindFlag;
+    private Messenger mServiceMessenger;
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+            mServiceMessenger = new Messenger(service);
+            Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
+
+            try {
+                mServiceMessenger.send(startMessage);
+            }
+            catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mServiceMessenger = null;
+        }
+
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (mServiceMessenger != null) {
+            unbindService(mServiceConnection);
+            mServiceMessenger = null;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Start SpeechRecognitionService
+        final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
+        this.startService(speechRecognitionService);
+        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
 
         // Create UnitConverter
         UnitConverter.createInstance(this);
@@ -75,6 +131,14 @@ public class MainActivity extends ActionBarActivity {
                     isRunning = false; // Now we are paused
                     //button.setImageResource(R.mipmap.play_icon);
 
+                    // Stop listening
+                    Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_CANCEL);
+                    try {
+                        mServiceMessenger.send(stopMessage);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+
                     button.setImageResource(R.drawable.avd_pause2play);
 
                     Animatable anim = (Animatable)button.getDrawable();
@@ -84,6 +148,12 @@ public class MainActivity extends ActionBarActivity {
                 } else {
                     isRunning = true; // Now we are running
                     //button.setImageResource(R.mipmap.pause_icon);
+                    Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
+                    try {
+                        mServiceMessenger.send(startMessage);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
 
                     button.setImageResource(R.drawable.avd_play2pause);
 
@@ -346,5 +416,6 @@ public class MainActivity extends ActionBarActivity {
 
         dialog.show();
     }
+
 
 }
