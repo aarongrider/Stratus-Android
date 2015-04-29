@@ -1,22 +1,23 @@
 package edu.spu.teamroot.voicecloud;
 
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 
 public class Word extends WordGroup {
     private String name;
     private int count;
+
+    private AnimatorSet animatorSet;
 
     public Button button;
     public RelativeLayout.LayoutParams layoutParams;
@@ -26,6 +27,8 @@ public class Word extends WordGroup {
 
         this.name = name;
         this.count = count;
+
+        this.animatorSet = null;
 
         button = createButton(name);
 
@@ -114,12 +117,22 @@ public class Word extends WordGroup {
         // Cache old size
         Rect oldBounds = new Rect(bounds);
 
+        Log.d(name, "Left: " + UnitConverter.getInstance().toDp(button.getLeft()) + " Top: " + UnitConverter.getInstance().toDp(button.getTop()));
+
         // Calculate new size based on count
         button.setTextSize(getTextSize(count));
         Log.d(name, "Count: " + count + " Size: " + getTextSize(count));
 
         // TODO: Calculate new color based on count (or part of speech)
 
+        // Update bounds with new button size
+        button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
+
+        bounds.set(bounds.left, bounds.top,
+                bounds.left + UnitConverter.getInstance().toDp(button.getMeasuredWidth()),
+                bounds.top + UnitConverter.getInstance().toDp(button.getMeasuredHeight()));
+
+        /*
         if (button.getWidth() == 0 && button.getHeight() == 0) {
             // The button has likely not been drawn in the View yet...
             // We need to fallback and get a calculated size based on the layout
@@ -127,12 +140,13 @@ public class Word extends WordGroup {
 
             bounds.set(bounds.left, bounds.top,
                     bounds.left + UnitConverter.getInstance().toDp(button.getMeasuredWidth()),
-                    bounds.right + UnitConverter.getInstance().toDp(button.getMeasuredHeight()));
+                    bounds.top + UnitConverter.getInstance().toDp(button.getMeasuredHeight()));
         } else {
             bounds.set(bounds.left, bounds.top,
                     bounds.left + UnitConverter.getInstance().toDp(button.getWidth()),
-                    bounds.right + UnitConverter.getInstance().toDp(button.getHeight()));
+                    bounds.top + UnitConverter.getInstance().toDp(button.getHeight()));
         }
+        //*/
 
         Log.d(name, "Bounds: " + bounds.toString());
 
@@ -170,23 +184,38 @@ public class Word extends WordGroup {
         center.offset(dx, dy);
         bounds.offset(dx, dy);
 
-        if (animate) {
-            TranslateAnimation anim = new TranslateAnimation(0, 0,
-                    UnitConverter.getInstance().toPx(dx), UnitConverter.getInstance().toPx(dy));
-            anim.setInterpolator(new LinearInterpolator());
-
-            anim.setDuration(1000);
-
-            button.clearAnimation();
-            button.setAnimation(anim);
-            button.animate();
+        // Cancel existing animation (we are moving the word again)
+        if (animatorSet != null) {
+            if (animatorSet.isStarted()) {
+                animatorSet.cancel();
+            }
         }
 
-        layoutParams.leftMargin = UnitConverter.getInstance().toPx(bounds.left);
-        layoutParams.topMargin = UnitConverter.getInstance().toPx(bounds.top);
+        if (animate) {
+            // Create animators (using updated destination value)
+            ValueAnimator xAnim = new MarginAnimationListener(
+                    WordCloud.layout, layoutParams, MarginAnimationListener.LEFT_MARGIN,
+                    UnitConverter.getInstance().toPx(bounds.left)).getValueAnimator();
+            ValueAnimator yAnim = new MarginAnimationListener(
+                    WordCloud.layout, layoutParams, MarginAnimationListener.TOP_MARGIN,
+                    UnitConverter.getInstance().toPx(bounds.top)).getValueAnimator();
 
-        Log.d(name, "moveBy: (" + dx + "," + dy + ") Bounds: " + bounds.toString());
-        Log.d(name, "moveBy: (" + dx + "," + dy + ") Center: " + center.toString());
+            // Combine animators into one set
+            animatorSet = new AnimatorSet();
+
+            animatorSet.playTogether(xAnim, yAnim);
+            animatorSet.setInterpolator(new SpringInterpolator());
+            animatorSet.setDuration(1000);
+
+            animatorSet.start();
+        } else {
+            layoutParams.leftMargin = UnitConverter.getInstance().toPx(bounds.left);
+            layoutParams.topMargin = UnitConverter.getInstance().toPx(bounds.top);
+
+            WordCloud.layout.requestLayout();
+        }
+
+        Log.d(name, "moveBy: (" + dx + "," + dy + ") Bounds: " + bounds.toString() + " Center: " + center.toString());
     }
 
     @Override
@@ -200,5 +229,10 @@ public class Word extends WordGroup {
         int dy = y - center.y;
 
         moveBy(dx, dy, animate);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
