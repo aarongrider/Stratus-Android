@@ -52,28 +52,28 @@ public class UnitConverter {
     public int toPx(float dp) {
         //int value = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics()));
         int value = Math.round(dp * density);
-        Log.d("UnitConverter", "Converting " + dp + "dp to " + value + "px");
+        //Log.d("UnitConverter", "Converting " + dp + "dp to " + value + "px");
         return value;
     }
 
     public int toDp(float px) {
         //int value = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, context.getResources().getDisplayMetrics()));
         int value = Math.round(px / density);
-        Log.d("UnitConverter", "Converting " + px + "px to " + value + "dp");
+        //Log.d("UnitConverter", "Converting " + px + "px to " + value + "dp");
         return value;
     }
 
     public float toPxFloat(float dp) {
         //float value = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.getResources().getDisplayMetrics());
         float value = dp * density;
-        Log.d("UnitConverter", "Converting " + dp + "dp to " + value + "px");
+        //Log.d("UnitConverter", "Converting " + dp + "dp to " + value + "px");
         return value;
     }
 
     public float toDpFloat(float px) {
         //float value = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, context.getResources().getDisplayMetrics());
         float value = px / density;
-        Log.d("UnitConverter", "Converting " + px + "px to " + value + "dp");
+        //Log.d("UnitConverter", "Converting " + px + "px to " + value + "dp");
         return value;
     }
 }

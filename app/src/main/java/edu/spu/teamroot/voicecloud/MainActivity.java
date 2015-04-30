@@ -16,8 +16,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
@@ -201,12 +199,12 @@ public class MainActivity extends ActionBarActivity {
         rl = new RelativeLayout(this);
 
         // Add the RelativeLayout element to the ScrollView
-        int scrollViewWidth = 1000;
-        int scrollViewHeight = 1000;
+        int scrollViewWidth = 3000;
+        int scrollViewHeight = 3000;
         scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
         // Move to center of the ScrollView
-        //scrollView.scrollToWhenReady(scrollViewWidth / 2, scrollViewHeight / 2);
+        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2));
 
         // Make buttons
         // Name, Size, X, Y, Delay in Sec
@@ -222,54 +220,99 @@ public class MainActivity extends ActionBarActivity {
         blacklist = Blacklist.createInstance();
         wordCloud = WordCloud.createInstance(context, rl);
 
+        /*
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Team", 35);
+                Log.d("MainActivity", "Initial word placement ------------------------------------");
+                wordCloud.processWord("Team", 10);
+                wordCloud.processWord("Root", 20);
+            }
+        }, 1000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Log.d("MainActivity", "Resize words ---------------------------------------------");
+                wordCloud.processWord("Team", 50);
+            }
+        }, 2000);
+        //*/
+
+        ///*
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Team", 10);
             }
         }, 2000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Root", 25);
+                wordCloud.processWord("Root", 20);
             }
         }, 4000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Washingtonian", 20);
+            wordCloud.processWord("Washingtonian", 10);
             }
         }, 6000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Geotastic", 10);
+                wordCloud.processWord("Geotastic", 5);
             }
         }, 8000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Awesome", 20);
+                wordCloud.processWord("Awesome", 5);
             }
         }, 10000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Weltz", 35);
+                wordCloud.processWord("Weltz", 15);
             }
         }, 12000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Ok", 50);
+                wordCloud.processWord("Ok", 30);
             }
         }, 14000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Geotastic", 15);
+            }
+        }, 16000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Team", 5);
+                wordCloud.processWord("Root", 10);
+                wordCloud.processWord("Awesome", 15);
+            }
+        }, 18000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Washingtonian", 15);
+                wordCloud.processWord("Weltz", 20);
+            }
+        }, 20000);
+        //*/
     }
 
     @Override
