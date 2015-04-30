@@ -13,6 +13,7 @@ import android.graphics.drawable.Animatable;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -50,12 +51,6 @@ public class MainActivity extends ActionBarActivity {
     private Blacklist blacklist;
 
     private boolean isRunning = true;
-
-    private String[] accentColors = {
-            "#20a760", // green
-            "#3d83f7", // blue
-            "#dc4339", // red
-            "#ffe233"};// yellow
 
     private static float MIN_ZOOM = 1f;
     private static float MAX_ZOOM = 5f;
@@ -111,13 +106,31 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get scroll view
+        scrollView = (TwoDScrollView)findViewById(R.id.WordCloudScrollView);
+
+        // Create UnitConverter
+        UnitConverter.createInstance(this);
+
+        // Create a RelativeLayout element
+        rl = new RelativeLayout(this);
+
+        // Add the RelativeLayout element to the ScrollView
+        int scrollViewWidth = 3000;
+        int scrollViewHeight = 3000;
+        scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
+
+        // Move to center of the ScrollView
+        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2));
+
+        // Create new instances
+        blacklist = Blacklist.createInstance();
+        wordCloud = WordCloud.createInstance(context, rl);
+
         // Start SpeechRecognitionService
         final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
         this.startService(speechRecognitionService);
         mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
-
-        // Create UnitConverter
-        UnitConverter.createInstance(this);
 
         mainButton = (ImageButton)findViewById(R.id.main_button);
         mainButton.setOnClickListener(new View.OnClickListener() {
@@ -167,16 +180,15 @@ public class MainActivity extends ActionBarActivity {
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, "Reset", Toast.LENGTH_SHORT).show();
 
                 wordCloud.clear();
-                WordCloud.deleteInstance();
-                Blacklist.deleteInstance();
-                UnitConverter.deleteInstance();
+                //WordCloud.deleteInstance();
+                //Blacklist.deleteInstance();
+                //UnitConverter.deleteInstance();
 
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
+                //Intent intent = getIntent();
+                //finish();
+                //startActivity(intent);
             }
         });
 
@@ -184,7 +196,6 @@ public class MainActivity extends ActionBarActivity {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, "Menu", Toast.LENGTH_SHORT).show();
 
                 PopupMenu popup = new PopupMenu(v.getContext(), v);
                 popup.inflate(R.menu.menu_main);
@@ -192,116 +203,75 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        // Get scroll view
-        scrollView = (TwoDScrollView)findViewById(R.id.WordCloudScrollView);
-
-        // Create a RelativeLayout element
-        rl = new RelativeLayout(this);
-
-        // Add the RelativeLayout element to the ScrollView
-        int scrollViewWidth = 3000;
-        int scrollViewHeight = 3000;
-        scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
-
-        // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2));
-
-        // Make buttons
-        // Name, Size, X, Y, Delay in Sec
-        //makeButton("Team", 70, 100, 360, 1);
-        //makeButton("Root", 50, 250, 465, 5);
-        //makeButton("Washingtonian", 40, 310, 400, 10);
-        //makeButton("Geotastic", 20, 310, 360, 15);
-        //makeButton("Awesome", 40, 220, 295, 20);
-        //makeButton("Weltz", 70, 400, 465, 25);
-        //makeButton("Ok", 100, 435, 255, 30);
-
-        // Create new instances
-        blacklist = Blacklist.createInstance();
-        wordCloud = WordCloud.createInstance(context, rl);
-
-        /*
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                Log.d("MainActivity", "Initial word placement ------------------------------------");
-                wordCloud.processWord("Team", 10);
-                wordCloud.processWord("Root", 20);
-            }
-        }, 1000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("MainActivity", "Resize words ---------------------------------------------");
-                wordCloud.processWord("Team", 50);
-            }
-        }, 2000);
-        //*/
-
-        ///*
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Team", 10);
+                wordCloud.processWord("Team", 1);
             }
         }, 2000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Root", 20);
+                wordCloud.processWord("Root", 1);
             }
         }, 4000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-            wordCloud.processWord("Washingtonian", 10);
+            wordCloud.processWord("Washingtonian", 1);
             }
         }, 6000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Geotastic", 5);
+                wordCloud.processWord("Geotastic", 1);
             }
         }, 8000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Awesome", 5);
+                wordCloud.processWord("Awesome", 1);
             }
         }, 10000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Weltz", 15);
+                wordCloud.processWord("Weltz", 1);
             }
         }, 12000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Ok", 30);
+                wordCloud.processWord("Ok", 1);
             }
         }, 14000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Geotastic", 15);
+                wordCloud.processWord("Geotastic", 1);
             }
         }, 16000);
 
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
-                wordCloud.processWord("Team", 5);
-                wordCloud.processWord("Root", 10);
-                wordCloud.processWord("Awesome", 15);
+                wordCloud.processWord("Geotastic", 3);
+            }
+        }, 17000);
+
+        rl.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wordCloud.processWord("Team", 20);
+                wordCloud.processWord("Root", 50);
+                wordCloud.processWord("Awesome", 10);
             }
         }, 18000);
 
@@ -335,74 +305,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void randomButtons() {
-        // Add a bunch of buttons for testing
-        for (int i = 0; i < 40; i++)
-        {
-            Random randomGenerator = new Random();  // Construct a new Random number generator
-            int size = randomGenerator.nextInt(150);
-
-            int x = UnitConverter.getInstance().toPx(20 + (Math.round(Math.random() * 100)) * 10);
-            int y = UnitConverter.getInstance().toPx(20 + i * 55);
-
-            String buttonName = String.format("Button %s", i);
-            makeButton(buttonName, size, x, y, 500);
-        }
-
-    }
-
-    public void makeButton(String name, int size, int x, int y, int delay) {
-        final Button button = new Button(this);
-        button.setTextSize(size);
-        button.setText(name);
-        button.setTextColor(getResources().getColor(android.R.color.white));
-
-        // Create new color filter and set button background color
-        PorterDuffColorFilter filter = new PorterDuffColorFilter(getRandomAccentColor(), PorterDuff.Mode.SRC_ATOP);
-        button.getBackground().setColorFilter(filter);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //if (lastToast != null) lastToast.cancel();
-                //lastToast = Toast.makeText(MainActivity.this, "Clicked " + ((Button)v).getText().toString(), Toast.LENGTH_SHORT);
-                //lastToast.show();
-
-                openAlert(v, button);
-            }
-        });
-
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        params.leftMargin = UnitConverter.getInstance().toPx(x);
-        params.topMargin = UnitConverter.getInstance().toPx(y);
-
-        // Create animation
-        ScaleAnimation scaleAnim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
-        scaleAnim.setInterpolator(new SpringInterpolator());
-
-        scaleAnim.setDuration(1000);
-
-        int offset = delay * 1000;
-        scaleAnim.setStartOffset(offset);
-
-        rl.addView(button, params);
-
-        // Animate the button
-        button.setAnimation(scaleAnim);
-        button.animate();
-    }
-
-    public int getRandomAccentColor() {
-        // Randomly select a fact
-        Random randomGenerator = new Random();  // Construct a new Random number generator
-        int randomNumber = randomGenerator.nextInt(accentColors.length);
-
-        int colorAsInt = Color.parseColor(accentColors[randomNumber]);
-
-        return colorAsInt;
-
     }
 
     private void openAlert(View view, Button button) {

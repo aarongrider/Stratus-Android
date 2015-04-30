@@ -31,6 +31,7 @@ public class SpeechRecognitionService extends Service {
     protected SpeechRecognizer mSpeechRecognizer;
     protected Intent mSpeechRecognizerIntent;
     protected final Messenger mServerMessenger = new Messenger(new VoiceHandler(this));
+    protected WordCloud mWordCloud;
 
     public boolean mIsListening = false;
     private static boolean mIsStreamSolo;
@@ -60,6 +61,8 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+
+        mWordCloud = WordCloud.getInstance();
     }
 
     public static class VoiceHandler extends Handler {
@@ -205,6 +208,9 @@ public class SpeechRecognitionService extends Service {
             }
             Log.d(TAG,"onError code:" + error + " message: " + message);
 
+            // Temp test logging
+            mWordCloud.processWord("Error", 5);
+
             // Cancel any current recognition processes and start over
             Message stopMessage = Message.obtain(null, MSG_RECOGNIZER_CANCEL);
 
@@ -245,6 +251,9 @@ public class SpeechRecognitionService extends Service {
             if (results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
                 //mCallback.onResults(this, results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
             }
+
+            mWordCloud.processWord("Hello", 1);
+
         }
 
         @Override

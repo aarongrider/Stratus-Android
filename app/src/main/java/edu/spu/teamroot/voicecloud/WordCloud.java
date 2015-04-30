@@ -109,6 +109,7 @@ public class WordCloud {
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
     private void addWord(Word word) {
+
         // Add to master word list
         wordList.put(word.getName(), word);
 

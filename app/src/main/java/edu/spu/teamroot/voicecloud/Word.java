@@ -19,6 +19,12 @@ public class Word extends WordGroup {
 
     private AnimatorSet animatorSet;
 
+    private int[] accentColors = {
+                R.color.accentBlue,
+                R.color.accentGreen,
+                R.color.accentYellow,
+                R.color.accentRed};
+
     public Button button;
     public RelativeLayout.LayoutParams layoutParams;
 
@@ -48,7 +54,7 @@ public class Word extends WordGroup {
         button.setText(text);
         button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
 
-        button.getBackground().setColorFilter(Color.parseColor("#20A760"), PorterDuff.Mode.SRC_ATOP);
+        button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(R.color.accentBlue), PorterDuff.Mode.SRC_ATOP);
 
         return button;
     }
@@ -123,7 +129,8 @@ public class Word extends WordGroup {
         button.setTextSize(getTextSize(count));
         Log.d(name, "Count: " + count + " Size: " + getTextSize(count));
 
-        // TODO: Calculate new color based on count (or part of speech)
+        // Calculate new color based on count (or part of speech)
+        button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(accentColors[(count / 5) % accentColors.length]), PorterDuff.Mode.SRC_ATOP);
 
         // Update bounds with new button size
         button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
@@ -171,7 +178,7 @@ public class Word extends WordGroup {
     }
 
     private int getTextSize(int count) {
-        return count * 2; // TODO: Update sizing algorithm
+        return 12 + count;
     }
 
     @Override
