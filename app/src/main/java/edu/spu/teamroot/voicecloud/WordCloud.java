@@ -98,13 +98,18 @@ public class WordCloud {
             word = new Word(name, count);
 
             addWord(word);
+            updateWord(word);
+            word.show(); // Make sure the word is shown (can be hidden on create)
         } else {
             // Increment only the count
-            word.incrementCount(count);
+            if (word.incrementCount(count)) {
+                updateWord(word);
+                word.show(); // Make sure the word is shown (can be hidden on create)
+            }
+            else {
+                WordCloud.getInstance().removeWord(word);
+            }
         }
-
-        updateWord(word);
-        word.show(); // Make sure the word is shown (can be hidden on create)
     }
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
@@ -165,7 +170,7 @@ public class WordCloud {
 
     // Removes a word, deleting it from the word cloud.
     public void removeWord(Word word) {
-        removeWord(word, false);
+        removeWord(word, true);
     }
 
     private void removeWord(Word word, boolean deleteFromList) {

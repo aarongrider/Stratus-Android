@@ -109,14 +109,15 @@ public class Word extends WordGroup {
         return count;
     }
 
-    public void incrementCount() {
-        count++;
-        refreshSize(true);
-    }
-
-    public void incrementCount(int value) {
+    public boolean incrementCount(int value) {
         count += value;
+
+        if (count <= 0) {
+            return false;
+        }
+
         refreshSize(true);
+        return true;
     }
 
     private void refreshSize(boolean animate) {
@@ -178,7 +179,7 @@ public class Word extends WordGroup {
     }
 
     private int getTextSize(int count) {
-        return count * 4;
+        return 20 + count;
     }
 
     @Override

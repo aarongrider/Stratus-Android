@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -18,9 +17,6 @@ import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class SpeechRecognitionService extends Service {
 
@@ -37,6 +33,8 @@ public class SpeechRecognitionService extends Service {
 
     private static final String TAG = "SRS";
 
+    private String[] prevBuff = {};
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -47,6 +45,7 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 
         mWordCloud = WordCloud.getInstance();
     }
@@ -201,7 +200,38 @@ public class SpeechRecognitionService extends Service {
 
         @Override
         public void onPartialResults(Bundle partialResults) {
-            Log.d(TAG,"onPartialResults");
+            Log.d(TAG,"onPartialResults: " + partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
+
+            // Return to the container activity dictation results
+            if (partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
+                ArrayList resultArray = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                String resultString = resultArray.get(0).toString();
+                String[] currBuff = resultString.split(" ");
+
+                // Iterate through partial results and send to cloud
+                for (String word: currBuff) {
+
+                    word = word.toLowerCase().trim();
+
+                    if (!word.isEmpty()) {
+                        mWordCloud.processWord(word, 1);
+                    }
+                }
+
+
+                for (String word: prevBuff) {
+
+                    word = word.toLowerCase().trim();
+
+                    if (!word.isEmpty()) {
+                        mWordCloud.processWord(word, -1);
+                    }
+                }
+
+                prevBuff = currBuff;
+
+            }
+
         }
 
         @Override
@@ -213,12 +243,27 @@ public class SpeechRecognitionService extends Service {
             if (results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
                 ArrayList resultArray = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 String resultString = resultArray.get(0).toString();
-                String[] words = resultString.split(" ");
+                String[] currBuff = resultString.split(" ");
 
                 // Iterate through words in sentence and add to cloud
-                for (String word: words) {
-                    mWordCloud.processWord(word, 4);
+                //for (String word: words) {
+                    //mWordCloud.processWord(word, 1);
+
+                // Iterate through partial results and send to cloud
+                for (String word: currBuff) {
+                    if (!word.isEmpty()) mWordCloud.processWord(word, 1);
                 }
+                for (String word: prevBuff) {
+
+                    word = word.toLowerCase().trim();
+
+                    if (!word.isEmpty()) {
+                        mWordCloud.processWord(word, -1);
+                    }
+                }
+
+
+                prevBuff = new String[]{};
 
             }
 
