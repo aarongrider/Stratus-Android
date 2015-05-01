@@ -178,7 +178,7 @@ public class Word extends WordGroup {
     }
 
     private int getTextSize(int count) {
-        return 12 + count;
+        return count * 4;
     }
 
     @Override

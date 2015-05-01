@@ -18,12 +18,9 @@ import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
-
-/**
- * Created by aarongrider on 4/16/15.
- */
 
 public class SpeechRecognitionService extends Service {
 
@@ -34,25 +31,14 @@ public class SpeechRecognitionService extends Service {
     protected WordCloud mWordCloud;
 
     public boolean mIsListening = false;
-    private static boolean mIsStreamSolo;
 
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
-    static final int MSG_RECOGNIZER_CANCEL = 2;
-    private static final String TAG = null;
+    static final int MSG_RECOGNIZER_STOP_LISTENING = 2;
 
-    private Timer speechTimeout = null;
-
-    public class SilenceTimer extends TimerTask {
-
-        @Override
-        public void run() {
-            //onError(SpeechRecognizer.ERROR_SPEECH_TIMEOUT);
-        }
-    }
+    private static final String TAG = "SRS";
 
     @Override
-    public void onCreate()
-    {
+    public void onCreate() {
         super.onCreate();
 
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
@@ -68,46 +54,37 @@ public class SpeechRecognitionService extends Service {
     public static class VoiceHandler extends Handler {
         private WeakReference<SpeechRecognitionService> mtarget;
 
-        VoiceHandler(SpeechRecognitionService target)
-        {
+        VoiceHandler(SpeechRecognitionService target) {
             mtarget = new WeakReference<SpeechRecognitionService>(target);
         }
 
         @Override
-        public void handleMessage(Message msg)
-        {
+        public void handleMessage(Message msg) {
 
             final SpeechRecognitionService target = mtarget.get();
 
-            switch (msg.what)
-            {
+            switch (msg.what) {
                 case MSG_RECOGNIZER_START_LISTENING:
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-                    {
+                    target.mIsListening = false;
+
+                    Log.d(TAG, "Start Recognizer");
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+
                         // Turn off beep sound
-                        if (!mIsStreamSolo)
-                        {
-                            mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
-                            mIsStreamSolo = true;
-                        }
+                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
                     }
-                    if (!target.mIsListening)
-                    {
+                    if (!target.mIsListening) {
                         Log.d(TAG, "Start listening");
                         target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
+                        target.mIsListening = true;
                     }
                     break;
 
-                case MSG_RECOGNIZER_CANCEL:
+                case MSG_RECOGNIZER_STOP_LISTENING:
 
-                    if (mIsStreamSolo)
-                    {
-                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, false);
-                        mIsStreamSolo = false;
-                    }
-
-                    Log.d(TAG, "Canceled Recognizer");
+                    Log.d(TAG, "Stopped Recognizer");
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;
                     break;
@@ -119,16 +96,14 @@ public class SpeechRecognitionService extends Service {
     public void onDestroy() {
         super.onDestroy();
 
-        if (mSpeechRecognizer != null)
-        {
+        if (mSpeechRecognizer != null) {
             mSpeechRecognizer.destroy();
         }
     }
 
     public void startVoiceRecognitionCycle() {
-        Message startMessage = Message.obtain(null, MSG_RECOGNIZER_START_LISTENING);
         try {
-            mServerMessenger.send(startMessage);
+            mServerMessenger.send(Message.obtain(null, MSG_RECOGNIZER_START_LISTENING));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -139,40 +114,36 @@ public class SpeechRecognitionService extends Service {
 
         @Override
         public void onReadyForSpeech(Bundle params) {
+            
             Log.d(TAG, "onReadyForSpeech");
 
-            speechTimeout = new Timer();
-            speechTimeout.schedule(new SilenceTimer(), 3000);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
+            }
+
         }
 
         @Override
         public void onBeginningOfSpeech() {
             Log.d(TAG, "onBeginningOfSpeech");
-
-            speechTimeout.cancel();
         }
 
         @Override
-        public void onBufferReceived(byte[] buffer)
-        {
+        public void onBufferReceived(byte[] buffer) {
             Log.d(TAG, "onBufferReceived");
         }
 
         @Override
-        public void onEndOfSpeech()
-        {
+        public void onEndOfSpeech() {
             Log.d(TAG, "onEndOfSpeech");
-
-            // Restart new dictation cycle
-            startVoiceRecognitionCycle();
         }
 
         @Override
         public void onError(int error) {
             String message;
             boolean restart = true;
-            switch (error)
-            {
+
+            switch (error) {
                 case SpeechRecognizer.ERROR_AUDIO:
                     message = "Audio recording error";
                     break;
@@ -209,13 +180,11 @@ public class SpeechRecognitionService extends Service {
             Log.d(TAG,"onError code:" + error + " message: " + message);
 
             // Temp test logging
-            mWordCloud.processWord("Error", 5);
+            //mWordCloud.processWord("Error", 5);
 
             // Cancel any current recognition processes and start over
-            Message stopMessage = Message.obtain(null, MSG_RECOGNIZER_CANCEL);
-
             try {
-                mServerMessenger.send(stopMessage);
+                mServerMessenger.send(Message.obtain(null, MSG_RECOGNIZER_STOP_LISTENING));
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -226,39 +195,40 @@ public class SpeechRecognitionService extends Service {
         }
 
         @Override
-        public void onEvent(int eventType, Bundle params)
-        {
+        public void onEvent(int eventType, Bundle params) {
             Log.d(TAG,"onEvent");
         }
 
         @Override
-        public void onPartialResults(Bundle partialResults)
-        {
+        public void onPartialResults(Bundle partialResults) {
             Log.d(TAG,"onPartialResults");
         }
 
         @Override
-        public void onResults(Bundle results)
-        {
+        public void onResults(Bundle results) {
 
-            StringBuilder scores = new StringBuilder();
-            for (int i = 0; i < results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES).length; i++) {
-                scores.append(results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)[i] + " ");
-            }
-            Log.d(TAG,"onResults: " + results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) + " scores: " + scores.toString());
+            Log.d(TAG,"onResults: " + results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
 
             // Return to the container activity dictation results
             if (results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
-                //mCallback.onResults(this, results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
+                ArrayList resultArray = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                String resultString = resultArray.get(0).toString();
+                String[] words = resultString.split(" ");
+
+                // Iterate through words in sentence and add to cloud
+                for (String word: words) {
+                    mWordCloud.processWord(word, 4);
+                }
+
             }
 
-            mWordCloud.processWord("Hello", 1);
+            // Restart new dictation cycle
+            startVoiceRecognitionCycle();
 
         }
 
         @Override
-        public void onRmsChanged(float rmsdB)
-        {
+        public void onRmsChanged(float rmsdB) {
 
         }
 

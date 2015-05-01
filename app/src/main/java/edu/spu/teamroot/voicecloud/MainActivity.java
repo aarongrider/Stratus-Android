@@ -143,7 +143,7 @@ public class MainActivity extends ActionBarActivity {
                     //button.setImageResource(R.mipmap.play_icon);
 
                     // Stop listening
-                    Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_CANCEL);
+                    Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_STOP_LISTENING);
                     try {
                         mServiceMessenger.send(stopMessage);
                     } catch (RemoteException e) {
@@ -203,6 +203,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        /*
         rl.postDelayed(new Runnable() {
             @Override
             public void run() {
