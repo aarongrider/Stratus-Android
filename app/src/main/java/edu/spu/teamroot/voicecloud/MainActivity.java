@@ -49,6 +49,7 @@ public class MainActivity extends ActionBarActivity {
 
     private WordCloud wordCloud;
     private Blacklist blacklist;
+    private Preprocessor preprocessor;
 
     private boolean isRunning = true;
 
@@ -126,6 +127,7 @@ public class MainActivity extends ActionBarActivity {
         // Create new instances
         blacklist = Blacklist.createInstance();
         wordCloud = WordCloud.createInstance(context, rl);
+        preprocessor = Preprocessor.createInstance();
 
         // Start SpeechRecognitionService
         final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);

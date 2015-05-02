@@ -24,7 +24,8 @@ public class SpeechRecognitionService extends Service {
     protected SpeechRecognizer mSpeechRecognizer;
     protected Intent mSpeechRecognizerIntent;
     protected final Messenger mServerMessenger = new Messenger(new VoiceHandler(this));
-    protected WordCloud mWordCloud;
+
+    protected Preprocessor mPreprocessor;
 
     public boolean mIsListening = false;
 
@@ -47,7 +48,7 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 
-        mWordCloud = WordCloud.getInstance();
+        mPreprocessor = Preprocessor.getInstance();
     }
 
     public static class VoiceHandler extends Handler {
@@ -214,7 +215,7 @@ public class SpeechRecognitionService extends Service {
                     word = word.toLowerCase().trim();
 
                     if (!word.isEmpty()) {
-                        mWordCloud.processWord(word, 1);
+                        mPreprocessor.processWord(word, 1);
                     }
                 }
 
@@ -224,7 +225,7 @@ public class SpeechRecognitionService extends Service {
                     word = word.toLowerCase().trim();
 
                     if (!word.isEmpty()) {
-                        mWordCloud.processWord(word, -1);
+                        mPreprocessor.processWord(word, -1);
                     }
                 }
 
@@ -251,14 +252,14 @@ public class SpeechRecognitionService extends Service {
 
                 // Iterate through partial results and send to cloud
                 for (String word: currBuff) {
-                    if (!word.isEmpty()) mWordCloud.processWord(word, 1);
+                    if (!word.isEmpty()) mPreprocessor.processWord(word, 1);
                 }
                 for (String word: prevBuff) {
 
                     word = word.toLowerCase().trim();
 
                     if (!word.isEmpty()) {
-                        mWordCloud.processWord(word, -1);
+                        mPreprocessor.processWord(word, -1);
                     }
                 }
 
