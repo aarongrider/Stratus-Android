@@ -29,6 +29,7 @@ public class Preprocessor {
     public static Preprocessor getInstance() {
         return instance;
     }
+
     public static void deleteInstance() {
         instance = null;
     }
@@ -39,6 +40,8 @@ public class Preprocessor {
 
     protected WordCloud mWordCloud;
     protected int mWordWeight;
+
+    private String[] prevBuff = {};
 
     /*
      * Constructors
@@ -57,20 +60,55 @@ public class Preprocessor {
      * Methods
      */
 
-    public void processString(String words) {
+    public void processString(String resultString, int type) { // Type: 0 = partial, 1 = final
 
-        // TODO Break string into words and process word
-    }
+        // Break string into separate words
+        String[] currBuff = resultString.split(" ");
 
-    public void processWord(String word, int weight) {
-
-        // TODO Partial aggregation (for partial results)
         // TODO Check against blacklist
         // TODO Part of speech identification
 
-        // Add to word cloud
-        mWordCloud.processWord(word, weight);
+        if (type == 0) {
+
+            // Iterate through partial results and send to cloud
+            for (String word : currBuff) {
+
+                word = word.toLowerCase().trim();
+
+                if (!word.isEmpty()) {
+                    mWordCloud.processWord(word, mWordWeight);
+                }
+            }
+
+
+            for (String word : prevBuff) {
+
+                word = word.toLowerCase().trim();
+
+                if (!word.isEmpty()) {
+                    mWordCloud.processWord(word, -1 * mWordWeight);
+                }
+            }
+
+            prevBuff = currBuff;
+
+        } else {
+            // Iterate through partial results and send to cloud
+            for (String word : currBuff) {
+                if (!word.isEmpty()) mWordCloud.processWord(word, mWordWeight);
+            }
+            for (String word : prevBuff) {
+
+                word = word.toLowerCase().trim();
+
+                if (!word.isEmpty()) {
+                    mWordCloud.processWord(word, -1 * mWordWeight);
+                }
+            }
+
+            prevBuff = new String[]{};
+
+        }
 
     }
-
 }

@@ -59,8 +59,6 @@ public class MainActivity extends ActionBarActivity {
     private float scaleFactor = 1f;
     private ScaleGestureDetector scaleDetector;
 
-    private TextView outputText;
-
     private int mBindFlag;
     private Messenger mServiceMessenger;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {

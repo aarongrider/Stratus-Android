@@ -32,9 +32,10 @@ public class SpeechRecognitionService extends Service {
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
     static final int MSG_RECOGNIZER_STOP_LISTENING = 2;
 
-    private static final String TAG = "SRS";
+    static final int PARTIAL_RESULTS = 0;
+    static final int FINAL_RESULTS = 1;
 
-    private String[] prevBuff = {};
+    private static final String TAG = "SRS";
 
     @Override
     public void onCreate() {
@@ -207,30 +208,7 @@ public class SpeechRecognitionService extends Service {
             if (partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
                 ArrayList resultArray = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 String resultString = resultArray.get(0).toString();
-                String[] currBuff = resultString.split(" ");
-
-                // Iterate through partial results and send to cloud
-                for (String word: currBuff) {
-
-                    word = word.toLowerCase().trim();
-
-                    if (!word.isEmpty()) {
-                        mPreprocessor.processWord(word, 1);
-                    }
-                }
-
-
-                for (String word: prevBuff) {
-
-                    word = word.toLowerCase().trim();
-
-                    if (!word.isEmpty()) {
-                        mPreprocessor.processWord(word, -1);
-                    }
-                }
-
-                prevBuff = currBuff;
-
+                mPreprocessor.processString(resultString, PARTIAL_RESULTS);
             }
 
         }
@@ -244,28 +222,7 @@ public class SpeechRecognitionService extends Service {
             if (results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION) != null) {
                 ArrayList resultArray = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 String resultString = resultArray.get(0).toString();
-                String[] currBuff = resultString.split(" ");
-
-                // Iterate through words in sentence and add to cloud
-                //for (String word: words) {
-                    //mWordCloud.processWord(word, 1);
-
-                // Iterate through partial results and send to cloud
-                for (String word: currBuff) {
-                    if (!word.isEmpty()) mPreprocessor.processWord(word, 1);
-                }
-                for (String word: prevBuff) {
-
-                    word = word.toLowerCase().trim();
-
-                    if (!word.isEmpty()) {
-                        mPreprocessor.processWord(word, -1);
-                    }
-                }
-
-
-                prevBuff = new String[]{};
-
+                mPreprocessor.processString(resultString, FINAL_RESULTS);
             }
 
             // Restart new dictation cycle
