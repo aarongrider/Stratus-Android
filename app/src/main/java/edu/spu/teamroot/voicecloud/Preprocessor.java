@@ -14,6 +14,10 @@ public class Preprocessor {
 
     private static Preprocessor instance;
 
+    static final int PARTIAL_RESULTS = 0;
+    static final int FINAL_RESULTS = 1;
+
+
     /*
      * Static methods
      */
@@ -53,14 +57,14 @@ public class Preprocessor {
         mWordCloud = WordCloud.getInstance();
         mWordWeight = 1;
 
-        Log.d("Preprocessor", "Preprocessor created.");
+        Log.d("Preprocessor", "Preprocessor created");
     }
 
     /*
      * Methods
      */
 
-    public void processString(String resultString, int type) { // Type: 0 = partial, 1 = final
+    public void processString(String resultString, int type) {
 
         // Break string into separate words
         String[] currBuff = resultString.split(" ");
@@ -68,7 +72,8 @@ public class Preprocessor {
         // TODO Check against blacklist
         // TODO Part of speech identification
 
-        if (type == 0) {
+        // TODO Refactor how we handle partial results to make more efficient
+        if (type == PARTIAL_RESULTS) {
 
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
@@ -92,7 +97,8 @@ public class Preprocessor {
 
             prevBuff = currBuff;
 
-        } else {
+        } else if (type == FINAL_RESULTS) {
+
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
                 if (!word.isEmpty()) mWordCloud.processWord(word, mWordWeight);
