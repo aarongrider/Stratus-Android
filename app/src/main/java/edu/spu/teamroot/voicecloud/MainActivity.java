@@ -47,10 +47,6 @@ public class MainActivity extends ActionBarActivity {
     private TwoDScrollView scrollView;
     private RelativeLayout rl;
 
-    private WordCloud wordCloud;
-    private Blacklist blacklist;
-    private Preprocessor preprocessor;
-
     private boolean isRunning = true;
 
     private static float MIN_ZOOM = 1f;
@@ -123,9 +119,9 @@ public class MainActivity extends ActionBarActivity {
         scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2));
 
         // Create new instances
-        blacklist = Blacklist.createInstance();
-        wordCloud = WordCloud.createInstance(context, rl);
-        preprocessor = Preprocessor.createInstance();
+        Blacklist.createInstance();
+        WordCloud.createInstance(context, rl);
+        Preprocessor.createInstance();
 
         // Start SpeechRecognitionService
         final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
@@ -181,7 +177,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
 
-                wordCloud.clear();
+                WordCloud.getInstance().clear();
                 //WordCloud.deleteInstance();
                 //Blacklist.deleteInstance();
                 //UnitConverter.deleteInstance();
