@@ -2,10 +2,19 @@ package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.util.Pair;
 import android.widget.RelativeLayout;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -112,6 +121,10 @@ public class WordCloud {
         }
     }
 
+    public Word getWord(String name) {
+        return wordList.get(name);
+    }
+
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
     private void addWord(Word word) {
 
@@ -205,4 +218,80 @@ public class WordCloud {
     public boolean isWordInCloud(String name) {
         return wordList.containsKey(name);
     }
+
+    public void saveWordCloud() {
+
+        // Create Master JSON Object
+        JSONObject toSend = new JSONObject();
+
+        // Create layout JSON Object
+        JSONObject layout = new JSONObject();
+        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
+        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
+
+        try {
+            layout.put("width", width);
+            layout.put("height", height);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Create Words JSON Array
+        JSONArray words = new JSONArray();
+
+        // Iterate through WordList and add to Json object
+        Iterator it = wordList.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+
+            // Get current word
+            Word currWord = (Word) pair.getValue();
+
+            // Create JSON Object for word
+            JSONObject word = new JSONObject();
+
+            // Put current word cloud data into json object
+            try {
+                // Add all word properties
+                word.put("name", currWord.getName());
+                word.put("count", currWord.getCount());
+
+                // Convert rect to JSON
+                JSONObject bounds = new JSONObject();
+                bounds.put("bottom", UnitConverter.getInstance().toDp(currWord.getBounds().bottom));
+                bounds.put("left", UnitConverter.getInstance().toDp(currWord.getBounds().left));
+                bounds.put("right", UnitConverter.getInstance().toDp(currWord.getBounds().right));
+                bounds.put("top", UnitConverter.getInstance().toDp(currWord.getBounds().top));
+                word.put("bounds", bounds);
+
+                // Get color as string
+                //Drawable buttonBackground = currWord.button.getBackground();
+                //word.put("color", buttonBackground);
+
+                // Add word json to words array
+                words.put(word);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            it.remove(); // Proper way to delete when using iterators
+        }
+
+        try {
+            // Add layout and words array to master json object
+            toSend.put("layout", layout);
+            toSend.put("words", words);
+
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

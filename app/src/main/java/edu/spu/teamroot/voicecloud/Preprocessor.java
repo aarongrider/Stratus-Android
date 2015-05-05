@@ -42,7 +42,6 @@ public class Preprocessor {
      * Member variables
      */
 
-    protected WordCloud mWordCloud;
     protected int mWordWeight;
 
     private String[] prevBuff = {};
@@ -54,7 +53,6 @@ public class Preprocessor {
     private Preprocessor() {
 
         // Set up member variables
-        mWordCloud = WordCloud.getInstance();
         mWordWeight = 1;
 
         Log.d("Preprocessor", "Preprocessor created");
@@ -67,7 +65,7 @@ public class Preprocessor {
     public void processString(String resultString, int type) {
 
         // Break string into separate words
-        String[] currBuff = resultString.split(" ");
+        String[] currBuff = resultString.toLowerCase().split(" ");
 
         // TODO Check against blacklist
         // TODO Part of speech identification
@@ -78,20 +76,20 @@ public class Preprocessor {
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
 
-                word = word.toLowerCase().trim();
+                word = word.trim();
 
                 if (!word.isEmpty()) {
-                    mWordCloud.processWord(word, mWordWeight);
+                    WordCloud.getInstance().processWord(word, mWordWeight);
                 }
             }
 
 
             for (String word : prevBuff) {
 
-                word = word.toLowerCase().trim();
+                word = word.trim();
 
                 if (!word.isEmpty()) {
-                    mWordCloud.processWord(word, -1 * mWordWeight);
+                    WordCloud.getInstance().processWord(word, -1 * mWordWeight);
                 }
             }
 
@@ -101,14 +99,14 @@ public class Preprocessor {
 
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
-                if (!word.isEmpty()) mWordCloud.processWord(word, mWordWeight);
+                if (!word.isEmpty()) WordCloud.getInstance().processWord(word, mWordWeight);
             }
             for (String word : prevBuff) {
 
                 word = word.toLowerCase().trim();
 
                 if (!word.isEmpty()) {
-                    mWordCloud.processWord(word, -1 * mWordWeight);
+                    WordCloud.getInstance().processWord(word, -1 * mWordWeight);
                 }
             }
 

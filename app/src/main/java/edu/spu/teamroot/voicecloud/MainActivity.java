@@ -17,6 +17,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
@@ -93,6 +94,18 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        try {
+            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
+        }
+        catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
         if (mServiceMessenger != null) {
             unbindService(mServiceConnection);
@@ -136,11 +149,9 @@ public class MainActivity extends ActionBarActivity {
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Toast.makeText(MainActivity.this, "Play", Toast.LENGTH_SHORT).show();
                 ImageButton button = (ImageButton)v;
                 if (isRunning) {
                     isRunning = false; // Now we are paused
-                    //button.setImageResource(R.mipmap.play_icon);
 
                     // Stop listening
                     Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_STOP_LISTENING);
@@ -158,7 +169,6 @@ public class MainActivity extends ActionBarActivity {
                     }
                 } else {
                     isRunning = true; // Now we are running
-                    //button.setImageResource(R.mipmap.pause_icon);
                     Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
                     try {
                         mServiceMessenger.send(startMessage);
@@ -203,87 +213,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        /*
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Team", 1);
-            }
-        }, 2000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Root", 1);
-            }
-        }, 4000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-            wordCloud.processWord("Washingtonian", 1);
-            }
-        }, 6000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Geotastic", 1);
-            }
-        }, 8000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Awesome", 1);
-            }
-        }, 10000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Weltz", 1);
-            }
-        }, 12000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Ok", 1);
-            }
-        }, 14000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Geotastic", 1);
-            }
-        }, 16000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Geotastic", 3);
-            }
-        }, 17000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Team", 20);
-                wordCloud.processWord("Root", 50);
-                wordCloud.processWord("Awesome", 10);
-            }
-        }, 18000);
-
-        rl.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                wordCloud.processWord("Washingtonian", 15);
-                wordCloud.processWord("Weltz", 20);
-            }
-        }, 20000);
-        //*/
     }
 
     @Override
@@ -307,61 +236,5 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    private void openAlert(View view, Button button) {
-        // custom dialog
-        final Dialog dialog = new Dialog(MainActivity.this);
-        dialog.setContentView(R.layout.word_action_dialog);
-        String dialogTitle = "\"" + button.getText() + "\"";
-        dialog.setTitle(dialogTitle);
-
-        ListView listView = (ListView) dialog.findViewById(R.id.listView);
-
-        ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
-        HashMap<String, String> curItemMap;
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
-        curItemMap.put("iconText", "12");
-        curItemMap.put("label", "Occurrences");
-        dataList.add(curItemMap);
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
-        curItemMap.put("iconText", "6");
-        curItemMap.put("label", "Occurrences Per Minute");
-        dataList.add(curItemMap);
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
-        curItemMap.put("iconText", "");
-        curItemMap.put("label", "Search with Google");
-        dataList.add(curItemMap);
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
-        curItemMap.put("iconText", "");
-        curItemMap.put("label", "Lookup on Wikipedia");
-        dataList.add(curItemMap);
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
-        curItemMap.put("iconText", "");
-        curItemMap.put("label", "Remove from Word Cloud");
-        dataList.add(curItemMap);
-
-        //curItemMap = new HashMap<>();
-        //curItemMap.put("icon", String.valueOf(R.mipmap.quizlet_icon));
-        //curItemMap.put("iconText", "");
-        //curItemMap.put("label", "Send to Quizlet");
-        //dataList.add(curItemMap);
-
-        SimpleAdapter simpleAdapter = new SimpleAdapter(this, dataList, R.layout.word_action_row, new String[] {"icon", "iconText", "label"}, new int[] {R.id.icon, R.id.iconText ,R.id.label});
-
-        listView.setAdapter(simpleAdapter);
-
-        dialog.show();
-    }
-
 
 }

@@ -2,16 +2,25 @@ package edu.spu.teamroot.voicecloud;
 
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.graphics.Color;
+import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Word extends WordGroup {
     private String name;
@@ -20,10 +29,10 @@ public class Word extends WordGroup {
     private AnimatorSet animatorSet;
 
     private int[] accentColors = {
-                R.color.accentBlue,
-                R.color.accentGreen,
-                R.color.accentYellow,
-                R.color.accentRed};
+            R.color.accentBlue,
+            R.color.accentGreen,
+            R.color.accentYellow,
+            R.color.accentRed};
 
     public Button button;
     public RelativeLayout.LayoutParams layoutParams;
@@ -48,13 +57,20 @@ public class Word extends WordGroup {
     }
 
     private Button createButton(String text) {
-        Button button = new Button(WordCloud.context);
+        final Button button = new Button(WordCloud.context);
         button.setVisibility(View.INVISIBLE);
 
         button.setText(text);
         button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
 
         button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(R.color.accentBlue), PorterDuff.Mode.SRC_ATOP);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wordActions(WordCloud.getInstance().getWord(button.getText().toString()));
+            }
+        });
 
         return button;
     }
@@ -164,8 +180,8 @@ public class Word extends WordGroup {
         Log.d(name, "Center: " + center.toString());
 
         if (animate) {
-            float prevX = (float)oldBounds.width() / bounds.width();
-            float prevY = (float)oldBounds.height() / bounds.height();
+            float prevX = (float) oldBounds.width() / bounds.width();
+            float prevY = (float) oldBounds.height() / bounds.height();
 
             ScaleAnimation anim = new ScaleAnimation(prevX, 1.0f, prevY, 1.0f);
             anim.setInterpolator(new SpringInterpolator());
@@ -243,4 +259,109 @@ public class Word extends WordGroup {
     public String toString() {
         return name;
     }
+
+    private void wordActions(final Word word) {
+
+        // WordActions custom dialog
+        final Dialog dialog = new Dialog(WordCloud.context);
+        dialog.setContentView(R.layout.word_action_dialog);
+        String dialogTitle = "\"" + word.getName() + "\"";
+        dialog.setTitle(dialogTitle);
+
+        ListView listView = (ListView) dialog.findViewById(R.id.listView);
+
+        ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
+        HashMap<String, String> curItemMap;
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("id", "count");
+        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("iconText", Integer.toString(word.getCount()));
+        curItemMap.put("label", word.getCount()==1?"Occurrence":"Occurrences");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("iconText", Integer.toString(word.getCount()));
+        curItemMap.put("label", word.getCount()==1?"Occurrence Per Minute":"Occurrences Per Minute");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Search with Google");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Lookup on Wikipedia");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.quizlet_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Save to Web");
+        dataList.add(curItemMap);
+
+        curItemMap = new HashMap<>();
+        curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
+        curItemMap.put("iconText", "");
+        curItemMap.put("label", "Remove from Word Cloud");
+        dataList.add(curItemMap);
+
+        SimpleAdapter simpleAdapter = new SimpleAdapter(WordCloud.context, dataList, R.layout.word_action_row, new String[]{"icon", "iconText", "label"}, new int[]{R.id.icon, R.id.iconText, R.id.label});
+
+        AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Toast.makeText(WordCloud.context, Integer.toString(position), Toast.LENGTH_SHORT);
+
+                // Count
+                if (position == 0) { }
+
+                // Count per minute
+                if (position == 1) { }
+
+                // Search with Google
+                if (position == 2) {
+                    String url = "https://google.com/#q=" + word.getName();
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    WordCloud.context.startActivity(i);
+                }
+
+                // Lookup on Wikipedia
+                if (position == 3) {
+                    String url = "http://wikipedia.org/wiki/" + word.getName();
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    WordCloud.context.startActivity(i);
+                }
+
+                // Save to Web
+                if (position == 4) {
+                    WordCloud.getInstance().saveWordCloud();
+                    dialog.dismiss();
+                }
+
+                // Remove from Word Cloud
+                if (position == 5) {
+
+                    // Add word to exclusion list
+
+                    // Remove word
+                    WordCloud.getInstance().removeWord(word);
+                    dialog.dismiss();
+
+                }
+            }
+        };
+
+        listView.setAdapter(simpleAdapter);
+        listView.setOnItemClickListener(listener);
+
+        dialog.show();
+    }
+
 }

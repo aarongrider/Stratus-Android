@@ -14,6 +14,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class SpeechRecognitionService extends Service {
 
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
     static final int MSG_RECOGNIZER_STOP_LISTENING = 2;
+    static final int MSG_SERVICE_KILL = 3;
 
     static final int PARTIAL_RESULTS = 0;
     static final int FINAL_RESULTS = 1;
@@ -89,12 +91,20 @@ public class SpeechRecognitionService extends Service {
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;
                     break;
+
+                case MSG_SERVICE_KILL:
+
+                    Log.d(TAG, "Killing service...");
+                    target.stopSelf();
             }
         }
     }
 
     @Override
     public void onDestroy() {
+
+        Log.d(TAG, "SRS destroy");
+
         super.onDestroy();
 
         if (mSpeechRecognizer != null) {
