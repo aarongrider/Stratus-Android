@@ -240,10 +240,8 @@ public class WordCloud {
         JSONArray words = new JSONArray();
 
         // Iterate through WordList and add to Json object
-        Iterator it = wordList.entrySet().iterator();
-
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
+        for (Object o : wordList.entrySet()) {
+            Map.Entry pair = (Map.Entry) o;
 
             // Get current word
             Word currWord = (Word) pair.getValue();
@@ -276,7 +274,6 @@ public class WordCloud {
                 e.printStackTrace();
             }
 
-            it.remove(); // Proper way to delete when using iterators
         }
 
         try {

@@ -301,7 +301,7 @@ public class Word extends WordGroup {
         curItemMap = new HashMap<>();
         curItemMap.put("icon", String.valueOf(R.mipmap.quizlet_icon));
         curItemMap.put("iconText", "");
-        curItemMap.put("label", "Save to Web");
+        curItemMap.put("label", "Create Flash Card");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
@@ -339,9 +339,8 @@ public class Word extends WordGroup {
                     WordCloud.context.startActivity(i);
                 }
 
-                // Save to Web
+                // Create Flash Card
                 if (position == 4) {
-                    WordCloud.getInstance().saveWordCloud();
                     dialog.dismiss();
                 }
 

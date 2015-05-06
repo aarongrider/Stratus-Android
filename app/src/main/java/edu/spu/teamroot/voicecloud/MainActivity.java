@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuItemClickListener {
     private static Toast lastToast;
 
     private ImageButton mainButton;
@@ -202,10 +202,10 @@ public class MainActivity extends ActionBarActivity {
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                PopupMenu popup = new PopupMenu(v.getContext(), v);
-                popup.inflate(R.menu.menu_main);
-                popup.show();
+            PopupMenu popup = new PopupMenu(v.getContext(), v);
+            popup.inflate(R.menu.menu_main);
+            popup.show();
+            popup.setOnMenuItemClickListener(MainActivity.this);
             }
         });
 
@@ -231,6 +231,30 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        if (id == R.id.save_to_web) {
+            WordCloud.getInstance().saveWordCloud();
+            return true;
+        }
+
+        if (id==R.id.view_exclude_list){
+        //openExclusion();
+        }
+
+        return false;
     }
 
 }
