@@ -79,7 +79,7 @@ public class WordCloud {
             height = UnitConverter.getInstance().toDp(layout.getHeight());
         }
 
-        wordTreeRoot.setBounds(new Rect(0, 0, width, height));
+        wordTreeRoot.setBounds(new Rect(width / 2, height / 2, width / 2, height / 2));
         Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
     }
 
@@ -103,16 +103,19 @@ public class WordCloud {
 
             if (word.isButtonCreated()) {
                 attachWord(word);
-                repositionWord(word);
+                repositionWord(word, true);
             }
         } else {
             // Increment only the count (this will create word if needed)
             if (word.incrementCount(count)) {
                 if (word.isButtonCreated()) {
-                    if (!word.isWordAttached())
+                    if (!word.isWordAttached()) {
                         attachWord(word);
-
-                    repositionWord(word);
+                        repositionWord(word, true);
+                    } else {
+                        // Word exists in the tree already, position relative to self
+                        repositionWord(word, false);
+                    }
                 }
             } else {
                 // Count is <= 0, remove the word from the tree!
@@ -169,14 +172,15 @@ public class WordCloud {
     }
 
     // Repositions a word inside a group.
-    private void repositionWord(Word word) {
+    private void repositionWord(Word word, boolean initialPlacement) {
         if (!word.isWordAttached()) return;
 
-        // Reposition word in parent group
-        word.parent.repositionChild(word);
+        // Initially, reposition word in parent group (otherwise relative to current position)
+        word.parent.repositionChild(word, initialPlacement);
 
-        // Now, reposition parent groups within the root
-        wordTreeRoot.repositionChild(word.parent);
+        // Now, reposition parent group within the root.
+        // If size <= 1, give it an initial position (once we get more children, we cannot move around as much)
+        wordTreeRoot.repositionChild(word.parent, word.parent.children.size() <= 1);
 
         // Make sure the word is shown (can be hidden on create)
         word.show();
@@ -197,6 +201,13 @@ public class WordCloud {
         word.delete(); // This will remove from tree and delete button
 
         if (group != null) {
+            // Refresh group bounds
+            group.bounds.setEmpty();
+
+            for (WordGroup child : group.children) {
+                group.bounds.union(child.bounds);
+            }
+
             // Add parent to list of free groups
             if (group.children.size() < groupSize && !freeGroups.contains(group)) {
                 freeGroups.addFirst(group);

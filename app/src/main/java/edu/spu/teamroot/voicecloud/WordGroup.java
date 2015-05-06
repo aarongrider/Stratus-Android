@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.view.View;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class WordGroup {
     private static enum Precision {
@@ -85,32 +86,51 @@ public class WordGroup {
     }
 
     public void repositionChild(WordGroup child) {
-        // TODO: Investigate other spiral formula, and use it instead
+        repositionChild(child, true);
+    }
 
-        double position = 0;
-        double angle = 0;
+    public void repositionChild(WordGroup child, boolean relativeToGroup) {
+        if (relativeToGroup == false && child.center.x == 0 && child.center.y == 0) {
+            // Safety check: do not set relativeToGroup=false if positioning for the first time!
+            // Initial placement will be messed up and will likely show up in the upper-left corner.
+            relativeToGroup = true;
+        }
 
-        int x, y;
+        final double ARC_LENGTH = 20; // Length between each potential word position
+        final double RADIUS_RATE = 5;  // Rate of radius growth per radian
 
-        do {
-            double radius = Math.pow(position + 1, 0.1);
-            angle += Math.asin(1 / radius);
+        final int CENTER_X = relativeToGroup ? center.x : child.center.x;
+        final int CENTER_Y = relativeToGroup ? center.y : child.center.y;
 
-            x = (int)(Math.cos(angle) * (radius * position)) + center.x;
-            y = (int)(Math.sin(angle) * (radius * position)) + center.y;
+        double angle = ARC_LENGTH / (RADIUS_RATE * 2);
 
-            position += 1;
-        } while (isChildOverlap(child, x, y));
+        int x = CENTER_X;
+        int y = CENTER_Y;
+
+        while (isChildOverlap(child, x, y)) {
+            double radius = RADIUS_RATE * angle; // Radius grows as angle increases
+
+            x = CENTER_X + (int)(radius * Math.cos(angle));
+            y = CENTER_Y + (int)(radius * Math.sin(angle));
+
+            if (relativeToGroup) {
+                // If positioning in group, add a random x offset
+                //x += new Random().nextInt(51) - 25; // Add (-25 to +25)
+            }
+
+            // Estimate delta angle using ARC_LENGTH / radius
+            // This will give us an angle that will result in a position ARC_LENGTH away.
+            // (arc = theta * radius) -> (theta = arc / radius)
+            angle += ARC_LENGTH / radius;
+        }
 
         child.moveTo(x, y);
 
-        // Update bounds (do not update if root)
-        if (parent != null) {
-            bounds.setEmpty();
+        // Update bounds
+        bounds.setEmpty();
 
-            for (WordGroup group : children) {
-                bounds.union(group.bounds);
-            }
+        for (WordGroup group : children) {
+            bounds.union(group.bounds);
         }
     }
 

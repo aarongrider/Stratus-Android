@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Animatable;
@@ -18,6 +19,7 @@ import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
@@ -128,8 +130,12 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int scrollViewHeight = 3000;
         scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
         // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2));
+        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
 
         // Create new instances
         Blacklist.createInstance();
@@ -209,6 +215,27 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
+        /* Tests for running on emulator
+        final String words[] = {
+                "hello",
+                "team", "root", "is", "awesome",
+                "team", "root",
+                "geotastic", "is", "not", "so", "awesome",
+                "do", "you", "understand", "me", "at", "all",
+                "do", "you", "really", "understand"
+        };
+
+        for (int i = 0; i < words.length; i++) {
+            final String word = words[i];
+
+            rl.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    WordCloud.getInstance().addWord(word, new Random().nextInt(8) + 2);
+                }
+            }, 1000 * i);
+        }
+        //*/
     }
 
     @Override
