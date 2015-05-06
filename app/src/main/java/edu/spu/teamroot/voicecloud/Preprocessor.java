@@ -71,43 +71,39 @@ public class Preprocessor {
         // TODO Part of speech identification
 
         // TODO Refactor how we handle partial results to make more efficient
+
         if (type == PARTIAL_RESULTS) {
-
-            // Iterate through partial results and send to cloud
-            for (String word : currBuff) {
-
+            for (String word : prevBuff) {
                 word = word.trim();
 
                 if (!word.isEmpty()) {
-                    WordCloud.getInstance().processWord(word, mWordWeight);
+                    WordCloud.getInstance().addWord(word, -1 * mWordWeight);
                 }
             }
 
-
-            for (String word : prevBuff) {
-
+            // Iterate through partial results and send to cloud
+            for (String word : currBuff) {
                 word = word.trim();
 
                 if (!word.isEmpty()) {
-                    WordCloud.getInstance().processWord(word, -1 * mWordWeight);
+                    WordCloud.getInstance().addWord(word, mWordWeight);
                 }
             }
 
             prevBuff = currBuff;
 
         } else if (type == FINAL_RESULTS) {
-
-            // Iterate through partial results and send to cloud
-            for (String word : currBuff) {
-                if (!word.isEmpty()) WordCloud.getInstance().processWord(word, mWordWeight);
-            }
             for (String word : prevBuff) {
-
                 word = word.toLowerCase().trim();
 
                 if (!word.isEmpty()) {
-                    WordCloud.getInstance().processWord(word, -1 * mWordWeight);
+                    WordCloud.getInstance().addWord(word, -1 * mWordWeight);
                 }
+            }
+
+            // Iterate through partial results and send to cloud
+            for (String word : currBuff) {
+                if (!word.isEmpty()) WordCloud.getInstance().addWord(word, mWordWeight);
             }
 
             prevBuff = new String[]{};

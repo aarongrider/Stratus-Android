@@ -191,7 +191,7 @@ public class SpeechRecognitionService extends Service {
             Log.d(TAG,"onError code:" + error + " message: " + message);
 
             // Temp test logging
-            //mWordCloud.processWord("Error", 5);
+            //mWordCloud.addWord("Error", 5);
 
             // Cancel any current recognition processes and start over
             try {
