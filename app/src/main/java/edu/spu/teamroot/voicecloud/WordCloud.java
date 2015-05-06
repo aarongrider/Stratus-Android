@@ -2,19 +2,13 @@ package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.RelativeLayout;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -93,29 +87,35 @@ public class WordCloud {
      * Methods
      */
 
-    public void processWord(String word) {
-        processWord(word, 1);
+    public void addWord(String word) {
+        addWord(word, 1);
     }
 
-    public void processWord(String name, int count) {
-        // TODO: Check blacklist for word
-
+    public void addWord(String name, int count) {
         Word word = wordList.get(name);
 
         if (word == null) {
-            // This will also create a new button and set the initial size of the word
+            // This will create a new button (if eligible) and set the initial size of the word
             word = new Word(name, count);
 
-            addWord(word);
-            updateWord(word);
-            word.show(); // Make sure the word is shown (can be hidden on create)
-        } else {
-            // Increment only the count
-            if (word.incrementCount(count)) {
-                updateWord(word);
-                word.show(); // Make sure the word is shown (can be hidden on create)
+            // Add to master word list
+            wordList.put(word.getName(), word);
+
+            if (word.isButtonCreated()) {
+                attachWord(word);
+                repositionWord(word);
             }
-            else {
+        } else {
+            // Increment only the count (this will create word if needed)
+            if (word.incrementCount(count)) {
+                if (word.isButtonCreated()) {
+                    if (!word.isWordAttached())
+                        attachWord(word);
+
+                    repositionWord(word);
+                }
+            } else {
+                // Count is <= 0, remove the word from the tree!
                 WordCloud.getInstance().removeWord(word);
             }
         }
@@ -126,11 +126,7 @@ public class WordCloud {
     }
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
-    private void addWord(Word word) {
-
-        // Add to master word list
-        wordList.put(word.getName(), word);
-
+    private void attachWord(Word word) {
         // Calculate new group size ( 1 + floor( sqrt( n-1 ) ) )
         // e.g. n=4, size = 2 groups of 2; n=8, size = 3 groups of 3
         int newSize = 1 + (int)Math.floor(Math.sqrt(wordList.size() - 1));
@@ -173,12 +169,17 @@ public class WordCloud {
     }
 
     // Repositions a word inside a group.
-    private void updateWord(Word word) {
+    private void repositionWord(Word word) {
+        if (!word.isWordAttached()) return;
+
         // Reposition word in parent group
         word.parent.repositionChild(word);
 
         // Now, reposition parent groups within the root
         wordTreeRoot.repositionChild(word.parent);
+
+        // Make sure the word is shown (can be hidden on create)
+        word.show();
     }
 
     // Removes a word, deleting it from the word cloud.
@@ -195,9 +196,11 @@ public class WordCloud {
 
         word.delete(); // This will remove from tree and delete button
 
-        // Add parent to list of free groups
-        if (group.children.size() < groupSize && !freeGroups.contains(group)) {
-            freeGroups.addFirst(group);
+        if (group != null) {
+            // Add parent to list of free groups
+            if (group.children.size() < groupSize && !freeGroups.contains(group)) {
+                freeGroups.addFirst(group);
+            }
         }
     }
 

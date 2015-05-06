@@ -9,6 +9,8 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -45,22 +47,35 @@ public class Word extends WordGroup {
 
         this.animatorSet = null;
 
-        button = createButton(name);
-
-        // Add the button to the word cloud layout
-        layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.topMargin = 0;
-        layoutParams.leftMargin = 0;
-        WordCloud.layout.addView(button, layoutParams);
-
-        refreshSize(false);
+        if (needsCreate()) {
+            createButton();
+        } else {
+            button = null;
+            layoutParams = null;
+        }
     }
 
-    private Button createButton(String text) {
-        final Button button = new Button(WordCloud.context);
+    // Checks if the actual word button is created.
+    // If the button is not created, the word is considered detached.
+    public boolean isButtonCreated() {
+        return button != null;
+    }
+
+    public boolean isWordAttached() {
+        return parent != null;
+    }
+
+    // Checks if the button needs to be created (and added to the cloud).
+    private boolean needsCreate() {
+        boolean eligible = (count >= 2);
+        return !isButtonCreated() && eligible;
+    }
+
+    private void createButton() {
+        button = new Button(WordCloud.context);
         button.setVisibility(View.INVISIBLE);
 
-        button.setText(text);
+        button.setText(name);
         button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
 
         button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(R.color.accentBlue), PorterDuff.Mode.SRC_ATOP);
@@ -72,7 +87,14 @@ public class Word extends WordGroup {
             }
         });
 
-        return button;
+        // Add the button to the word cloud layout
+        layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        layoutParams.topMargin = 0;
+        layoutParams.leftMargin = 0;
+        WordCloud.layout.addView(button, layoutParams);
+
+        // Set initial size (do not animate)
+        refreshSize(false);
     }
 
     // Removes the word from the tree and deletes the associated button.
@@ -81,7 +103,14 @@ public class Word extends WordGroup {
             parent.removeChild(this);
         }
 
-        WordCloud.layout.removeView(button);
+        if (isButtonCreated()) {
+            if (animatorSet != null) {
+                animatorSet.cancel();
+            }
+
+            WordCloud.layout.removeView(button);
+        }
+
         button = null;
         layoutParams = null;
     }
@@ -91,6 +120,8 @@ public class Word extends WordGroup {
     }
 
     public void show(boolean animate) {
+        if (!isButtonCreated()) return;
+
         button.setVisibility(View.VISIBLE);
 
         if (animate) {
@@ -110,10 +141,19 @@ public class Word extends WordGroup {
     }
 
     public void hide(boolean animate) {
+        if (!isButtonCreated()) return;
+
         button.setVisibility(View.INVISIBLE);
 
         if (animate) {
-            // TODO: Animate with fade-out
+            AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
+            anim.setInterpolator(new LinearInterpolator());
+
+            anim.setDuration(500);
+
+            button.clearAnimation();
+            button.setAnimation(anim);
+            button.animate();
         }
     }
 
@@ -132,11 +172,19 @@ public class Word extends WordGroup {
             return false;
         }
 
-        refreshSize(true);
+        if (isButtonCreated()) {
+            // Button size has changed; animate
+            refreshSize(true);
+        } else if (needsCreate()) {
+            createButton();
+        }
+
         return true;
     }
 
     private void refreshSize(boolean animate) {
+        if (!isButtonCreated()) return;
+
         // Cache old size
         Rect oldBounds = new Rect(bounds);
 
