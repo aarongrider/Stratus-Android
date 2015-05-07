@@ -3,32 +3,35 @@ package edu.spu.teamroot.voicecloud;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
-/**
- * Created by Wang Laptop on 3/2/2015.
- */
+
 public class WordCloudLayout extends RelativeLayout {
-    private static float MIN_ZOOM = 1f;
-    private static float MAX_ZOOM = 5f;
+    private static final float MIN_SCALE = 0.1f;
+    private static final float MAX_SCALE = 1.0f;
+    private float mScaleFactor = 1.0f;
 
-    private float scaleFactor = 1f;
+    private ScaleGestureDetector mScaleGestureDetector;
 
-    private ScaleGestureDetector scaleDetector;
-
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            scaleFactor *= detector.getScaleFactor();
-            scaleFactor = Math.max(MIN_ZOOM, Math.min(scaleFactor, MAX_ZOOM));
+            // Get the current percentage by which to scale
+            float scaleFactor = detector.getScaleFactor();
+
+            mScaleFactor *= scaleFactor;
+            mScaleFactor = Math.max(MIN_SCALE, Math.min(mScaleFactor, MAX_SCALE));
+
             invalidate();
             return true;
         }
-    }
+    };
 
     private void initScaleDetector(Context context) {
-        scaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+        mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
     }
 
     public WordCloudLayout(Context context) {
@@ -48,7 +51,16 @@ public class WordCloudLayout extends RelativeLayout {
 
     protected void dispatchDraw(Canvas canvas) {
         canvas.save();
-        canvas.scale(scaleFactor, scaleFactor);
+        canvas.scale(mScaleFactor, mScaleFactor);
+        super.dispatchDraw(canvas);
         canvas.restore();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean retval = false;
+        retval |= mScaleGestureDetector.onTouchEvent(event);
+        retval |= super.onTouchEvent(event);
+        return retval;
     }
 }
