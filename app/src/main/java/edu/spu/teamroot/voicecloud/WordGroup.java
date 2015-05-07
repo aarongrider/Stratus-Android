@@ -115,7 +115,7 @@ public class WordGroup {
 
             if (relativeToGroup) {
                 // If positioning in group, add a random x offset
-                //x += new Random().nextInt(51) - 25; // Add (-25 to +25)
+                x += new Random().nextInt(bounds.width() / 2 + 1) - bounds.width() / 4;
             }
 
             // Estimate delta angle using ARC_LENGTH / radius
