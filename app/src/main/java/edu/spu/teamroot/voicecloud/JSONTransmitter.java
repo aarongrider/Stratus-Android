@@ -6,37 +6,90 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObject> {
 
-    String url = "http://72.233.176.79:9000/";
+    String url = "http://52.24.35.51/cloud/submit";
     String key = "4r3hjiohs3jfiuh3";
 
     @Override
     protected JSONObject doInBackground(JSONObject... data) {
+
+        // Create json string from JSONObject
         String json = data[0].toString();
-        HttpClient client = new DefaultHttpClient();
-        HttpConnectionParams.setConnectionTimeout(client.getParams(), 100000);
-        JSONObject jsonResponse = null;
-        HttpPost post = new HttpPost(url);
+
+        // Set up client connectioon
+        HttpClient httpClient = new DefaultHttpClient();
+        HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 100000);
+
+        // Initialize return data object
+        InputStream inputStream = null;
+        String result = "";
+
+        HttpPost httpPost = new HttpPost(url);
+
         try {
-            StringEntity se = new StringEntity(key+"="+json);
-            post.addHeader("content-type", "application/x-www-form-urlencoded");
-            //se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-            post.setEntity(se);
 
-            HttpResponse response = client.execute(post);
-            String resFromServer = org.apache.http.util.EntityUtils.toString(response.getEntity());
-            jsonResponse=new JSONObject(resFromServer);
-            Log.i("Response from server", jsonResponse.toString());
+            // Create StringEntity and add to POST
+            //StringEntity se = new StringEntity(key+"="+json);
+            StringEntity se = new StringEntity(json);
+            httpPost.setEntity(se);
 
-        } catch (Exception e) { e.printStackTrace();}
+            // Set headers so server knows what we are sending
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
 
-        return jsonResponse;
+            // Execute POST request
+            HttpResponse httpResponse = httpClient.execute(httpPost);
+
+            // Receive response
+            inputStream = httpResponse.getEntity().getContent();
+
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        // Log result
+        Log.d("Post", result);
+
+        // Return result
+        JSONObject returnObject = new JSONObject();
+        try {
+            returnObject.put("id", result);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return returnObject;
+    }
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+
     }
 
 }

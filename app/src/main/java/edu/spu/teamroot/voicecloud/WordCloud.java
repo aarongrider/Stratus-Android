@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 public class WordCloud {
     /*
@@ -235,6 +237,8 @@ public class WordCloud {
 
     public void saveWordCloud() {
 
+        Log.d("wordCloud", "Saving word cloud");
+
         // Create Master JSON Object
         JSONObject toSend = new JSONObject();
 
@@ -298,6 +302,21 @@ public class WordCloud {
             // Transmit object to web server
             JSONTransmitter transmitter = new JSONTransmitter();
             transmitter.execute(toSend);
+
+                try {
+
+                    JSONObject result = transmitter.get();
+                    String cloudID = result.getString("id");
+
+                    // Toast result
+                    Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();
