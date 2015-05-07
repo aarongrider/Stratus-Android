@@ -24,12 +24,15 @@ package edu.spu.teamroot.voicecloud;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -194,6 +197,7 @@ public class TwoDScrollView extends FrameLayout {
     }
 
     private void initTwoDScrollView() {
+        mScaleGestureDetector = new ScaleGestureDetector(getContext(), mScaleGestureListener);
         mScroller = new Scroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
@@ -382,6 +386,7 @@ public class TwoDScrollView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        mScaleGestureDetector.onTouchEvent(ev);
 
         if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
             // Don't handle edge touches immediately -- they may actually belong to one of our
@@ -1168,4 +1173,50 @@ public class TwoDScrollView extends FrameLayout {
         }
         return n;
     }
+
+
+    /*
+     * Isaac's View Scaling Code
+     */
+
+    private static final float MIN_SCALE = 0.1f;
+    private static final float MAX_SCALE = 1.0f;
+    private float mScaleFactor = 1.0f;
+
+    private ScaleGestureDetector mScaleGestureDetector;
+
+    private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            // Get the current percentage by which to scale
+            float scaleFactor = detector.getScaleFactor();
+
+            mScaleFactor *= scaleFactor;
+            mScaleFactor = Math.max(MIN_SCALE, Math.min(mScaleFactor, MAX_SCALE));
+
+            // Scale the child
+            TwoDScrollView.this.getChildAt(0).setScaleX(mScaleFactor);
+            TwoDScrollView.this.getChildAt(0).setScaleY(mScaleFactor);
+
+            // Center around focal point
+            TwoDScrollView.this.getChildAt(0).setTranslationX(detector.getFocusX());
+            TwoDScrollView.this.getChildAt(0).setTranslationY(detector.getFocusY());
+
+            invalidate();
+            return true;
+        }
+    };
+
+    private void initScaleDetector(Context context) {
+        mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
+    }
+
+    /*
+    protected void dispatchDraw(Canvas canvas) {
+        canvas.save();
+        canvas.scale(mScaleFactor, mScaleFactor);
+        super.dispatchDraw(canvas);
+        canvas.restore();
+    }
+    //*/
 }
