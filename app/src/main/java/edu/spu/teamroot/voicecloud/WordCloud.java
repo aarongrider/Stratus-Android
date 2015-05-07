@@ -1,6 +1,8 @@
 package edu.spu.teamroot.voicecloud;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
@@ -235,7 +237,7 @@ public class WordCloud {
         return wordList.containsKey(name);
     }
 
-    public void saveWordCloud() {
+    public void uploadWordCloud() {
 
         Log.d("wordCloud", "Saving word cloud");
 
@@ -295,6 +297,7 @@ public class WordCloud {
         }
 
         try {
+
             // Add layout and words array to master json object
             toSend.put("layout", layout);
             toSend.put("words", words);
@@ -303,25 +306,27 @@ public class WordCloud {
             JSONTransmitter transmitter = new JSONTransmitter();
             transmitter.execute(toSend);
 
-                try {
+            JSONObject result = transmitter.get();
+            String cloudID = result.getString("id");
 
-                    JSONObject result = transmitter.get();
-                    String cloudID = result.getString("id");
+            // Toast result
+            //Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
 
-                    // Toast result
-                    Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
+            builder.setMessage("View your word cloud by visiting \"http://52.24.35.51/cloud\" and entering the CloudID: " + cloudID)
+                    .setTitle("Word Cloud Saved")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            //do things
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-
-        } catch (JSONException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 }

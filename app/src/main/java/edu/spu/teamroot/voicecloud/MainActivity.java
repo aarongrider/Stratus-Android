@@ -273,7 +273,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         }
 
         if (id == R.id.save_to_web) {
-            WordCloud.getInstance().saveWordCloud();
+            WordCloud.getInstance().uploadWordCloud();
             return true;
         }
 
