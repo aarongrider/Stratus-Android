@@ -1,9 +1,11 @@
 package edu.spu.teamroot.voicecloud;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Color;
@@ -269,16 +271,52 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
             return true;
         }
 
-        if (id == R.id.save_to_web) {
-            WordCloud.getInstance().uploadWordCloud();
+        if (id == R.id.save_cloud) {
+
+            Toast.makeText(this, "Saving Cloud...", Toast.LENGTH_SHORT).show();
+
+            String title;
+            String message;
+            String cloudID = WordCloud.getInstance().saveWordCloud();
+
+            if (cloudID.equals("none")) {
+                title = "Not Saved";
+                message = "Word cloud could not be saved. Please check your internet connection.";
+            }
+            else {
+                title = "Saved Successfully!";
+                message = "View at \"http://52.24.35.51/cloud\"\n\nEnter CloudID: " + cloudID;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
+            builder.setMessage(message)
+                    .setTitle(title)
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            //do things
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+
             return true;
+        }
+
+        if (id == R.id.load_cloud) {
+
+            // Load cloud
+            Toast.makeText(this, "Loading Cloud...", Toast.LENGTH_SHORT).show();
+            boolean success = WordCloud.getInstance().loadWordCloud("21");
+
         }
 
         if (id==R.id.view_exclude_list){
-        //openExclusion();
+            Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
         }
 
         return false;

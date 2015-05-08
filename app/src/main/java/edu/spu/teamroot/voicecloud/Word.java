@@ -68,7 +68,7 @@ public class Word extends WordGroup {
 
     // Checks if the button needs to be created (and added to the cloud).
     private boolean needsCreate() {
-        boolean eligible = (count >= 2);
+        boolean eligible = (count >= 1);
         return !isButtonCreated() && eligible;
     }
 

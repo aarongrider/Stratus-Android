@@ -4,6 +4,7 @@
     <string name="app_name">Voice Cloud</string>
     <string name="action_settings">Settings</string>
     <string name="view_exclude_list">View Exclusion List</string>
-    <string name="save_to_web">Save to Web</string>
+    <string name="save_cloud">Save Word Cloud</string>
+    <string name="load_cloud">Load Previous</string>
 
 </resources>

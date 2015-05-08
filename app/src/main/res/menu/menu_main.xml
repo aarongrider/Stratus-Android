@@ -5,10 +5,13 @@
           android:title="@string/view_exclude_list"
           android:orderInCategory="100"
           app:showAsAction="never" />
-    <item android:id="@+id/save_to_web" android:title="@string/save_to_web"
+    <item android:id="@+id/save_cloud" android:title="@string/save_cloud"
           android:orderInCategory="200"
           app:showAsAction="never" />
+    <item android:id="@+id/load_cloud" android:title="@string/load_cloud"
+          android:orderInCategory="300"
+          app:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="300"
+        android:orderInCategory="400"
         app:showAsAction="never" />
 </menu>

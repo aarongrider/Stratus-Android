@@ -17,20 +17,23 @@ import org.json.JSONObject;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObject> {
 
-    String url = "http://52.24.35.51/cloud/submit";
-    String key = "4r3hjiohs3jfiuh3";
+    String baseURL = "http://52.24.35.51/cloud";
 
     @Override
     protected JSONObject doInBackground(JSONObject... data) {
 
+        String url = baseURL;
+
+        if (data[0].has("layout")) url = baseURL + "/save";
+        else url = baseURL + "/load";
+
         // Create json string from JSONObject
         String json = data[0].toString();
 
-        // Set up client connectioon
+        // Set up client connection
         HttpClient httpClient = new DefaultHttpClient();
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 100000);
 

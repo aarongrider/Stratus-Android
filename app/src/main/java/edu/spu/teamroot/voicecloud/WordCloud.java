@@ -244,7 +244,7 @@ public class WordCloud {
         return wordList.containsKey(name);
     }
 
-    public void uploadWordCloud() {
+    public String saveWordCloud() {
 
         Log.d("wordCloud", "Saving word cloud");
 
@@ -253,8 +253,8 @@ public class WordCloud {
 
         // Create layout JSON Object
         JSONObject layout = new JSONObject();
-        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
-        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
+        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width) / 2;
+        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height) / 2;
         String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
@@ -322,21 +322,51 @@ public class WordCloud {
             // Toast result
             //Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
-            builder.setMessage("View your word cloud by visiting \"http://52.24.35.51/cloud\" and entering the CloudID: " + cloudID)
-                    .setTitle("Word Cloud Saved")
-                    .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            //do things
-                        }
-                    });
-            AlertDialog alert = builder.create();
-            alert.show();
+            return cloudID;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return "none";
+    }
+
+    public boolean loadWordCloud(String id) {
+
+        // Make request
+        Log.d("wordCloud", "Loading word cloud");
+
+        // Create Master JSON Object
+        JSONObject toSend = new JSONObject();
+
+        try {
+            toSend.put("id", id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+            // Ping API and get JSON object
+            JSONObject result = transmitter.get();
+
+            //String cloudID = result.getString("id");
+
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+
+        // Lookup based on string
+
+        // Load JSON Object into cloud and word list
     }
 
 }
