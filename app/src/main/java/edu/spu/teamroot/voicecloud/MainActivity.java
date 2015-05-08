@@ -20,6 +20,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -27,6 +28,7 @@ import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.animation.ScaleAnimation;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.PopupMenu;
@@ -289,7 +291,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
             else {
                 title = "Saved Successfully!";
-                message = "View at \"http://52.24.35.51/cloud\"\n\nEnter CloudID: " + cloudID;
+                message = "View at \"http://52.24.35.51/cloud\"\n\nCloudID: " + cloudID;
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
@@ -309,9 +311,34 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         if (id == R.id.load_cloud) {
 
-            // Load cloud
-            Toast.makeText(this, "Loading Cloud...", Toast.LENGTH_SHORT).show();
-            boolean success = WordCloud.getInstance().loadWordCloud("21");
+            // Get ID
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Load Word Cloud");
+
+            // Set up the input
+            final EditText input = new EditText(this);
+            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_CLASS_NUMBER);
+            builder.setView(input);
+
+            // Set up the buttons
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    // Load cloud
+                    Toast.makeText(MainActivity.this, "Loading Cloud...", Toast.LENGTH_SHORT).show();
+                    if (!WordCloud.getInstance().loadWordCloud(input.getText().toString())) Toast.makeText(MainActivity.this, "Loading Cloud Failed", Toast.LENGTH_SHORT).show();
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.show();
 
         }
 

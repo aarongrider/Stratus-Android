@@ -28,7 +28,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
         String url = baseURL;
 
         if (data[0].has("layout")) url = baseURL + "/save";
-        else url = baseURL + "/load";
+        else url = baseURL + "/load.json";
 
         // Create json string from JSONObject
         String json = data[0].toString();
@@ -70,7 +70,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
         }
 
         // Log result
-        Log.d("Post", result);
+        Log.d("Result", result);
 
         // Return result
         JSONObject returnObject = new JSONObject();

@@ -19,7 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 

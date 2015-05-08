@@ -1,8 +1,6 @@
 package edu.spu.teamroot.voicecloud;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
@@ -353,8 +351,22 @@ public class WordCloud {
 
             // Ping API and get JSON object
             JSONObject result = transmitter.get();
+            result = new JSONObject(result.getString("id"));
 
-            //String cloudID = result.getString("id");
+            // Clear out current cloud
+            this.clear();
+
+            // Populate words
+            JSONArray wordArray = result.getJSONObject("cloud").getJSONArray("words");
+
+            for (int i = 0; i < wordArray.length(); i++) {
+                JSONObject word = wordArray.getJSONObject(i);
+                String name = word.getString("name");
+                Integer count = Integer.parseInt(word.getString("count"));
+                Long timestamp = Timestamp.valueOf(word.getString("timestamp")).getTime();
+
+                addWord(name, count);
+            }
 
             return true;
 
@@ -363,10 +375,6 @@ public class WordCloud {
         }
 
         return false;
-
-        // Lookup based on string
-
-        // Load JSON Object into cloud and word list
     }
 
 }
