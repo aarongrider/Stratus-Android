@@ -105,6 +105,11 @@ public class SpeechRecognitionService extends Service {
 
         Log.d(TAG, "SRS destroy");
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
+            mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+        }
+
         super.onDestroy();
 
         if (mSpeechRecognizer != null) {
@@ -127,10 +132,6 @@ public class SpeechRecognitionService extends Service {
         public void onReadyForSpeech(Bundle params) {
             
             Log.d(TAG, "onReadyForSpeech");
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
-            }
 
         }
 
