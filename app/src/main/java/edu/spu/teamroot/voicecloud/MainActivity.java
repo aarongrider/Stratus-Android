@@ -89,17 +89,23 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onStart() {
+        Log.d("MainActivity", "onStart");
+
         super.onStart();
         bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
 
     @Override
     protected void onStop() {
+        Log.d("MainActivity", "onStop");
+
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
+        Log.d("MainActivity", "onDestroy");
+
         super.onDestroy();
 
         try {
@@ -117,6 +123,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("MainActivity", "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 

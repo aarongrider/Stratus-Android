@@ -75,7 +75,8 @@ public class SpeechRecognitionService extends Service {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 
                         // Turn off beep sound
-                        mAudioManager.setStreamSolo(AudioManager.STREAM_VOICE_CALL, true);
+                        mAudioManager.setStreamMute(AudioManager.STREAM_VOICE_CALL, true);
+                        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
                     }
                     if (!target.mIsListening) {
                         Log.d(TAG, "Start listening");
