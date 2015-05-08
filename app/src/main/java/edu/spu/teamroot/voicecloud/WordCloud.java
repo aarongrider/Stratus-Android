@@ -6,18 +6,17 @@ import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
 
 public class WordCloud {
     /*
@@ -58,6 +57,8 @@ public class WordCloud {
 
     private WordGroup wordTreeRoot;
 
+    private long timestamp;
+
     /*
      * Constructors
      */
@@ -70,6 +71,7 @@ public class WordCloud {
         freeGroups = new LinkedList<>();
         groupSize = 0;
         wordTreeRoot = new WordGroup();
+        timestamp = System.currentTimeMillis();
 
         int width, height;
 
@@ -131,6 +133,8 @@ public class WordCloud {
     public Word getWord(String name) {
         return wordList.get(name);
     }
+
+    public long getTimestamp() { return this.timestamp; }
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
     private void attachWord(Word word) {
@@ -231,6 +235,9 @@ public class WordCloud {
 
             it.remove(); // Proper way to delete when using iterators
         }
+
+        // Update timestamp
+        timestamp = System.currentTimeMillis();
     }
 
     public boolean isWordInCloud(String name) {
@@ -248,10 +255,12 @@ public class WordCloud {
         JSONObject layout = new JSONObject();
         int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
         int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
+        String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
             layout.put("width", width);
             layout.put("height", height);
+            layout.put("timestamp", timestamp);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -274,6 +283,7 @@ public class WordCloud {
                 // Add all word properties
                 word.put("name", currWord.getName());
                 word.put("count", currWord.getCount());
+                word.put("timestamp", new Timestamp(currWord.getTimestamp()).toString());
 
                 // Convert rect to JSON
                 JSONObject bounds = new JSONObject();

@@ -14,19 +14,19 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Word extends WordGroup {
     private String name;
     private int count;
+    private long timestamp;
 
     private AnimatorSet animatorSet;
 
@@ -44,6 +44,7 @@ public class Word extends WordGroup {
 
         this.name = name;
         this.count = count;
+        this.timestamp = System.currentTimeMillis();
 
         this.animatorSet = null;
 
@@ -165,8 +166,17 @@ public class Word extends WordGroup {
         return count;
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     public boolean incrementCount(int value) {
+
+        // Increment count
         count += value;
+
+        // Update timestamp
+        this.timestamp = System.currentTimeMillis();
 
         if (count <= 0) {
             return false;
@@ -325,13 +335,17 @@ public class Word extends WordGroup {
         curItemMap.put("id", "count");
         curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
         curItemMap.put("iconText", Integer.toString(word.getCount()));
-        curItemMap.put("label", word.getCount()==1?"Occurrence":"Occurrences");
+        curItemMap.put("label", word.getCount() == 1 ? "Occurrence" : "Occurrences");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
+
+        // Find count per minute
+        double countPerMinute = word.getCount() / ((System.currentTimeMillis() - WordCloud.getInstance().getTimestamp()) / 60000.0);
+
         curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
-        curItemMap.put("iconText", Integer.toString(word.getCount()));
-        curItemMap.put("label", word.getCount()==1?"Occurrence Per Minute":"Occurrences Per Minute");
+        curItemMap.put("iconText", countPerMinute>=10?String.format("%d", (int)countPerMinute):String.format("%.1f", countPerMinute));
+        curItemMap.put("label", countPerMinute==1?"Occurrence Per Minute":"Occurrences Per Minute");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
