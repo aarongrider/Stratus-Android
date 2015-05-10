@@ -23,15 +23,15 @@
             android:id="@+id/iconText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="4"
+            android:text="14"
             android:layout_alignParentBottom="false"
             android:layout_alignParentLeft="false"
             android:layout_alignParentTop="false"
             android:layout_alignWithParentIfMissing="false"
             android:layout_centerInParent="true"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:textColor="@color/primary"
-            android:paddingRight="1dp"
+            android:paddingLeft="0dp"
             android:paddingBottom="2dp">
         </TextView>
 

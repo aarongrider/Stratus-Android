@@ -22,6 +22,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -327,6 +328,9 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             final EditText input = new EditText(this);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_CLASS_NUMBER);
+            input.setHint("CloudID");
+            input.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 40);
+            input.setPadding(50, 50, 50, 50);
             builder.setView(input);
 
             // Set up the buttons

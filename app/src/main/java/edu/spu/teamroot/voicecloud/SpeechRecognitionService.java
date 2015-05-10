@@ -105,6 +105,7 @@ public class SpeechRecognitionService extends Service {
 
         Log.d(TAG, "SRS destroy");
 
+        // Turn sounds back on
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
             mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);

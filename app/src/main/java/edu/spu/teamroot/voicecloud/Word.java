@@ -332,7 +332,7 @@ public class Word extends WordGroup {
 
         curItemMap = new HashMap<>();
         curItemMap.put("id", "count");
-        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
         curItemMap.put("iconText", Integer.toString(word.getCount()));
         curItemMap.put("label", word.getCount() == 1 ? "Occurrence" : "Occurrences");
         dataList.add(curItemMap);
@@ -342,7 +342,7 @@ public class Word extends WordGroup {
         // Find count per minute
         double countPerMinute = word.getCount() / ((System.currentTimeMillis() - WordCloud.getInstance().getTimestamp()) / 60000.0);
 
-        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
         curItemMap.put("iconText", countPerMinute>=10?String.format("%d", (int)countPerMinute):String.format("%.1f", countPerMinute));
         curItemMap.put("label", countPerMinute==1?"Occurrence Per Minute":"Occurrences Per Minute");
         dataList.add(curItemMap);
@@ -360,15 +360,9 @@ public class Word extends WordGroup {
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.count_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.dictionary_icon));
         curItemMap.put("iconText", "");
         curItemMap.put("label", "Define in Dictionary");
-        dataList.add(curItemMap);
-
-        curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.quizlet_icon));
-        curItemMap.put("iconText", "");
-        curItemMap.put("label", "Create Flash Card");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
@@ -381,8 +375,6 @@ public class Word extends WordGroup {
 
         AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                Toast.makeText(WordCloud.context, Integer.toString(position), Toast.LENGTH_SHORT);
 
                 // Count
                 if (position == 0) { }
@@ -413,13 +405,8 @@ public class Word extends WordGroup {
                     WordCloud.context.startActivity(i);
                 }
 
-                // Create Flash Card
-                if (position == 5) {
-                    dialog.dismiss();
-                }
-
                 // Remove from Word Cloud
-                if (position == 6) {
+                if (position == 5) {
 
                     // Add word to exclusion list
 
