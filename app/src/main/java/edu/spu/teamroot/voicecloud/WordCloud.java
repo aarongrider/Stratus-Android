@@ -251,8 +251,8 @@ public class WordCloud {
 
         // Create layout JSON Object
         JSONObject layout = new JSONObject();
-        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width) / 2;
-        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height) / 2;
+        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
+        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
         String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
@@ -285,15 +285,11 @@ public class WordCloud {
 
                 // Convert rect to JSON
                 JSONObject bounds = new JSONObject();
-                bounds.put("bottom", UnitConverter.getInstance().toDp(currWord.getBounds().bottom));
-                bounds.put("left", UnitConverter.getInstance().toDp(currWord.getBounds().left));
-                bounds.put("right", UnitConverter.getInstance().toDp(currWord.getBounds().right));
-                bounds.put("top", UnitConverter.getInstance().toDp(currWord.getBounds().top));
+                bounds.put("bottom", currWord.getBounds().bottom);
+                bounds.put("left", currWord.getBounds().left);
+                bounds.put("right", currWord.getBounds().right);
+                bounds.put("top", currWord.getBounds().top);
                 word.put("bounds", bounds);
-
-                // Get color as string
-                //Drawable buttonBackground = currWord.button.getBackground();
-                //word.put("color", buttonBackground);
 
                 // Add word json to words array
                 words.put(word);
@@ -317,10 +313,8 @@ public class WordCloud {
             JSONObject result = transmitter.get();
             String cloudID = result.getString("id");
 
-            // Toast result
-            //Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
-
-            return cloudID;
+            if (cloudID != "") return cloudID;
+            else return "none";
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -332,7 +326,7 @@ public class WordCloud {
     public boolean loadWordCloud(String id) {
 
         // Make request
-        Log.d("wordCloud", "Loading word cloud");
+        Log.d("wordCloud", "Loading CLOUDID " + id);
 
         // Create Master JSON Object
         JSONObject toSend = new JSONObject();

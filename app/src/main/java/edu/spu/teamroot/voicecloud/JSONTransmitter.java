@@ -20,7 +20,7 @@ import android.util.Log;
 
 public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObject> {
 
-    String baseURL = "http://52.24.35.51/cloud";
+    String baseURL = "http://52.24.35.51/API";
 
     @Override
     protected JSONObject doInBackground(JSONObject... data) {

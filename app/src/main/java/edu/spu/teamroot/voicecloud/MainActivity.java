@@ -295,12 +295,12 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             String cloudID = WordCloud.getInstance().saveWordCloud();
 
             if (cloudID.equals("none")) {
-                title = "Not Saved";
-                message = "Word cloud could not be saved. Please check your internet connection.";
+                title = "Not Saved :(";
+                message = "Your word cloud could not be saved. We couldn't talk with the server. Do you have an internet connection?";
             }
             else {
                 title = "Saved Successfully!";
-                message = "View at \"http://52.24.35.51/cloud\"\n\nCloudID: " + cloudID;
+                message = "CLOUDID: " + cloudID;
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
@@ -328,7 +328,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             final EditText input = new EditText(this);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_CLASS_NUMBER);
-            input.setHint("CloudID");
+            input.setHint("CLOUDID");
             input.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 40);
             input.setPadding(50, 50, 50, 50);
             builder.setView(input);
