@@ -2,13 +2,12 @@ package edu.spu.teamroot.voicecloud;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class WordGroup {
-    private static enum Precision {
+    private enum Precision {
         COARSE,
         FAVOR_EXISTING,
         FAVOR_CURRENT,
@@ -62,6 +61,21 @@ public class WordGroup {
         return new Rect(bounds);
     }
 
+    // Refreshes the group's bounds.
+    public void refreshBounds() {
+        // Refresh group bounds
+        bounds.setEmpty();
+
+        for (WordGroup child : children) {
+            bounds.union(child.bounds);
+        }
+
+        // Update center
+        // TODO Test changing the center on bounds update
+        center.x = bounds.centerX();
+        center.y = bounds.centerY();
+    }
+
     // Returns a copy of the group's center point.
     // (Note: this is not the same as the center of the group's bounds)
     public Point getCenter() {
@@ -85,12 +99,8 @@ public class WordGroup {
         return false;
     }
 
-    public void repositionChild(WordGroup child) {
-        repositionChild(child, true);
-    }
-
     public void repositionChild(WordGroup child, boolean relativeToGroup) {
-        if (relativeToGroup == false && child.center.x == 0 && child.center.y == 0) {
+        if (!relativeToGroup && child.center.x == 0 && child.center.y == 0) {
             // Safety check: do not set relativeToGroup=false if positioning for the first time!
             // Initial placement will be messed up and will likely show up in the upper-left corner.
             relativeToGroup = true;

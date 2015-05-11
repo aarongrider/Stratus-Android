@@ -73,14 +73,6 @@ public class Preprocessor {
         // TODO Refactor how we handle partial results to make more efficient
 
         if (type == PARTIAL_RESULTS) {
-            for (String word : prevBuff) {
-                word = word.trim();
-
-                if (!word.isEmpty()) {
-                    WordCloud.getInstance().addWord(word, -1 * mWordWeight);
-                }
-            }
-
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
                 word = word.trim();
@@ -90,20 +82,28 @@ public class Preprocessor {
                 }
             }
 
-            prevBuff = currBuff;
-
-        } else if (type == FINAL_RESULTS) {
             for (String word : prevBuff) {
-                word = word.toLowerCase().trim();
+                word = word.trim();
 
                 if (!word.isEmpty()) {
                     WordCloud.getInstance().addWord(word, -1 * mWordWeight);
                 }
             }
 
+            prevBuff = currBuff;
+
+        } else if (type == FINAL_RESULTS) {
             // Iterate through partial results and send to cloud
             for (String word : currBuff) {
                 if (!word.isEmpty()) WordCloud.getInstance().addWord(word, mWordWeight);
+            }
+
+            for (String word : prevBuff) {
+                word = word.toLowerCase().trim();
+
+                if (!word.isEmpty()) {
+                    WordCloud.getInstance().addWord(word, -1 * mWordWeight);
+                }
             }
 
             prevBuff = new String[]{};
