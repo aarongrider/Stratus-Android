@@ -16,7 +16,8 @@ public class SimpleWeighter implements WordWeighter {
     @Override
     public int getWordColor(Word word) {
         // Change color every 5 occurrences
-        return WordCloud.context.getResources().getColor(accentColors[(word.getCount() / 5) % accentColors.length]);
+        int index = Math.max((word.getCount() / 5) % accentColors.length, 0);
+        return WordCloud.context.getResources().getColor(accentColors[index]);
     }
 
     @Override

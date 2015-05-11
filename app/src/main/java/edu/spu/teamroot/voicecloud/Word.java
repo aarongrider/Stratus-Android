@@ -44,6 +44,8 @@ public class Word extends WordGroup {
 
     // Initializes the word attributes.
     private void init(String name, int count) {
+        Log.d(name, "init(" + count + ")");
+
         this.name = name;
         this.count = (count >= 0) ? count : 0;
         this.timestamp = System.currentTimeMillis();
@@ -52,6 +54,8 @@ public class Word extends WordGroup {
     // Removes the word from the word list.
     // Also detaches from the view and removes from word tree.
     public void delete() {
+        Log.d(name, "delete(" + count + ")");
+
         if (isAttached()) {
             detachFromCloud();
         }
@@ -67,6 +71,8 @@ public class Word extends WordGroup {
 
     // Creates the word button.
     private void createButton() {
+        Log.d(name, "createButton(" + count + ")");
+
         if (!isCreated()) {
             button = new Button(WordCloud.context);
             button.setVisibility(View.INVISIBLE);
@@ -94,6 +100,8 @@ public class Word extends WordGroup {
 
     // Destroys the word button.
     private void destroyButton() {
+        Log.d(name, "destroyButton(" + count + ")");
+
         if (isCreated()) {
             button = null;
             layoutParams = null;
@@ -103,6 +111,8 @@ public class Word extends WordGroup {
     // Attaches the word to the word cloud.
     // Alias for WordCloud.attachWord().
     private void attachToCloud() {
+        Log.d(name, "attachToCloud(" + count + ")");
+
         if (!isAttached()) {
             WordCloud.getInstance().attachWord(this);
         }
@@ -111,6 +121,8 @@ public class Word extends WordGroup {
     // Detaches the word from the word cloud.
     // Alias for WordCloud.detachWord().
     private void detachFromCloud() {
+        Log.d(name, "detachFromCloud(" + count + ")");
+
         if (isAttached()) {
             WordCloud.getInstance().detachWord(this);
         }
@@ -122,6 +134,8 @@ public class Word extends WordGroup {
     }
 
     public void show(boolean animate) {
+        Log.d(name, "show(" + count + ")");
+
         if (!isCreated()) return;
 
         button.setVisibility(View.VISIBLE);
@@ -144,6 +158,8 @@ public class Word extends WordGroup {
     }
 
     public void hide(boolean animate) {
+        Log.d(name, "hide(" + count + ")");
+
         if (!isCreated()) return;
 
         button.setVisibility(View.INVISIBLE);
@@ -180,15 +196,21 @@ public class Word extends WordGroup {
         return timestamp;
     }
 
-    public void incrementCount(int value) {
+    public boolean incrementCount(int value) {
         // Increment count
         count += value;
 
         // Update timestamp
         this.timestamp = System.currentTimeMillis();
 
+        if (count <= 0) {
+            return false;
+        }
+
         // Button size has changed; animate
         refreshSize(true);
+
+        return true;
     }
 
     private void refreshSize(boolean animate) {

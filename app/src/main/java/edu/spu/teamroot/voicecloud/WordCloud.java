@@ -139,6 +139,8 @@ public class WordCloud {
     }
 
     private void showWord(Word word) {
+        Log.d("WordCloud", word.getName() + ": showWord");
+
         attachWord(word);
         repositionWord(word, true);
         word.show();
@@ -147,6 +149,8 @@ public class WordCloud {
     }
 
     private void hideWord(Word word) {
+        Log.d("WordCloud", word.getName() + ": hideWord");
+
         word.hide();
         detachWord(word);
 
@@ -212,6 +216,8 @@ public class WordCloud {
 
     // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
     protected void attachWord(Word word) {
+        Log.d("WordCloud", word.getName() + ": attachWord");
+
         // Do not attach word if already parented!
         if (word.isAttached()) return;
 
@@ -228,8 +234,12 @@ public class WordCloud {
     }
 
     protected void detachWord(Word word) {
+        Log.d("WordCloud", word.getName() + ": detachWord");
+
         // Do not detach if already detached.
         if (!word.isAttached()) return;
+
+        word.button.clearAnimation();
 
         // Remove the word from the view
         WordCloud.layout.removeView(word.button);
@@ -248,6 +258,8 @@ public class WordCloud {
 
     // Repositions a word inside a group.
     protected void repositionWord(Word word, boolean initialPlacement) {
+        Log.d("WordCloud", word.getName() + ": repositionWord");
+
         if (!word.isAttached()) return;
 
         // Initially, reposition word in parent group (otherwise relative to current position)
@@ -264,6 +276,8 @@ public class WordCloud {
     }
 
     protected void removeWord(Word word, boolean deleteFromList) {
+        Log.d("WordCloud", word.getName() + ": removeWord");
+
         if (deleteFromList) {
             wordList.remove(word.getName()); // Remove from word list
         }
