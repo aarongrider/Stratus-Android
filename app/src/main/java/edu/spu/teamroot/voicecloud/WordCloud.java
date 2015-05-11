@@ -48,12 +48,15 @@ public class WordCloud {
      * Member variables
      */
 
+    public WordWeighter weighter;
+
     private Map<String, Word> wordList;
 
     private Deque<WordGroup> freeGroups;
     private int groupSize;
 
     private WordGroup wordTreeRoot;
+    private int treeSize; // Number of (attached) words in the tree
 
     private long timestamp;
 
@@ -64,6 +67,8 @@ public class WordCloud {
     private WordCloud(Context context, RelativeLayout layout) {
         WordCloud.context = context;
         WordCloud.layout = layout;
+
+        weighter = new SimpleWeighter(); // TODO Adjust weighter based on settings
 
         wordList = new TreeMap<>();
         freeGroups = new LinkedList<>();
@@ -96,34 +101,71 @@ public class WordCloud {
     }
 
     public void addWord(String name, int count) {
+        // Get the word from the list
         Word word = wordList.get(name);
 
         if (word == null) {
-            // This will create a new button (if eligible) and set the initial size of the word
+            // Create a new word and add to master word list
             word = new Word(name, count);
-
-            // Add to master word list
             wordList.put(word.getName(), word);
+        } else {
+            // Increment only the count
+            word.incrementCount(count);
+        }
 
-            if (word.isButtonCreated()) {
-                attachWord(word);
-                repositionWord(word, true);
+        // Update the word
+        boolean isAttached = word.isAttached();
+        boolean shouldShow = weighter.shouldShow(word);
+
+        if (isAttached) {
+            if (shouldShow) {
+                // Word already exists in the tree, position relative to self
+                repositionWord(word, false);
+            } else {
+                // Word needs to be removed from cloud
+                hideWord(word);
             }
         } else {
-            // Increment only the count (this will create word if needed)
-            if (word.incrementCount(count)) {
-                if (word.isButtonCreated()) {
-                    if (!word.isWordAttached()) {
-                        attachWord(word);
-                        repositionWord(word, true);
-                    } else {
-                        // Word exists in the tree already, position relative to self
-                        repositionWord(word, false);
-                    }
-                }
-            } else {
-                // Count is <= 0, remove the word from the tree!
-                WordCloud.getInstance().removeWord(word);
+            if (shouldShow) {
+                // Word needs to be added to cloud
+                showWord(word);
+            }
+        }
+
+        // Check if we need to refresh all words
+        if (weighter.refreshAll(word)) {
+            evaluateAllWords();
+        }
+    }
+
+    private void showWord(Word word) {
+        attachWord(word);
+        repositionWord(word, true);
+        word.show();
+
+        treeSize++;
+    }
+
+    private void hideWord(Word word) {
+        word.hide();
+        detachWord(word);
+
+        treeSize--;
+    }
+
+    private void evaluateAllWords() {
+        for (Map.Entry pair : wordList.entrySet()) {
+            Word word = (Word)pair.getValue();
+
+            boolean isAttached = word.isAttached();
+            boolean shouldShow = weighter.shouldShow(word);
+
+            if (isAttached && !shouldShow) {
+                hideWord(word);
+            } else if (!isAttached && shouldShow) {
+                showWord(word);
+
+                // TODO Re-evaluate size too? (Requires reposition for all words)
             }
         }
     }
@@ -132,13 +174,14 @@ public class WordCloud {
         return wordList.get(name);
     }
 
-    public long getTimestamp() { return this.timestamp; }
+    public long getTimestamp() {
+        return this.timestamp;
+    }
 
-    // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
-    private void attachWord(Word word) {
+    protected WordGroup getFreeGroup() {
         // Calculate new group size ( 1 + floor( sqrt( n-1 ) ) )
         // e.g. n=4, size = 2 groups of 2; n=8, size = 3 groups of 3
-        int newSize = 1 + (int)Math.floor(Math.sqrt(wordList.size() - 1));
+        int newSize = 1 + (int)Math.floor(Math.sqrt(treeSize - 1));
 
         // If size needs to be increased, or there are no free groups (for some reason)
         if (newSize > groupSize || freeGroups.isEmpty()) {
@@ -158,28 +201,54 @@ public class WordCloud {
 
             // Create new word group and link to tree hierarchy
             WordGroup newGroup = new WordGroup();
-            newGroup.addChild(word);
             wordTreeRoot.addChild(newGroup);
 
-            // Add new group to front of free group queue (most likely has extra space)
-            if (newGroup.children.size() < groupSize) {
-                freeGroups.addFirst(newGroup);
-            }
+            return newGroup;
         } else {
             // Get a free group and add the word to it
-            WordGroup group = freeGroups.removeFirst();
-            group.addChild(word);
+            return freeGroups.removeFirst();
+        }
+    }
 
-            // Stick group back if still has room
-            if (group.children.size() < groupSize) {
-                freeGroups.addFirst(group);
-            }
+    // Adds a word to the word cloud. Finds a free group, and increases group size if needed.
+    protected void attachWord(Word word) {
+        // Do not attach word if already parented!
+        if (word.isAttached()) return;
+
+        // Add the word to the view
+        WordCloud.layout.addView(word.button, word.layoutParams);
+
+        WordGroup group = getFreeGroup();
+        group.addChild(word);
+
+        // Stick group back if still has room
+        if (group.children.size() < groupSize) {
+            freeGroups.addFirst(group);
+        }
+    }
+
+    protected void detachWord(Word word) {
+        // Do not detach if already detached.
+        if (!word.isAttached()) return;
+
+        // Remove the word from the view
+        WordCloud.layout.removeView(word.button);
+
+        // Remove the word from the word tree
+        WordGroup group = word.parent;
+
+        group.removeChild(word);
+        group.refreshBounds();
+
+        // Add parent to list of free groups
+        if (group.children.size() < groupSize && !freeGroups.contains(group)) {
+            freeGroups.addFirst(group);
         }
     }
 
     // Repositions a word inside a group.
-    private void repositionWord(Word word, boolean initialPlacement) {
-        if (!word.isWordAttached()) return;
+    protected void repositionWord(Word word, boolean initialPlacement) {
+        if (!word.isAttached()) return;
 
         // Initially, reposition word in parent group (otherwise relative to current position)
         word.parent.repositionChild(word, initialPlacement);
@@ -187,33 +256,22 @@ public class WordCloud {
         // Now, reposition parent group within the root.
         // If size <= 1, give it an initial position (once we get more children, we cannot move around as much)
         wordTreeRoot.repositionChild(word.parent, word.parent.children.size() <= 1);
-
-        // Make sure the word is shown (can be hidden on create)
-        word.show();
     }
 
-    // Removes a word, deleting it from the word cloud.
+    // Removes a word, permanently deleting it from the word cloud.
     public void removeWord(Word word) {
         removeWord(word, true);
     }
 
-    private void removeWord(Word word, boolean deleteFromList) {
-        WordGroup group = word.parent;
-
+    protected void removeWord(Word word, boolean deleteFromList) {
         if (deleteFromList) {
             wordList.remove(word.getName()); // Remove from word list
         }
 
+        WordGroup group = word.parent; // Cache word parent group
         word.delete(); // This will remove from tree and delete button
 
         if (group != null) {
-            // Refresh group bounds
-            group.bounds.setEmpty();
-
-            for (WordGroup child : group.children) {
-                group.bounds.union(child.bounds);
-            }
-
             // Add parent to list of free groups
             if (group.children.size() < groupSize && !freeGroups.contains(group)) {
                 freeGroups.addFirst(group);
@@ -251,8 +309,8 @@ public class WordCloud {
 
         // Create layout JSON Object
         JSONObject layout = new JSONObject();
-        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width) / 2;
-        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height) / 2;
+        int width = UnitConverter.getInstance().toDp(WordCloud.layout.getLayoutParams().width) / 2;
+        int height = UnitConverter.getInstance().toDp(WordCloud.layout.getLayoutParams().height) / 2;
         String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
@@ -267,9 +325,7 @@ public class WordCloud {
         JSONArray words = new JSONArray();
 
         // Iterate through WordList and add to Json object
-        for (Object o : wordList.entrySet()) {
-            Map.Entry pair = (Map.Entry) o;
-
+        for (Map.Entry pair : wordList.entrySet()) {
             // Get current word
             Word currWord = (Word) pair.getValue();
 
@@ -315,12 +371,11 @@ public class WordCloud {
             transmitter.execute(toSend);
 
             JSONObject result = transmitter.get();
-            String cloudID = result.getString("id");
 
             // Toast result
             //Toast.makeText(WordCloud.context, "ID: "+ cloudID, Toast.LENGTH_SHORT).show();
 
-            return cloudID;
+            return result.getString("id");
 
         } catch (Exception e) {
             e.printStackTrace();

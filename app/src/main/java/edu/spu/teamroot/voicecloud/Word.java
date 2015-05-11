@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,102 +28,105 @@ public class Word extends WordGroup {
 
     private AnimatorSet animatorSet;
 
-    private int[] accentColors = {
-            R.color.accentBlue,
-            R.color.accentGreen,
-            R.color.accentYellow,
-            R.color.accentRed};
-
     public Button button;
     public RelativeLayout.LayoutParams layoutParams;
 
     public Word(String name, int count) {
         super();
 
+        init(name, count);
+        createButton();
+    }
+
+    /*
+     * Methods
+     */
+
+    // Initializes the word attributes.
+    private void init(String name, int count) {
         this.name = name;
-        this.count = count;
+        this.count = (count >= 0) ? count : 0;
         this.timestamp = System.currentTimeMillis();
+    }
 
-        this.animatorSet = null;
+    // Removes the word from the word list.
+    // Also detaches from the view and removes from word tree.
+    public void delete() {
+        if (isAttached()) {
+            detachFromCloud();
+        }
 
-        if (needsCreate()) {
-            createButton();
-        } else {
+        if (isCreated()) {
+            if (animatorSet != null) {
+                animatorSet.cancel();
+            }
+
+            destroyButton();
+        }
+    }
+
+    // Creates the word button.
+    private void createButton() {
+        if (!isCreated()) {
+            button = new Button(WordCloud.context);
+            button.setVisibility(View.INVISIBLE);
+
+            button.setText(name);
+            button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
+            button.getBackground().setColorFilter(WordCloud.getInstance().weighter.getWordColor(this), PorterDuff.Mode.SRC_ATOP);
+
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    wordActions(Word.this);
+                }
+            });
+
+            // Create layoutParams (not used until word attached)
+            layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            layoutParams.topMargin = 0;
+            layoutParams.leftMargin = 0;
+
+            // Set initial size (do not animate)
+            refreshSize(false);
+        }
+    }
+
+    // Destroys the word button.
+    private void destroyButton() {
+        if (isCreated()) {
             button = null;
             layoutParams = null;
         }
     }
 
-    // Checks if the actual word button is created.
-    // If the button is not created, the word is considered detached.
-    public boolean isButtonCreated() {
-        return button != null;
-    }
-
-    public boolean isWordAttached() {
-        return parent != null;
-    }
-
-    // Checks if the button needs to be created (and added to the cloud).
-    private boolean needsCreate() {
-        boolean eligible = (count >= 1);
-        return !isButtonCreated() && eligible;
-    }
-
-    private void createButton() {
-        button = new Button(WordCloud.context);
-        button.setVisibility(View.INVISIBLE);
-
-        button.setText(name);
-        button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
-
-        button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(R.color.accentBlue), PorterDuff.Mode.SRC_ATOP);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                wordActions(WordCloud.getInstance().getWord(button.getText().toString()));
-            }
-        });
-
-        // Add the button to the word cloud layout
-        layoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        layoutParams.topMargin = 0;
-        layoutParams.leftMargin = 0;
-        WordCloud.layout.addView(button, layoutParams);
-
-        // Set initial size (do not animate)
-        refreshSize(false);
-    }
-
-    // Removes the word from the tree and deletes the associated button.
-    public void delete() {
-        if (parent != null) {
-            parent.removeChild(this);
+    // Attaches the word to the word cloud.
+    // Alias for WordCloud.attachWord().
+    private void attachToCloud() {
+        if (!isAttached()) {
+            WordCloud.getInstance().attachWord(this);
         }
-
-        if (isButtonCreated()) {
-            if (animatorSet != null) {
-                animatorSet.cancel();
-            }
-
-            WordCloud.layout.removeView(button);
-        }
-
-        button = null;
-        layoutParams = null;
     }
 
+    // Detaches the word from the word cloud.
+    // Alias for WordCloud.detachWord().
+    private void detachFromCloud() {
+        if (isAttached()) {
+            WordCloud.getInstance().detachWord(this);
+        }
+    }
+
+    // Shows the word on the view.
     public void show() {
         show(button.getVisibility() == View.INVISIBLE);
     }
 
     public void show(boolean animate) {
-        if (!isButtonCreated()) return;
+        if (!isCreated()) return;
 
         button.setVisibility(View.VISIBLE);
 
-        if (animate) {
+        if (isAttached() && animate) {
             ScaleAnimation anim = new ScaleAnimation(0.0f, 1.0f, 0.0f, 1.0f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f, ScaleAnimation.RELATIVE_TO_SELF, 0.5f);
             anim.setInterpolator(new SpringInterpolator());
 
@@ -136,16 +138,17 @@ public class Word extends WordGroup {
         }
     }
 
+    // Hides the word from the view.
     public void hide() {
         hide(button.getVisibility() == View.VISIBLE);
     }
 
     public void hide(boolean animate) {
-        if (!isButtonCreated()) return;
+        if (!isCreated()) return;
 
         button.setVisibility(View.INVISIBLE);
 
-        if (animate) {
+        if (isAttached() && animate) {
             AlphaAnimation anim = new AlphaAnimation(1.0f, 0.0f);
             anim.setInterpolator(new LinearInterpolator());
 
@@ -155,6 +158,14 @@ public class Word extends WordGroup {
             button.setAnimation(anim);
             button.animate();
         }
+    }
+
+    public boolean isCreated() {
+        return button != null;
+    }
+
+    public boolean isAttached() {
+        return parent != null;
     }
 
     public String getName() {
@@ -169,30 +180,19 @@ public class Word extends WordGroup {
         return timestamp;
     }
 
-    public boolean incrementCount(int value) {
-
+    public void incrementCount(int value) {
         // Increment count
         count += value;
 
         // Update timestamp
         this.timestamp = System.currentTimeMillis();
 
-        if (count <= 0) {
-            return false;
-        }
-
-        if (isButtonCreated()) {
-            // Button size has changed; animate
-            refreshSize(true);
-        } else if (needsCreate()) {
-            createButton();
-        }
-
-        return true;
+        // Button size has changed; animate
+        refreshSize(true);
     }
 
     private void refreshSize(boolean animate) {
-        if (!isButtonCreated()) return;
+        if (!isCreated()) return;
 
         // Cache old size
         Rect oldBounds = new Rect(bounds);
@@ -200,11 +200,11 @@ public class Word extends WordGroup {
         Log.d(name, "Left: " + UnitConverter.getInstance().toDp(button.getLeft()) + " Top: " + UnitConverter.getInstance().toDp(button.getTop()));
 
         // Calculate new size based on count
-        button.setTextSize(getTextSize(count));
-        Log.d(name, "Count: " + count + " Size: " + getTextSize(count));
+        button.setTextSize(WordCloud.getInstance().weighter.getTextSize(this));
+        Log.d(name, "Count: " + count + " Size: " + WordCloud.getInstance().weighter.getTextSize(this));
 
         // Calculate new color based on count (or part of speech)
-        button.getBackground().setColorFilter(WordCloud.context.getResources().getColor(accentColors[(count / 5) % accentColors.length]), PorterDuff.Mode.SRC_ATOP);
+        button.getBackground().setColorFilter(WordCloud.getInstance().weighter.getWordColor(this), PorterDuff.Mode.SRC_ATOP);
 
         // Update bounds with new button size
         button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
@@ -213,7 +213,7 @@ public class Word extends WordGroup {
                 bounds.left + UnitConverter.getInstance().toDp(button.getMeasuredWidth()),
                 bounds.top + UnitConverter.getInstance().toDp(button.getMeasuredHeight()));
 
-        /*
+        /* Extra checks to see if the button Width and Height are available... to my knowledge, they are always incorrect...
         if (button.getWidth() == 0 && button.getHeight() == 0) {
             // The button has likely not been drawn in the View yet...
             // We need to fallback and get a calculated size based on the layout
@@ -236,7 +236,7 @@ public class Word extends WordGroup {
 
         Log.d(name, "Center: " + center.toString());
 
-        if (animate) {
+        if (isAttached() && animate) {
             float prevX = (float) oldBounds.width() / bounds.width();
             float prevY = (float) oldBounds.height() / bounds.height();
 
@@ -249,10 +249,6 @@ public class Word extends WordGroup {
             button.setAnimation(anim);
             button.animate();
         }
-    }
-
-    private int getTextSize(int count) {
-        return 20 + count;
     }
 
     @Override
@@ -272,7 +268,7 @@ public class Word extends WordGroup {
             }
         }
 
-        if (animate) {
+        if (isAttached() && animate) {
             // Create animators (using updated destination value)
             ValueAnimator xAnim = new MarginAnimationListener(
                     WordCloud.layout, layoutParams, MarginAnimationListener.LEFT_MARGIN,
@@ -327,7 +323,7 @@ public class Word extends WordGroup {
 
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
 
-        ArrayList<HashMap<String, String>> dataList = new ArrayList<HashMap<String, String>>();
+        ArrayList<HashMap<String, String>> dataList = new ArrayList<>();
         HashMap<String, String> curItemMap;
 
         curItemMap = new HashMap<>();
