@@ -381,6 +381,7 @@ public class WordCloud {
             transmitter.execute(toSend);
 
             JSONObject result = transmitter.get();
+            String cloudID = result.getString("id");
 
             if (cloudID != "") return cloudID;
             else return "none";
