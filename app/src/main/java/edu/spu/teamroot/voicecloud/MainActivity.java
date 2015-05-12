@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
@@ -136,7 +137,15 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         UnitConverter.createInstance(this);
 
         // Create a RelativeLayout element
-        rl = new RelativeLayout(this);
+        rl = new RelativeLayout(this) {
+            protected void dispatchDraw(Canvas canvas) {
+                super.dispatchDraw(canvas);
+
+                if (WordCloud.getInstance() != null) {
+                    WordCloud.getInstance().onDraw(canvas);
+                }
+            }
+        };
 
         // Add the RelativeLayout element to the ScrollView
         int scrollViewWidth = 3000;
@@ -354,7 +363,11 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         }
 
-        if (id==R.id.view_exclude_list){
+        if (id == R.id.toggle_outlines) {
+            WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
+        }
+
+        if (id == R.id.view_exclude_list){
             Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
         }
 

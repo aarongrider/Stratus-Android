@@ -1,6 +1,9 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
@@ -59,6 +62,8 @@ public class WordCloud {
     private int treeSize; // Number of (attached) words in the tree
 
     private long timestamp;
+
+    private boolean showOutline = false;
 
     /*
      * Constructors
@@ -441,4 +446,56 @@ public class WordCloud {
         return false;
     }
 
+    /*
+     * Drawing
+     */
+
+    public boolean getShowOutline() {
+        return showOutline;
+    }
+
+    public void setShowOutline(boolean showOutline) {
+        this.showOutline = showOutline;
+    }
+
+    public void onDraw(Canvas canvas) {
+        if (!showOutline) return;
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(4.0f);
+
+        for (WordGroup group : wordTreeRoot.children) {
+            canvas.drawRect(
+                    UnitConverter.getInstance().toPx(group.bounds.left),
+                    UnitConverter.getInstance().toPx(group.bounds.top),
+                    UnitConverter.getInstance().toPx(group.bounds.right),
+                    UnitConverter.getInstance().toPx(group.bounds.bottom),
+                    paint
+            );
+        }
+
+        paint.setColor(Color.BLUE);
+        paint.setStrokeWidth(8.0f);
+
+        canvas.drawRect(
+                UnitConverter.getInstance().toPx(wordTreeRoot.bounds.left),
+                UnitConverter.getInstance().toPx(wordTreeRoot.bounds.top),
+                UnitConverter.getInstance().toPx(wordTreeRoot.bounds.right),
+                UnitConverter.getInstance().toPx(wordTreeRoot.bounds.bottom),
+                paint
+        );
+
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth(16.0f);
+
+        canvas.drawRect(
+                layout.getLeft(),
+                layout.getTop(),
+                layout.getRight(),
+                layout.getBottom(),
+                paint
+        );
+    }
 }
