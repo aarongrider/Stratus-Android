@@ -11,10 +11,13 @@
     <item android:id="@+id/load_cloud" android:title="@string/load_cloud"
           android:orderInCategory="300"
           app:showAsAction="never" />
+    <item android:id="@+id/save_screen" android:title="Save Screenshot"
+        android:orderInCategory="400"
+        app:showAsAction="never" />
     <item android:id="@+id/toggle_outlines" android:title="Toggle Outlines"
-          android:orderInCategory="400"
+          android:orderInCategory="500"
           app:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="500"
+        android:orderInCategory="600"
         app:showAsAction="never" />
 </menu>

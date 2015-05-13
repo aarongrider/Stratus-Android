@@ -1,27 +1,27 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Animatable;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -29,22 +29,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.view.animation.ScaleAnimation;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Button;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Random;
 
 public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuItemClickListener {
+    public static final String VC_PATH = Environment.getExternalStorageDirectory() + "/VoiceCloud/";
+
     private static Toast lastToast;
 
     private ImageButton mainButton;
@@ -54,15 +52,9 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     private Context context = this;
 
     private TwoDScrollView scrollView;
-    private RelativeLayout rl;
+    private WordCloudLayout cloudLayout;
 
     private boolean isRunning = true;
-
-    private static float MIN_ZOOM = 1f;
-    private static float MAX_ZOOM = 5f;
-
-    private float scaleFactor = 1f;
-    private ScaleGestureDetector scaleDetector;
 
     private int mBindFlag;
     private Messenger mServiceMessenger;
@@ -137,31 +129,25 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         UnitConverter.createInstance(this);
 
         // Create a RelativeLayout element
-        rl = new RelativeLayout(this) {
-            protected void dispatchDraw(Canvas canvas) {
-                super.dispatchDraw(canvas);
-
-                if (WordCloud.getInstance() != null) {
-                    WordCloud.getInstance().onDraw(canvas);
-                }
-            }
-        };
+        cloudLayout = new WordCloudLayout(this);
 
         // Add the RelativeLayout element to the ScrollView
         int scrollViewWidth = 3000;
         int scrollViewHeight = 3000;
-        scrollView.addView(rl, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
+        scrollView.addView(cloudLayout, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
 
         // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
+        scrollView.scrollToWhenReady(
+                UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
+                UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
 
         // Create new instances
         Blacklist.createInstance();
-        WordCloud.createInstance(context, rl);
+        WordCloud.createInstance(context, cloudLayout);
         Preprocessor.createInstance();
 
         // Start SpeechRecognitionService
@@ -239,23 +225,21 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         /* Tests for running on emulator
         final String words[] = {
-                "hello",
-                "team", "root", "is", "awesome",
-                "team", "root",
-                "geotastic", "is", "not", "so", "awesome",
-                "do", "you", "understand", "me", "at", "all",
-                "do", "you", "really", "understand"
+                "voice", "cloud", "is", "an", "android", "application", "designed", "to",
+                "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
+                "this", "is", "an", "example", "of", "a", "word", "cloud",
+                "size", "based", "on", "count"
         };
 
         for (int i = 0; i < words.length; i++) {
             final String word = words[i];
 
-            rl.postDelayed(new Runnable() {
+            cloudLayout.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    WordCloud.getInstance().addWord(word, new Random().nextInt(8) + 2);
+                    WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
                 }
-            }, 1000 * i);
+            }, i);
         }
         //*/
     }
@@ -293,9 +277,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         if (id == R.id.action_settings) {
             Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
             return true;
-        }
-
-        if (id == R.id.save_cloud) {
+        } else if (id == R.id.save_cloud) {
 
             Toast.makeText(this, "Saving Cloud...", Toast.LENGTH_SHORT).show();
 
@@ -325,10 +307,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             alert.show();
 
             return true;
-        }
-
-        if (id == R.id.load_cloud) {
-
+        } else if (id == R.id.load_cloud) {
             // Get ID
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Load Word Cloud");
@@ -349,7 +328,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
                     // Load cloud
                     Toast.makeText(MainActivity.this, "Loading Cloud...", Toast.LENGTH_SHORT).show();
-                    if (!WordCloud.getInstance().loadWordCloud(input.getText().toString())) Toast.makeText(MainActivity.this, "Loading Cloud Failed", Toast.LENGTH_SHORT).show();
+                    if (!WordCloud.getInstance().loadWordCloud(input.getText().toString()))
+                        Toast.makeText(MainActivity.this, "Loading Cloud Failed", Toast.LENGTH_SHORT).show();
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -360,14 +340,51 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             });
 
             builder.show();
+        } else if (id == R.id.save_screen) {
+            Toast saveToast = Toast.makeText(this, "Saving screenshot...", Toast.LENGTH_LONG);
+            saveToast.show();
 
-        }
+            try {
+                // Draw the word cloud to a bitmap
+                Bitmap bmp = Bitmap.createBitmap(
+                        UnitConverter.getInstance().toDp(cloudLayout.getWidth()),
+                        UnitConverter.getInstance().toDp(cloudLayout.getHeight()),
+                        Bitmap.Config.ARGB_8888);
 
-        if (id == R.id.toggle_outlines) {
+                float density = 1 / UnitConverter.getInstance().toPxFloat(1);
+
+                Canvas canvas = new Canvas(bmp);
+                canvas.scale(density, density);
+                canvas.drawColor(Color.WHITE);
+
+                cloudLayout.draw(canvas);
+
+                // Cook up filename
+                String date = new SimpleDateFormat("MM-dd-yy-kkmmss").format(Calendar.getInstance().getTime());
+                String filename = "Cloud_" + date + ".png";
+
+                // Try to create directory
+                File folder = new File(VC_PATH);
+                folder.mkdir();
+
+                // Try to create file
+                File file = new File(VC_PATH + "Cloud-" + date + ".png");
+                file.createNewFile();
+
+                FileOutputStream outStream = new FileOutputStream(file);
+                bmp.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                outStream.close();
+
+                saveToast.cancel();
+                Toast.makeText(this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
+            } catch (Exception e) {
+                saveToast.cancel();
+                Toast.makeText(this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
+            }
+        } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
-        }
-
-        if (id == R.id.view_exclude_list){
+            cloudLayout.invalidate();
+        } else if (id == R.id.view_exclude_list){
             Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
         }
 

@@ -10,57 +10,28 @@ import android.widget.RelativeLayout;
 
 
 public class WordCloudLayout extends RelativeLayout {
-    private static final float MIN_SCALE = 0.1f;
-    private static final float MAX_SCALE = 1.0f;
-    private float mScaleFactor = 1.0f;
-
-    private ScaleGestureDetector mScaleGestureDetector;
-
-    private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            // Get the current percentage by which to scale
-            float scaleFactor = detector.getScaleFactor();
-
-            mScaleFactor *= scaleFactor;
-            mScaleFactor = Math.max(MIN_SCALE, Math.min(mScaleFactor, MAX_SCALE));
-
-            invalidate();
-            return true;
-        }
-    };
-
-    private void initScaleDetector(Context context) {
-        mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
-    }
-
     public WordCloudLayout(Context context) {
         super(context);
-        initScaleDetector(context);
     }
 
     public WordCloudLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        initScaleDetector(context);
     }
 
-    public WordCloudLayout(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        initScaleDetector(context);
+    public WordCloudLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
     protected void dispatchDraw(Canvas canvas) {
-        canvas.save();
-        canvas.scale(mScaleFactor, mScaleFactor);
         super.dispatchDraw(canvas);
-        canvas.restore();
+
+        if (WordCloud.getInstance() != null) {
+            WordCloud.getInstance().onDraw(canvas);
+        }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        boolean retval = false;
-        retval |= mScaleGestureDetector.onTouchEvent(event);
-        retval |= super.onTouchEvent(event);
-        return retval;
+    public void drawToCanvas(Canvas canvas) {
+        super.draw(canvas);
+        //dispatchDraw(canvas);
     }
 }
