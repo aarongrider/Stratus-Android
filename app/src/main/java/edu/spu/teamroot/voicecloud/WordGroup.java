@@ -7,12 +7,16 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class WordGroup {
+    private static int curIndex = 0;
+
     private enum Precision {
         COARSE,
         FAVOR_EXISTING,
         FAVOR_CURRENT,
         FINE_GRAINED
     }
+
+    protected final int GROUP_ID;
 
     private Precision precision;
 
@@ -23,6 +27,8 @@ public class WordGroup {
     protected ArrayList<WordGroup> children;
 
     public WordGroup() {
+        GROUP_ID = curIndex++;
+
         precision = Precision.COARSE;
         center = new Point();
         bounds = new Rect();
