@@ -24,6 +24,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
@@ -148,12 +149,31 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         display.getSize(size);
 
         // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
+        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2));
 
         // Create new instances
-        Blacklist.createInstance();
+        ExclusionList.createInstance();
         WordCloud.createInstance(context, rl);
         Preprocessor.createInstance();
+
+        // Add sample words to exclustion list
+        ExclusionList.getInstance().addWord("test");
+        ExclusionList.getInstance().addWord("this");
+        ExclusionList.getInstance().addWord("is");
+        ExclusionList.getInstance().addWord("a");
+        ExclusionList.getInstance().addWord("sample");
+        ExclusionList.getInstance().addWord("set");
+        ExclusionList.getInstance().addWord("of");
+        ExclusionList.getInstance().addWord("values");
+        ExclusionList.getInstance().addWord("more");
+        ExclusionList.getInstance().addWord("of");
+        ExclusionList.getInstance().addWord("them");
+        ExclusionList.getInstance().addWord("than");
+        ExclusionList.getInstance().addWord("you");
+        ExclusionList.getInstance().addWord("even");
+        ExclusionList.getInstance().addWord("know");
+        ExclusionList.getInstance().addWord("way");
+        ExclusionList.getInstance().addWord("aaron");
 
         // Start SpeechRecognitionService
         final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
@@ -355,10 +375,17 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         }
 
         if (id==R.id.view_exclude_list){
-            Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
+            openExclusion();
         }
 
         return false;
+    }
+
+    public void openExclusion( )
+    {
+        Intent intent = new Intent(this, ExclusionActivity.class);
+        startActivity(intent);
+
     }
 
 }

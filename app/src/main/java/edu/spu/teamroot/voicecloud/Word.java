@@ -402,7 +402,7 @@ public class Word extends WordGroup {
 
                 // Search with Google
                 if (position == 2) {
-                    String url = "https://google.com/#q=" + word.getName();
+                    String url = "https://www.google.com/search?q=" + word.getName();
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(url));
                     WordCloud.context.startActivity(i);

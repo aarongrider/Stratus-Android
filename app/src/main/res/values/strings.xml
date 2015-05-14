@@ -6,5 +6,8 @@
     <string name="load_cloud">Load</string>
     <string name="view_exclude_list">Exclusion List</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_exclusion">Exclusion List</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>

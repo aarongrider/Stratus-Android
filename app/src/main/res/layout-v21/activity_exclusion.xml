@@ -1,0 +1,29 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="edu.spu.teamroot.voicecloud.ExclusionActivity">
+
+    <ImageButton
+        android:id="@+id/add_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_gravity="right|bottom"
+        android:layout_marginBottom="@dimen/main_button_margin"
+        android:layout_marginRight="30dp"
+        android:tint="@android:color/white"
+        android:background="@drawable/oval_ripple_add"
+        android:scaleType="fitXY"
+        android:elevation="@dimen/elevation_low"
+        android:stateListAnimator="@anim/button_elevation"
+        android:src="@drawable/plus_icon"
+        tools:ignore="RtlCompat"
+        android:longClickable="true"
+        android:padding="0dp" />
+
+    <ListView
+    android:id="@+id/exclusionList"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+
+</FrameLayout>
