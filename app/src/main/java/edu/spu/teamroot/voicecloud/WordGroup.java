@@ -27,7 +27,12 @@ public class WordGroup {
     protected ArrayList<WordGroup> children;
 
     public WordGroup() {
-        GROUP_ID = curIndex++;
+        if (this.getClass() != WordGroup.class) {
+            // This is not a direct instance of a WordGroup
+            GROUP_ID = -1;
+        } else {
+            GROUP_ID = curIndex++;
+        }
 
         precision = Precision.COARSE;
         center = new Point();
