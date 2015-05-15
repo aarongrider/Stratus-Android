@@ -108,7 +108,7 @@ public class WordCloud {
         addWord(word, 1);
     }
 
-    public void addWord(String name, int count) {
+    public synchronized void addWord(String name, int count) {
         // Get the word from the list
         Word word = wordList.get(name);
 
