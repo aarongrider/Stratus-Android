@@ -340,7 +340,7 @@ public class Word extends WordGroup {
         // WordActions custom dialog
         final Dialog dialog = new Dialog(WordCloud.context);
         dialog.setContentView(R.layout.word_action_dialog);
-        String dialogTitle = "\"" + word.getName() + "\"";
+        String dialogTitle = word.getName().toUpperCase();
         dialog.setTitle(dialogTitle);
 
         ListView listView = (ListView) dialog.findViewById(R.id.listView);
