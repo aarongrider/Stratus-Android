@@ -122,8 +122,14 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Get screen size
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
         // Get scroll view
         scrollView = (TwoDScrollView)findViewById(R.id.WordCloudScrollView);
+        scrollView.setScreenSize(size);
 
         // Create UnitConverter
         UnitConverter.createInstance(this);
@@ -135,10 +141,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int scrollViewWidth = 3000;
         int scrollViewHeight = 3000;
         scrollView.addView(cloudLayout, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
 
         // Move to center of the ScrollView
         scrollView.scrollToWhenReady(
@@ -341,46 +343,62 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
             builder.show();
         } else if (id == R.id.save_screen) {
-            Toast saveToast = Toast.makeText(this, "Saving screenshot...", Toast.LENGTH_LONG);
+            final Toast saveToast = Toast.makeText(this, "Saving screenshot...", Toast.LENGTH_LONG);
             saveToast.show();
 
-            try {
-                // Draw the word cloud to a bitmap
-                Bitmap bmp = Bitmap.createBitmap(
-                        UnitConverter.getInstance().toDp(cloudLayout.getWidth()),
-                        UnitConverter.getInstance().toDp(cloudLayout.getHeight()),
-                        Bitmap.Config.ARGB_8888);
+            // Cook up filename
+            final String date = new SimpleDateFormat("MM-dd-yy-kkmmss").format(Calendar.getInstance().getTime());
+            String filename = "Cloud_" + date + ".png";
 
-                float density = 1 / UnitConverter.getInstance().toPxFloat(1);
-
-                Canvas canvas = new Canvas(bmp);
-                canvas.scale(density, density);
-                canvas.drawColor(Color.WHITE);
-
-                cloudLayout.draw(canvas);
-
-                // Cook up filename
-                String date = new SimpleDateFormat("MM-dd-yy-kkmmss").format(Calendar.getInstance().getTime());
-                String filename = "Cloud_" + date + ".png";
-
-                // Try to create directory
-                File folder = new File(VC_PATH);
-                folder.mkdir();
-
-                // Try to create file
-                File file = new File(VC_PATH + "Cloud-" + date + ".png");
-                file.createNewFile();
-
-                FileOutputStream outStream = new FileOutputStream(file);
-                bmp.compress(Bitmap.CompressFormat.PNG, 100, outStream);
-                outStream.close();
-
-                saveToast.cancel();
-                Toast.makeText(this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
-            } catch (Exception e) {
-                saveToast.cancel();
-                Toast.makeText(this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
+            class MyBool {
+                boolean value = false;
             }
+
+            final MyBool hasError = new MyBool();
+
+            new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        // Draw the word cloud to a bitmap
+                        Bitmap bmp = Bitmap.createBitmap(
+                                UnitConverter.getInstance().toDp(cloudLayout.getWidth()),
+                                UnitConverter.getInstance().toDp(cloudLayout.getHeight()),
+                                Bitmap.Config.ARGB_8888);
+
+                        float density = 1 / UnitConverter.getInstance().toPxFloat(1);
+
+                        Canvas canvas = new Canvas(bmp);
+                        canvas.scale(density, density);
+                        canvas.drawColor(Color.WHITE);
+
+                        cloudLayout.draw(canvas);
+
+                        // Try to create directory
+                        File folder = new File(VC_PATH);
+                        folder.mkdir();
+
+                        // Try to create file
+                        File file = new File(VC_PATH + "Cloud-" + date + ".png");
+                        file.createNewFile();
+
+                        FileOutputStream outStream = new FileOutputStream(file);
+                        bmp.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+                        outStream.close();
+                    } catch (Exception e) {
+                        hasError.value = true;
+                    }
+                }
+            }.start();
+
+            if (!hasError.value) {
+                saveToast.cancel();
+                Toast.makeText(MainActivity.this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
+            } else {
+                saveToast.cancel();
+                Toast.makeText(MainActivity.this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
+            }
+
         } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
             cloudLayout.invalidate();
