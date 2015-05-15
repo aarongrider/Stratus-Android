@@ -15,6 +15,7 @@ import android.graphics.drawable.Animatable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
@@ -346,15 +347,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             final Toast saveToast = Toast.makeText(this, "Saving screenshot...", Toast.LENGTH_LONG);
             saveToast.show();
 
-            // Cook up filename
-            final String date = new SimpleDateFormat("MM-dd-yy-kkmmss").format(Calendar.getInstance().getTime());
-            String filename = "Cloud_" + date + ".png";
-
-            class MyBool {
-                boolean value = false;
-            }
-
-            final MyBool hasError = new MyBool();
+            final Handler mainHandler = new Handler();
 
             new Thread() {
                 @Override
@@ -374,6 +367,10 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
                         cloudLayout.draw(canvas);
 
+                        // Cook up filename
+                        final String date = new SimpleDateFormat("MM-dd-yy-kkmmss").format(Calendar.getInstance().getTime());
+                        final String filename = "Cloud_" + date + ".png";
+
                         // Try to create directory
                         File folder = new File(VC_PATH);
                         folder.mkdir();
@@ -385,19 +382,25 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                         FileOutputStream outStream = new FileOutputStream(file);
                         bmp.compress(Bitmap.CompressFormat.PNG, 100, outStream);
                         outStream.close();
+
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                saveToast.cancel();
+                                Toast.makeText(MainActivity.this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     } catch (Exception e) {
-                        hasError.value = true;
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                saveToast.cancel();
+                                Toast.makeText(MainActivity.this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
             }.start();
-
-            if (!hasError.value) {
-                saveToast.cancel();
-                Toast.makeText(MainActivity.this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
-            } else {
-                saveToast.cancel();
-                Toast.makeText(MainActivity.this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
-            }
 
         } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
