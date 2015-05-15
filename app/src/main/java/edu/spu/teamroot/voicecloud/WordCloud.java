@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 import android.widget.RelativeLayout;
@@ -12,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.acl.Group;
 import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.Iterator;
@@ -43,6 +45,7 @@ public class WordCloud {
     public static WordCloud getInstance() {
         return instance;
     }
+
     public static void deleteInstance() {
         instance = null;
     }
@@ -340,6 +343,45 @@ public class WordCloud {
             e.printStackTrace();
         }
 
+        // Create Groups JSON Array
+        JSONArray groups = new JSONArray();
+
+        // Iterate through WordList and add to Json object
+        for (int i = 0; i < wordTreeRoot.children.size(); i++) {
+            // Get current word
+            WordGroup currGroup = (WordGroup) wordTreeRoot.children.get(i);
+
+            // Create JSON Object for word
+            JSONObject group = new JSONObject();
+
+            // Put current word cloud data into json object
+            try {
+                // Add all word properties
+                group.put("id", currGroup.GROUP_ID);
+
+                // Center to JSON
+                JSONObject center = new JSONObject();
+                center.put("x", currGroup.center.x);
+                center.put("y", currGroup.center.y);
+                group.put("center", center);
+
+                // Bounds to JSON
+                JSONObject bounds = new JSONObject();
+                bounds.put("bottom", currGroup.getBounds().bottom);
+                bounds.put("left", currGroup.getBounds().left);
+                bounds.put("right", currGroup.getBounds().right);
+                bounds.put("top", currGroup.getBounds().top);
+                group.put("bounds", bounds);
+
+                // Add word json to words array
+                groups.put(group);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
         // Create Words JSON Array
         JSONArray words = new JSONArray();
 
@@ -357,6 +399,8 @@ public class WordCloud {
                 word.put("name", currWord.getName());
                 word.put("count", currWord.getCount());
                 word.put("timestamp", new Timestamp(currWord.getTimestamp()).toString());
+                word.put("attached", currWord.isAttached() ? 1 : 0);
+                word.put("group", currWord.parent.GROUP_ID);
 
                 // Convert rect to JSON
                 JSONObject bounds = new JSONObject();
@@ -380,6 +424,7 @@ public class WordCloud {
             // Add layout and words array to master json object
             toSend.put("layout", layout);
             toSend.put("words", words);
+            toSend.put("groups", groups);
 
             // Transmit object to web server
             JSONTransmitter transmitter = new JSONTransmitter();
@@ -425,17 +470,62 @@ public class WordCloud {
             // Clear out current cloud
             this.clear();
 
+            // Create map for id to group instance
+            Map<Integer, WordGroup> groupMap = new TreeMap<>();
+
+            // Populate groups
+            JSONArray groupArray = result.getJSONObject("cloud").getJSONArray("groups");
+
+            for (int i = 0; i < groupArray.length(); i++) {
+                JSONObject group = groupArray.getJSONObject(i);
+
+                // Get id
+                Integer groupId = Integer.parseInt(group.getString("groupcloudid"));
+
+                // Get center
+                Point center = new Point(Integer.parseInt(group.getString("centerx")), Integer.parseInt(group.getString("centery")));
+
+                // Get bounds
+                Rect bounds = new Rect(Integer.parseInt(group.getString("left")), Integer.parseInt(group.getString("top")), Integer.parseInt(group.getString("right")), Integer.parseInt(group.getString("bottom")));
+
+                WordGroup wordGroup = new WordGroup(center, bounds);
+                groupMap.put(groupId, wordGroup);
+                wordTreeRoot.addChild(wordGroup);
+            }
+
             // Populate words
             JSONArray wordArray = result.getJSONObject("cloud").getJSONArray("words");
 
             for (int i = 0; i < wordArray.length(); i++) {
                 JSONObject word = wordArray.getJSONObject(i);
+
+                // Get properties
                 String name = word.getString("name");
                 Integer count = Integer.parseInt(word.getString("count"));
                 Long timestamp = Timestamp.valueOf(word.getString("timestamp")).getTime();
+                Integer groupId = Integer.parseInt(word.getString("group"));
 
-                addWord(name, count);
+                // Get bounds
+                Integer top = Integer.parseInt(word.getString("top"));
+                Integer left = Integer.parseInt(word.getString("left"));
+                Integer bottom = Integer.parseInt(word.getString("bottom"));
+                Integer right = Integer.parseInt(word.getString("right"));
+                Rect bounds = new Rect(left, top, right, bottom);
+
+                Word newWord = new Word(name, count);
+                wordList.put(newWord.getName(), newWord);
+
+                // Get parent group
+                WordGroup parentGroup = groupMap.get(groupId);
+                parentGroup.addChild(newWord);
+
+                // Add the word to the view
+                WordCloud.layout.addView(newWord.button, newWord.layoutParams);
+
+                newWord.moveTo(bounds.centerX(), bounds.centerY());
+                newWord.show();
             }
+
 
             return true;
 

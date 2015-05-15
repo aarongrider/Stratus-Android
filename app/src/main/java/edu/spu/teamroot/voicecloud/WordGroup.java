@@ -16,7 +16,7 @@ public class WordGroup {
         FINE_GRAINED
     }
 
-    protected final int GROUP_ID;
+    public final int GROUP_ID;
 
     private Precision precision;
 
@@ -37,6 +37,21 @@ public class WordGroup {
         precision = Precision.COARSE;
         center = new Point();
         bounds = new Rect();
+        parent = null;
+        children = new ArrayList<>();
+    }
+
+    public WordGroup(Point center, Rect bounds) {
+        if (this.getClass() != WordGroup.class) {
+            // This is not a direct instance of a WordGroup
+            GROUP_ID = -1;
+        } else {
+            GROUP_ID = curIndex++;
+        }
+
+        precision = Precision.COARSE;
+        this.center = center;
+        this.bounds = bounds;
         parent = null;
         children = new ArrayList<>();
     }
