@@ -1,19 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MyActivity"
     android:background="@color/primary">
 
     <ImageButton
-        android:id="@+id/runCommand"
+        android:id="@+id/main_button"
         android:layout_width="@dimen/round_button_diameter"
         android:layout_height="@dimen/round_button_diameter"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="@dimen/main_button_margin"
         android:tint="@android:color/white"
-        android:src="@android:drawable/ic_input_add"
-        android:background="@drawable/oval"
+        android:background="@drawable/oval_ripple"
+        android:src="@drawable/vc_pause"
+        android:scaleType="fitXY"
+        tools:ignore="RtlCompat"
+        android:longClickable="true"
+        android:padding="20dp" />
+
+    <ImageButton
+        android:id="@+id/reset_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_marginBottom="@dimen/main_button_margin"
+        android:layout_marginLeft="@dimen/main_button_margin"
+        android:layout_gravity="left|bottom"
+        android:tint="#90000000"
+        android:src="@drawable/reset_icon"
+        android:background="@drawable/option"
+        tools:ignore="RtlCompat" />
+
+    <ImageButton
+        android:id="@+id/menu_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_marginBottom="@dimen/main_button_margin"
+        android:layout_marginRight="@dimen/main_button_margin"
+        android:layout_gravity="right|bottom"
+        android:tint="#90000000"
+        android:src="@drawable/menu_icon"
+        android:background="@drawable/option"
         tools:ignore="RtlCompat" />
 
     <edu.spu.teamroot.voicecloud.TwoDScrollView
