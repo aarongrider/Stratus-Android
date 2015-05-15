@@ -25,10 +25,12 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -39,6 +41,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -82,6 +85,11 @@ public class TwoDScrollView extends FrameLayout {
     private float mLastMotionX;
 
     /**
+     * The primary pointer ID of the current event.
+     */
+    private int mPointerId = -1;
+
+    /**
      * True when the layout has changed but the traversal has not come through yet.
      * Ideally the view hierarchy would keep track of this for us.
      */
@@ -114,7 +122,7 @@ public class TwoDScrollView extends FrameLayout {
     private int mMaximumVelocity;
 
     /**
-     * For scroll with guarentees
+     * For scroll with guarantees
      */
     private int desiredScrollX = -1;
     private int desiredScrollY = -1;
@@ -197,7 +205,7 @@ public class TwoDScrollView extends FrameLayout {
     }
 
     private void initTwoDScrollView() {
-        mScaleGestureDetector = new ScaleGestureDetector(getContext(), mScaleGestureListener);
+        initScaleDetector(getContext());
         mScroller = new Scroller(getContext());
         setFocusable(true);
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
@@ -404,8 +412,19 @@ public class TwoDScrollView extends FrameLayout {
         mVelocityTracker.addMovement(ev);
 
         final int action = ev.getAction();
-        final float y = ev.getY();
-        final float x = ev.getX();
+        final float y;
+        final float x;
+
+        int pointerIndex = ev.findPointerIndex(mPointerId);
+
+        if (pointerIndex != -1) {
+            // Get the specific x and y for the pointer
+            y = ev.getY(pointerIndex);
+            x = ev.getX(pointerIndex);
+        } else {
+            y = ev.getY();
+            x = ev.getX();
+        }
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
@@ -420,11 +439,30 @@ public class TwoDScrollView extends FrameLayout {
                 // Remember where the motion event started
                 mLastMotionY = y;
                 mLastMotionX = x;
+
+                // Cache the pointer ID
+                if (mPointerId == -1) {
+                    mPointerId = ev.getPointerId(ev.getActionIndex());
+                }
+
                 break;
             case MotionEvent.ACTION_MOVE:
+                int curPointerId = ev.getPointerId(ev.getActionIndex());
+
+                if (curPointerId != mPointerId && (ev.getPointerCount() == 1)) {
+                    // Lost previous pointer; start over
+                    mLastMotionX = x;
+                    mLastMotionY = y;
+
+                    mPointerId = curPointerId;
+
+                    return true;
+                }
+
                 // Scroll to follow the motion event
                 int deltaX = (int) (mLastMotionX - x);
                 int deltaY = (int) (mLastMotionY - y);
+
                 mLastMotionX = x;
                 mLastMotionY = y;
 
@@ -433,7 +471,7 @@ public class TwoDScrollView extends FrameLayout {
                         deltaX = 0;
                     }
                 } else if (deltaX > 0) {
-                    final int rightEdge = getWidth() - getPaddingRight();
+                    final int rightEdge = (int)(mScaleFactor * getWidth()) - getPaddingRight();
                     final int availableToScroll = getChildAt(0).getRight() - getScrollX() - rightEdge;
                     if (availableToScroll > 0) {
                         deltaX = Math.min(availableToScroll, deltaX);
@@ -446,7 +484,7 @@ public class TwoDScrollView extends FrameLayout {
                         deltaY = 0;
                     }
                 } else if (deltaY > 0) {
-                    final int bottomEdge = getHeight() - getPaddingBottom();
+                    final int bottomEdge = (int)(mScaleFactor * getHeight()) - getPaddingBottom();
                     final int availableToScroll = getChildAt(0).getBottom() - getScrollY() - bottomEdge;
                     if (availableToScroll > 0) {
                         deltaY = Math.min(availableToScroll, deltaY);
@@ -458,6 +496,11 @@ public class TwoDScrollView extends FrameLayout {
                     scrollBy(deltaX, deltaY);
                 break;
             case MotionEvent.ACTION_UP:
+                if (ev.getPointerCount() == 1) {
+                    // Our only pointer was released; clear pointer ID
+                    mPointerId = -1;
+                }
+
                 final VelocityTracker velocityTracker = mVelocityTracker;
                 velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
                 int initialXVelocity = (int) velocityTracker.getXVelocity();
@@ -1179,13 +1222,43 @@ public class TwoDScrollView extends FrameLayout {
      * Isaac's View Scaling Code
      */
 
+    private boolean mIsZooming = false;
+
     private static final float MIN_SCALE = 0.1f;
     private static final float MAX_SCALE = 1.0f;
     private float mScaleFactor = 1.0f;
 
     private ScaleGestureDetector mScaleGestureDetector;
 
+    private Point mScreenSize = new Point();
+
     private final ScaleGestureDetector.OnScaleGestureListener mScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+            mIsZooming = true;
+
+            View child = TwoDScrollView.this.getChildAt(0);
+
+            // Set the pivot
+            float pivotX = TwoDScrollView.this.getScrollX() + detector.getFocusX() - child.getPivotX();
+            float pivotY = TwoDScrollView.this.getScrollY() + detector.getFocusY() - child.getPivotY();
+
+            float newPivotX = (mScaleFactor) * pivotX;
+            float newPivotY = (mScaleFactor) * pivotY;
+
+            //child.setTranslationX(pivotX - newPivotX);
+            //child.setTranslationY(pivotY - newPivotY);
+
+            ///*
+            // getFocus() returns the pixel position of the focal point relative to SCREEN!
+            // We need to normalize it by getting the scrolled position
+            child.setPivotX(child.getPivotX() + newPivotX);
+            child.setPivotY(child.getPivotY() + newPivotY);
+            //*/
+
+            return super.onScaleBegin(detector);
+        }
+
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             // Get the current percentage by which to scale
@@ -1194,29 +1267,28 @@ public class TwoDScrollView extends FrameLayout {
             mScaleFactor *= scaleFactor;
             mScaleFactor = Math.max(MIN_SCALE, Math.min(mScaleFactor, MAX_SCALE));
 
-            // Scale the child
-            TwoDScrollView.this.getChildAt(0).setScaleX(mScaleFactor);
-            TwoDScrollView.this.getChildAt(0).setScaleY(mScaleFactor);
+            View child = TwoDScrollView.this.getChildAt(0);
 
-            // Center around focal point
-            TwoDScrollView.this.getChildAt(0).setTranslationX(detector.getFocusX());
-            TwoDScrollView.this.getChildAt(0).setTranslationY(detector.getFocusY());
+            // Scale the child
+            child.setScaleX(mScaleFactor);
+            child.setScaleY(mScaleFactor);
 
             invalidate();
             return true;
         }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            mIsZooming = false;
+            super.onScaleEnd(detector);
+        }
     };
+
+    public void setScreenSize(Point screenSize) {
+        mScreenSize = new Point(screenSize);
+    }
 
     private void initScaleDetector(Context context) {
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
     }
-
-    /*
-    protected void dispatchDraw(Canvas canvas) {
-        canvas.save();
-        canvas.scale(mScaleFactor, mScaleFactor);
-        super.dispatchDraw(canvas);
-        canvas.restore();
-    }
-    //*/
 }
