@@ -16,7 +16,7 @@ public class WordGroup {
         FINE_GRAINED
     }
 
-    public final int GROUP_ID;
+    private final int GROUP_ID;
 
     private Precision precision;
 
@@ -106,6 +106,10 @@ public class WordGroup {
     // (Note: this is not the same as the center of the group's bounds)
     public Point getCenter() {
         return new Point(center);
+    }
+
+    public int getId() {
+        return GROUP_ID;
     }
 
     public void addChild(WordGroup child) {
