@@ -279,11 +279,11 @@ public class WordCloud {
     }
 
     // Removes a word, permanently deleting it from the word cloud.
-    public void removeWord(Word word) {
+    public synchronized void removeWord(Word word) {
         removeWord(word, true);
     }
 
-    protected void removeWord(Word word, boolean deleteFromList) {
+    protected synchronized void removeWord(Word word, boolean deleteFromList) {
         Log.d("WordCloud", word.getName() + ": removeWord");
 
         if (deleteFromList) {
@@ -322,7 +322,7 @@ public class WordCloud {
         return wordList.containsKey(name);
     }
 
-    public String saveWordCloud() {
+    public synchronized String saveWordCloud() {
 
         Log.d("wordCloud", "Saving word cloud");
 
@@ -446,7 +446,7 @@ public class WordCloud {
         return "none";
     }
 
-    public boolean loadWordCloud(String id) {
+    public synchronized boolean loadWordCloud(String id) {
 
         // Make request
         Log.d("wordCloud", "Loading CLOUDID " + id);
