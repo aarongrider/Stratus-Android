@@ -356,29 +356,26 @@ public class WordCloud {
 
             // Put current word cloud data into json object
             try {
+                // Add all word properties
+                Log.d("wordCloud", "Group ID: " + currGroup.getId());
+                group.put("id", currGroup.getId());
 
-                if (currGroup != null) {
-                    // Add all word properties
-                    Log.d("wordCloud", "Group ID: " + currGroup.getId());
-                    group.put("id", currGroup.getId());
+                // Center to JSON
+                JSONObject center = new JSONObject();
+                center.put("x", currGroup.center.x);
+                center.put("y", currGroup.center.y);
+                group.put("center", center);
 
-                    // Center to JSON
-                    JSONObject center = new JSONObject();
-                    center.put("x", currGroup.center.x);
-                    center.put("y", currGroup.center.y);
-                    group.put("center", center);
+                // Bounds to JSON
+                JSONObject bounds = new JSONObject();
+                bounds.put("bottom", currGroup.getBounds().bottom);
+                bounds.put("left", currGroup.getBounds().left);
+                bounds.put("right", currGroup.getBounds().right);
+                bounds.put("top", currGroup.getBounds().top);
+                group.put("bounds", bounds);
 
-                    // Bounds to JSON
-                    JSONObject bounds = new JSONObject();
-                    bounds.put("bottom", currGroup.getBounds().bottom);
-                    bounds.put("left", currGroup.getBounds().left);
-                    bounds.put("right", currGroup.getBounds().right);
-                    bounds.put("top", currGroup.getBounds().top);
-                    group.put("bounds", bounds);
-
-                    // Add word json to words array
-                    groups.put(group);
-                }
+                // Add word json to words array
+                groups.put(group);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -399,12 +396,14 @@ public class WordCloud {
 
             // Put current word cloud data into json object
             try {
-                // Add all word properties
                 word.put("name", currWord.getName());
                 word.put("count", currWord.getCount());
                 word.put("timestamp", new Timestamp(currWord.getTimestamp()).toString());
                 word.put("attached", currWord.isAttached() ? 1 : 0);
-                word.put("group", currWord.parent.getId());
+
+                // Put parent group if it exists
+                if (currWord.parent != null) word.put("group", currWord.parent.getId());
+                else word.put("group", -1);
 
                 // Convert rect to JSON
                 JSONObject bounds = new JSONObject();
