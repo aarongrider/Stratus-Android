@@ -145,13 +145,21 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         scrollView.addView(cloudLayout, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
         // Move to center of the ScrollView
+<<<<<<< HEAD
         scrollView.scrollToWhenReady(
                 UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
                 UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
 
         // Create new instances
+        Blacklist.createInstance();
         WordCloud.createInstance(context, cloudLayout);
+=======
+        scrollView.scrollToWhenReady(UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2), UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2));
+
+        // Create new instances
         ExclusionList.createInstance();
+        WordCloud.createInstance(context, rl);
+>>>>>>> exclusion_list
         Preprocessor.createInstance();
 
         // Add sample words to exclustion list
@@ -422,11 +430,16 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 }
             }.start();
 
+<<<<<<< HEAD
         } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
             cloudLayout.invalidate();
-        } else if (id == R.id.view_exclude_list) {
+        } else if (id == R.id.view_exclude_list){
+            Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
+=======
+        if (id==R.id.view_exclude_list){
             openExclusion();
+>>>>>>> exclusion_list
         }
 
         return false;
