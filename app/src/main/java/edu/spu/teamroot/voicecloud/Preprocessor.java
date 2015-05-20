@@ -38,10 +38,14 @@ public class Preprocessor {
      */
 
     public static Preprocessor createInstance() {
-        if (instance == null) {
-            instance = new Preprocessor();
+        Log.d("Preprocessor", "createInstance()");
+
+        if (instance != null) {
+            Log.d("Preprocessor", "createInstance -- Existing instance destroyed");
+            deleteInstance();
         }
 
+        instance = new Preprocessor();
         return instance;
     }
 
@@ -50,6 +54,8 @@ public class Preprocessor {
     }
 
     public static void deleteInstance() {
+        Log.d("Preprocessor", "deleteInstance()");
+
         instance = null;
     }
 
@@ -99,20 +105,21 @@ public class Preprocessor {
             // Break string into separate words
             String[] currBuff = RESULT.toLowerCase().split(" ");
 
-            // TODO Check against blacklist
-            // TODO Part of speech identification
-
             // Make map of words
             for (String curPart : currBuff) {
                 final String word = curPart.trim();
 
                 if (!word.isEmpty()) {
-                    ProcWord wordObj = curMap.get(word);
+                    // TODO Part of speech identification
 
-                    if (wordObj == null) {
-                        curMap.put(word, new ProcWord());
-                    } else {
-                        wordObj.increment();
+                    if (!ExclusionList.getInstance().isWordExcluded(word)) {
+                        ProcWord wordObj = curMap.get(word);
+
+                        if (wordObj == null) {
+                            curMap.put(word, new ProcWord());
+                        } else {
+                            wordObj.increment();
+                        }
                     }
                 }
             }
