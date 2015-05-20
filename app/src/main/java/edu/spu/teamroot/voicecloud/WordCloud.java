@@ -196,6 +196,16 @@ public class WordCloud {
         return this.timestamp;
     }
 
+    private void refreshFreeGroups() {
+        freeGroups.clear();
+
+        for (WordGroup group : wordTreeRoot.children) {
+            if (group.children.size() < groupSize) {
+                freeGroups.addFirst(group);
+            }
+        }
+    }
+
     protected WordGroup getFreeGroup() {
         // Calculate new group size ( 1 + floor( sqrt( n-1 ) ) )
         // e.g. n=4, size = 2 groups of 2; n=8, size = 3 groups of 3
@@ -211,11 +221,7 @@ public class WordCloud {
             }
 
             // Update free groups list (group size has changed)
-            for (WordGroup group : wordTreeRoot.children) {
-                if (group.children.size() < groupSize) {
-                    freeGroups.addFirst(group);
-                }
-            }
+            refreshFreeGroups();
 
             // Create new word group and link to tree hierarchy
             WordGroup newGroup = new WordGroup();
@@ -477,6 +483,7 @@ public class WordCloud {
         try {
             // Clear out current cloud
             this.clear();
+            treeSize = 0;
 
             // Create map for id to group instance
             Map<Integer, WordGroup> groupMap = new TreeMap<>();
@@ -523,8 +530,9 @@ public class WordCloud {
                 Word newWord = new Word(name, count);
                 wordList.put(newWord.getName(), newWord);
 
-                // Get parent group
+                // Check if word is attached (groupId is valid)
                 if (groupId >= 0) {
+                    // Get parent group
                     WordGroup parentGroup = groupMap.get(groupId);
                     parentGroup.addChild(newWord);
 
@@ -533,9 +541,14 @@ public class WordCloud {
 
                     newWord.moveTo(bounds.centerX(), bounds.centerY());
                     newWord.show();
-                }
 
+                    treeSize++;
+                }
             }
+
+            // Update group size and refresh free groups
+            groupSize = 1 + (int)Math.floor(Math.sqrt(treeSize - 1));
+            refreshFreeGroups();
 
             return true;
         } catch (Exception e) {
