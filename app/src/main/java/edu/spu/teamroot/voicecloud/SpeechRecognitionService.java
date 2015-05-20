@@ -99,6 +99,12 @@ public class SpeechRecognitionService extends Service {
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d("SRS", "onUnbind()");
+        return super.onUnbind(intent);
+    }
+
+    @Override
     public void onDestroy() {
 
         Log.d(TAG, "SRS destroy");
