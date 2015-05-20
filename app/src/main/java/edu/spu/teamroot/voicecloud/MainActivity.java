@@ -86,6 +86,10 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     };
 
+    /*
+     * Activity Lifecycle
+     */
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.d("MainActivity", "onSaveInstanceState(" + outState + ")");
@@ -109,41 +113,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onStart() {
-        Log.d("MainActivity", "onStart()");
-
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d("MainActivity", "onStop()");
-
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d("MainActivity", "onDestroy()");
-
-        super.onDestroy();
-
-        /*
-        try {
-            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
-        }
-        catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
-        if (mServiceMessenger != null) {
-            unbindService(mServiceConnection);
-            mServiceMessenger = null;
-        }
-        //*/
     }
 
     @Override
@@ -280,6 +249,60 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
+
+    @Override
+    protected void onStart() {
+        Log.d("MainActivity", "onStart()");
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d("MainActivity", "onRestart()");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("MainActivity", "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainActivity", "onPause()");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("MainActivity", "onStop()");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("MainActivity", "onDestroy()");
+        super.onDestroy();
+
+        /*
+        try {
+            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
+        }
+        catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        if (mServiceMessenger != null) {
+            unbindService(mServiceConnection);
+            mServiceMessenger = null;
+        }
+        //*/
+    }
+
+    /*
+     * Methods
+     */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
