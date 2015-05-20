@@ -62,18 +62,15 @@ public class SpeechRecognitionService extends Service {
 
         @Override
         public void handleMessage(Message msg) {
-
             final SpeechRecognitionService target = mtarget.get();
 
             switch (msg.what) {
                 case MSG_RECOGNIZER_START_LISTENING:
-
                     target.mIsListening = false;
 
                     Log.d(TAG, "Start Recognizer");
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-
                         // Turn off beep sound
                         mAudioManager.setStreamMute(AudioManager.STREAM_VOICE_CALL, true);
                         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
@@ -84,16 +81,17 @@ public class SpeechRecognitionService extends Service {
                         target.mIsListening = true;
                     }
                     break;
-
                 case MSG_RECOGNIZER_STOP_LISTENING:
-
                     Log.d(TAG, "Stopped Recognizer");
+
+                    // Clear previous results
+                    mtarget.get().mPreprocessor.clearPrevious();
+
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;
+
                     break;
-
                 case MSG_SERVICE_KILL:
-
                     Log.d(TAG, "Killing service...");
                     target.stopSelf();
             }
@@ -199,6 +197,9 @@ public class SpeechRecognitionService extends Service {
                 e.printStackTrace();
             }
 
+            // Clear the previous results
+            mPreprocessor.clearPrevious();
+
             if (restart) {
                 startVoiceRecognitionCycle();
             }
@@ -218,6 +219,8 @@ public class SpeechRecognitionService extends Service {
                 ArrayList resultArray = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 String resultString = resultArray.get(0).toString();
                 mPreprocessor.processString(resultString, PARTIAL_RESULTS);
+            } else {
+                Log.d(TAG, "onPartialResults failed to convert");
             }
 
         }
@@ -232,6 +235,8 @@ public class SpeechRecognitionService extends Service {
                 ArrayList resultArray = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 String resultString = resultArray.get(0).toString();
                 mPreprocessor.processString(resultString, FINAL_RESULTS);
+            } else {
+                Log.d(TAG, "onResults failed to convert");
             }
 
             // Restart new dictation cycle
