@@ -426,10 +426,12 @@ public class Word extends WordGroup {
                 // Remove from Word Cloud
                 if (position == 5) {
 
-                    // Add word to exclusion list
-
-                    // Remove word
+                    // Remove word from cloud
                     WordCloud.getInstance().removeWord(word);
+
+                    // Add word to exclusion list
+                    ExclusionList.getInstance().addWord(word.getName());
+
                     dialog.dismiss();
 
                 }

@@ -53,7 +53,7 @@ public class ExclusionActivity extends ActionBarActivity {
         });
     }
 
-    protected void removeItemFromList(int position) {
+    protected void removeItemFromList(final int position) {
         final int deletePosition = position;
 
         AlertDialog.Builder alert = new AlertDialog.Builder(
@@ -64,10 +64,10 @@ public class ExclusionActivity extends ActionBarActivity {
         alert.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TOD O Auto-generated method stub
 
-                // main code on after clicking yes
-                wordArrayList.remove(deletePosition);
+                String word = wordArrayList.get(deletePosition);
+                wordArrayList.remove(word);
+                ExclusionList.getInstance().removeWord(word);
                 adapter.notifyDataSetChanged();
                 adapter.notifyDataSetInvalidated();
 

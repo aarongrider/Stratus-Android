@@ -61,7 +61,7 @@ public class ExclusionList {
 
     // Removes a word from the exclusion list.
     public void removeWord(String word) {
-
+        excludeList.remove(word);
     }
 
     // Checks if a word is in the exclusion list.

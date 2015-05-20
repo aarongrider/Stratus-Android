@@ -358,7 +358,7 @@ public class WordCloud {
             try {
                 // Add all word properties
                 Log.d("wordCloud", "Group ID: " + currGroup.getId());
-                group.put("id", currGroup.getId());
+                group.put("groupcloudid", currGroup.getId());
 
                 group.put("centerx", currGroup.center.x);
                 group.put("centery", currGroup.center.y);

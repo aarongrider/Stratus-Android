@@ -154,25 +154,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         ExclusionList.createInstance();
         Preprocessor.createInstance();
 
-        // Add sample words to exclustion list
-        ExclusionList.getInstance().addWord("test");
-        ExclusionList.getInstance().addWord("this");
-        ExclusionList.getInstance().addWord("is");
-        ExclusionList.getInstance().addWord("a");
-        ExclusionList.getInstance().addWord("sample");
-        ExclusionList.getInstance().addWord("set");
-        ExclusionList.getInstance().addWord("of");
-        ExclusionList.getInstance().addWord("values");
-        ExclusionList.getInstance().addWord("more");
-        ExclusionList.getInstance().addWord("of");
-        ExclusionList.getInstance().addWord("them");
-        ExclusionList.getInstance().addWord("than");
-        ExclusionList.getInstance().addWord("you");
-        ExclusionList.getInstance().addWord("even");
-        ExclusionList.getInstance().addWord("know");
-        ExclusionList.getInstance().addWord("way");
-        ExclusionList.getInstance().addWord("aaron");
-
         // Start SpeechRecognitionService
         final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
         this.startService(speechRecognitionService);
