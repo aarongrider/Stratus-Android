@@ -510,14 +510,17 @@ public class WordCloud {
                 wordList.put(newWord.getName(), newWord);
 
                 // Get parent group
-                WordGroup parentGroup = groupMap.get(groupId);
-                parentGroup.addChild(newWord);
+                if (groupId >= 0) {
+                    WordGroup parentGroup = groupMap.get(groupId);
+                    parentGroup.addChild(newWord);
 
-                // Add the word to the view
-                WordCloud.layout.addView(newWord.button, newWord.layoutParams);
+                    // Add the word to the view
+                    WordCloud.layout.addView(newWord.button, newWord.layoutParams);
 
-                newWord.moveTo(bounds.centerX(), bounds.centerY());
-                newWord.show();
+                    newWord.moveTo(bounds.centerX(), bounds.centerY());
+                    newWord.show();
+                }
+
             }
 
 
