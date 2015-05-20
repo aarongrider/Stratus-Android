@@ -1,7 +1,5 @@
 package edu.spu.teamroot.voicecloud;
 
-import android.util.Log;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,14 +16,10 @@ public class ExclusionList {
      */
 
     public static ExclusionList createInstance() {
-        Log.d("ExclusionList", "createInstance()");
-
-        if (instance != null) {
-            Log.d("ExclusionList", "createInstance -- Existing instance destroyed");
-            deleteInstance();
+        if (instance == null) {
+            instance = new ExclusionList();
         }
 
-        instance = new ExclusionList();
         return instance;
     }
 
@@ -33,8 +27,6 @@ public class ExclusionList {
         return instance;
     }
     public static void deleteInstance() {
-        Log.d("ExclusionList", "deleteInstance()");
-
         instance = null;
     }
 

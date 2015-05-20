@@ -35,14 +35,10 @@ public class WordCloud {
      */
 
     public static WordCloud createInstance(Context context, RelativeLayout layout) {
-        Log.d("WordCloud", "createInstance(" + context + ", " + layout + ")");
-
-        if (instance != null) {
-            Log.d("WordCloud", "createInstance -- Existing instance destroyed");
-            deleteInstance();
+        if (instance == null) {
+            instance = new WordCloud(context, layout);
         }
 
-        instance = new WordCloud(context, layout);
         return instance;
     }
 
@@ -51,8 +47,6 @@ public class WordCloud {
     }
 
     public static void deleteInstance() {
-        Log.d("WordCloud", "deleteInstance()");
-
         instance = null;
     }
 
@@ -328,58 +322,12 @@ public class WordCloud {
         return wordList.containsKey(name);
     }
 
-    public String saveWordCloud() {
-        try {
-            JSONObject toSend = toJSON();
+    public synchronized String saveWordCloud() {
 
-            // Transmit object to web server
-            JSONTransmitter transmitter = new JSONTransmitter();
-            transmitter.execute(toSend);
-
-            JSONObject result = transmitter.get();
-            String cloudID = result.getString("cloudid");
-
-            if (cloudID != "") return cloudID;
-            else return "none";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return "none";
-    }
-
-    public synchronized boolean loadWordCloud(String cloudid) {
-        // Make request
-        Log.d("wordCloud", "Loading CLOUDID " + cloudid);
-
-        try {
-            // Create Master JSON Object
-            JSONObject toSend = new JSONObject();
-
-            toSend.put("cloudid", cloudid);
-
-            // Transmit object to web server
-            JSONTransmitter transmitter = new JSONTransmitter();
-            transmitter.execute(toSend);
-
-            // Ping API and get JSON object
-            JSONObject result = transmitter.get();
-            result = new JSONObject(result.getString("cloudid"));
-
-            return fromJSON(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    public synchronized JSONObject toJSON() {
-        Log.d("WordCloud", "Saving word cloud");
+        Log.d("wordCloud", "Saving word cloud");
 
         // Create Master JSON Object
-        JSONObject saveObj = new JSONObject();
+        JSONObject toSend = new JSONObject();
 
         // Create layout JSON Object
         JSONObject cloud = new JSONObject();
@@ -459,22 +407,60 @@ public class WordCloud {
                 // Add word json to words array
                 words.put(word);
 
-                // Add layout and words array to master json object
-                cloud.put("words", words);
-                cloud.put("groups", groups);
-                saveObj.put("cloud", cloud);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
         }
 
-        return saveObj;
+        try {
+
+            // Add layout and words array to master json object
+            cloud.put("words", words);
+            cloud.put("groups", groups);
+            toSend.put("cloud", cloud);
+
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+            JSONObject result = transmitter.get();
+            String cloudID = result.getString("cloudid");
+
+            if (cloudID != "") return cloudID;
+            else return "none";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "none";
     }
 
-    public synchronized boolean fromJSON(JSONObject fromRecv) {
-        Log.d("WordCloud", "Loading word cloud");
+    public synchronized boolean loadWordCloud(String cloudid) {
+
+        // Make request
+        Log.d("wordCloud", "Loading CLOUDID " + cloudid);
+
+        // Create Master JSON Object
+        JSONObject toSend = new JSONObject();
 
         try {
+            toSend.put("cloudid", cloudid);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+            // Ping API and get JSON object
+            JSONObject result = transmitter.get();
+            result = new JSONObject(result.getString("cloudid"));
+
             // Clear out current cloud
             this.clear();
 
@@ -482,7 +468,7 @@ public class WordCloud {
             Map<Integer, WordGroup> groupMap = new TreeMap<>();
 
             // Populate groups
-            JSONArray groupArray = fromRecv.getJSONObject("cloud").getJSONArray("groups");
+            JSONArray groupArray = result.getJSONObject("cloud").getJSONArray("groups");
 
             for (int i = 0; i < groupArray.length(); i++) {
                 JSONObject group = groupArray.getJSONObject(i);
@@ -502,7 +488,7 @@ public class WordCloud {
             }
 
             // Populate words
-            JSONArray wordArray = fromRecv.getJSONObject("cloud").getJSONArray("words");
+            JSONArray wordArray = result.getJSONObject("cloud").getJSONArray("words");
 
             for (int i = 0; i < wordArray.length(); i++) {
                 JSONObject word = wordArray.getJSONObject(i);
@@ -537,7 +523,9 @@ public class WordCloud {
 
             }
 
+
             return true;
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -18,14 +18,10 @@ public class UnitConverter {
      */
 
     public static UnitConverter createInstance(Context context) {
-        Log.d("UnitConverter", "createInstance(" + context + ")");
-
-        if (instance != null) {
-            Log.d("UnitConverter", "createInstance -- Existing instance destroyed");
-            deleteInstance();
+        if (instance == null) {
+            instance = new UnitConverter(context);
         }
 
-        instance = new UnitConverter(context);
         return instance;
     }
 
@@ -33,8 +29,6 @@ public class UnitConverter {
         return instance;
     }
     public static void deleteInstance() {
-        Log.d("UnitConverter", "deleteInstance()");
-
         instance = null;
     }
 

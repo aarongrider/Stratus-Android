@@ -36,9 +36,6 @@ import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -87,51 +84,26 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     };
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        Log.d("MainActivity", "onSaveInstanceState(" + outState + ")");
-
-        super.onSaveInstanceState(outState);
-
-        JSONObject obj = WordCloud.getInstance().toJSON();
-        outState.putString("JSON", obj.toString());
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.d("MainActivity", "onRestoreInstanceState(" + savedInstanceState + ")");
-
-        super.onRestoreInstanceState(savedInstanceState);
-
-        String json = savedInstanceState.getString("JSON");
-
-        try {
-            WordCloud.getInstance().fromJSON(new JSONObject(json));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
     protected void onStart() {
-        Log.d("MainActivity", "onStart()");
+        Log.d("MainActivity", "onStart");
 
         super.onStart();
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
 
     @Override
     protected void onStop() {
-        Log.d("MainActivity", "onStop()");
+        Log.d("MainActivity", "onStop");
 
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        Log.d("MainActivity", "onDestroy()");
+        Log.d("MainActivity", "onDestroy");
 
         super.onDestroy();
 
-        /*
         try {
             mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
         }
@@ -143,12 +115,11 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             unbindService(mServiceConnection);
             mServiceMessenger = null;
         }
-        //*/
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("MainActivity", "onCreate(" + savedInstanceState + ")");
+        Log.d("MainActivity", "onCreate");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -256,29 +227,25 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
-        ///* Tests for running on emulator
-        if (savedInstanceState == null) {
-            final String words[] = {
-                    "voice", "cloud", "is", "an", "android", "application", "designed", "to",
-                    "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
-                    "this", "is", "an", "example", "of", "a", "word", "cloud",
-                    "size", "based", "on", "count"
-            };
+        /* Tests for running on emulator
+        final String words[] = {
+                "voice", "cloud", "is", "an", "android", "application", "designed", "to",
+                "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
+                "this", "is", "an", "example", "of", "a", "word", "cloud",
+                "size", "based", "on", "count"
+        };
 
-            for (int i = 0; i < words.length; i++) {
-                final String word = words[i];
+        for (int i = 0; i < words.length; i++) {
+            final String word = words[i];
 
-                cloudLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
-                    }
-                }, i);
-            }
+            cloudLayout.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
+                }
+            }, i);
         }
         //*/
-
-        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
 
     @Override
