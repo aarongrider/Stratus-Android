@@ -30,7 +30,7 @@
             android:layout_alignWithParentIfMissing="false"
             android:layout_centerInParent="true"
             android:textSize="18dp"
-            android:textColor="@color/primary"
+            android:textColor="@color/accentWhite"
             android:paddingLeft="0dp"
             android:paddingBottom="2dp">
         </TextView>

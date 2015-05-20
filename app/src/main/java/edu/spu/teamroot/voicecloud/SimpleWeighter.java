@@ -3,9 +3,16 @@ package edu.spu.teamroot.voicecloud;
 public class SimpleWeighter implements WordWeighter {
     private static final int[] accentColors = {
             R.color.accentBlue,
+            R.color.accentBlue,
+            R.color.accentBlueDark,
+            R.color.accentPurple,
+            R.color.accentPurpleDark,
             R.color.accentGreen,
+            R.color.accentGreenDark,
             R.color.accentYellow,
-            R.color.accentRed};
+            R.color.accentYellowDark,
+            R.color.accentRed,
+            R.color.accentRedDark};
 
     @Override
     public int getTextSize(Word word) {
@@ -16,7 +23,7 @@ public class SimpleWeighter implements WordWeighter {
     @Override
     public int getWordColor(Word word) {
         // Change color every 5 occurrences
-        int index = Math.max((word.getCount() / 5) % accentColors.length, 0);
+        int index = Math.max((word.getCount() / 1) % accentColors.length, 0);
         return WordCloud.context.getResources().getColor(accentColors[index]);
     }
 
