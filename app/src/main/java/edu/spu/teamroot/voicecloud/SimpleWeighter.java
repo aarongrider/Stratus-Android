@@ -2,28 +2,29 @@ package edu.spu.teamroot.voicecloud;
 
 public class SimpleWeighter implements WordWeighter {
     private static final int[] accentColors = {
-            R.color.accentBlue,
-            R.color.accentBlue,
-            R.color.accentBlueDark,
-            R.color.accentPurple,
-            R.color.accentPurpleDark,
-            R.color.accentGreen,
-            R.color.accentGreenDark,
-            R.color.accentYellow,
-            R.color.accentYellowDark,
-            R.color.accentRed,
-            R.color.accentRedDark};
+            R.color.blue,
+            R.color.cyan,
+            R.color.teal,
+            R.color.green,
+            R.color.greenLight,
+            R.color.lime,
+            R.color.yellow,
+            R.color.amber,
+            R.color.orange,
+            R.color.orangeDark,
+            R.color.red,
+            R.color.redDark};
 
     @Override
     public int getTextSize(Word word) {
         // Minimum size of word is 20
-        return 20 + word.getCount();
+        return (int) (20 + Math.pow(word.getCount(), 2));
     }
 
     @Override
     public int getWordColor(Word word) {
-        // Change color every 5 occurrences
-        int index = Math.max((word.getCount() / 1) % accentColors.length, 0);
+        // Change color every occurrence
+        int index = Math.max(word.getCount() % accentColors.length, 0);
         return WordCloud.context.getResources().getColor(accentColors[index]);
     }
 

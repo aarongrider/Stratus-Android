@@ -2,13 +2,19 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/accentBlue</item>
-        <item name="colorPrimaryDark">@color/accentBlueDark</item>
+        <item name="colorPrimary">@color/vcBlue</item>
+        <item name="colorPrimaryDark">@color/blue</item>
         <!-- Customize your theme here. -->
     </style>
     <style name="ExclusionTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <item name="colorPrimary">@color/accentRed</item>
-        <item name="colorPrimaryDark">@color/accentRedDark</item>
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimaryDark">@color/redDark</item>
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="SettingsTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/teal</item>
+        <item name="colorPrimaryDark">@color/cyan</item>
         <!-- Customize your theme here. -->
     </style>
 

@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.os.Build;
@@ -22,14 +21,11 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -312,8 +308,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
-            return true;
+            openSettings();
         } else if (id == R.id.save_cloud) {
 
             Toast.makeText(this, "Saving Cloud...", Toast.LENGTH_SHORT).show();
@@ -446,11 +441,17 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         return false;
     }
 
-    public void openExclusion( )
+    public void openExclusion()
     {
         Intent intent = new Intent(this, ExclusionActivity.class);
         startActivity(intent);
 
+    }
+
+    public void openSettings()
+    {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
 }
