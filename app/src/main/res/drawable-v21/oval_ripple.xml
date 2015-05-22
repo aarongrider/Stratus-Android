@@ -4,7 +4,7 @@
     <item>
         <shape android:shape="oval">
             <!-- <solid android:color="?attr/colorAccent"/> -->
-            <solid android:color="@color/vcBlue"/>
+            <solid android:color="@color/button"/>
         </shape>
     </item>
 </ripple>
