@@ -2,10 +2,18 @@ package edu.spu.teamroot.voicecloud;
 
 public class RelativeWeighter implements WordWeighter {
     private static final int[] accentColors = {
-            R.color.accentBlue,
-            R.color.accentGreen,
-            R.color.accentYellow,
-            R.color.accentRed};
+            R.color.blue,
+            R.color.blue,
+            R.color.cyan,
+            R.color.teal,
+            R.color.green,
+            R.color.greenLight,
+            R.color.lime,
+            R.color.yellow,
+            R.color.amber,
+            R.color.orange,
+            R.color.orangeDark,
+            R.color.red};
 
     private static final int WINDOW = 10;
 

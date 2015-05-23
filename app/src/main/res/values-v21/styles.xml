@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primaryDark</item>
-        <item name="android:colorControlActivated">#ffbdbdbd</item>
-        <item name="android:navigationBarColor">@color/primaryDark</item>
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimaryDark">@color/button</item>
+        <item name="android:colorControlActivated">@color/accentBlackTransparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
     </style>
 </resources>

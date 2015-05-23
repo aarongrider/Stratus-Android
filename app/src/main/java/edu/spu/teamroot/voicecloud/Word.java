@@ -4,6 +4,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.LightingColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -79,7 +80,7 @@ public class Word extends WordGroup {
 
             button.setText(name);
             button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
-            button.getBackground().setColorFilter(WordCloud.getInstance().weighter.getWordColor(this), PorterDuff.Mode.SRC_ATOP);
+            button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -226,7 +227,7 @@ public class Word extends WordGroup {
         Log.d(name, "Count: " + count + " Size: " + WordCloud.getInstance().weighter.getTextSize(this));
 
         // Calculate new color based on count (or part of speech)
-        button.getBackground().setColorFilter(WordCloud.getInstance().weighter.getWordColor(this), PorterDuff.Mode.SRC_ATOP);
+        button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
 
         // Update bounds with new button size
         button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
@@ -426,10 +427,12 @@ public class Word extends WordGroup {
                 // Remove from Word Cloud
                 if (position == 5) {
 
-                    // Add word to exclusion list
-
-                    // Remove word
+                    // Remove word from cloud
                     WordCloud.getInstance().removeWord(word);
+
+                    // Add word to exclusion list
+                    ExclusionList.getInstance().addWord(word.getName());
+
                     dialog.dismiss();
 
                 }

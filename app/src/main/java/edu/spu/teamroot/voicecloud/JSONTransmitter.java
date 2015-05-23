@@ -20,14 +20,14 @@ import android.util.Log;
 
 public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObject> {
 
-    String baseURL = "http://52.24.35.51/API";
+    String baseURL = "http://voicecloudapp.com/api";
 
     @Override
     protected JSONObject doInBackground(JSONObject... data) {
 
         String url = baseURL;
 
-        if (data[0].has("layout")) url = baseURL + "/save";
+        if (data[0].has("cloud")) url = baseURL + "/save";
         else url = baseURL + "/load.json";
 
         // Create json string from JSONObject
@@ -75,7 +75,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
         // Return result
         JSONObject returnObject = new JSONObject();
         try {
-            returnObject.put("id", result);
+            returnObject.put("cloudid", result);
         } catch (JSONException e) {
             e.printStackTrace();
         }

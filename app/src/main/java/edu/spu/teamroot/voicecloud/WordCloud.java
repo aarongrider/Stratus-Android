@@ -35,10 +35,14 @@ public class WordCloud {
      */
 
     public static WordCloud createInstance(Context context, RelativeLayout layout) {
-        if (instance == null) {
-            instance = new WordCloud(context, layout);
+        Log.d("WordCloud", "createInstance(" + context + ", " + layout + ")");
+
+        if (instance != null) {
+            Log.d("WordCloud", "createInstance -- Existing instance destroyed");
+            deleteInstance();
         }
 
+        instance = new WordCloud(context, layout);
         return instance;
     }
 
@@ -47,6 +51,8 @@ public class WordCloud {
     }
 
     public static void deleteInstance() {
+        Log.d("WordCloud", "deleteInstance()");
+
         instance = null;
     }
 
@@ -190,6 +196,16 @@ public class WordCloud {
         return this.timestamp;
     }
 
+    private void refreshFreeGroups() {
+        freeGroups.clear();
+
+        for (WordGroup group : wordTreeRoot.children) {
+            if (group.children.size() < groupSize) {
+                freeGroups.addFirst(group);
+            }
+        }
+    }
+
     protected WordGroup getFreeGroup() {
         // Calculate new group size ( 1 + floor( sqrt( n-1 ) ) )
         // e.g. n=4, size = 2 groups of 2; n=8, size = 3 groups of 3
@@ -205,11 +221,7 @@ public class WordCloud {
             }
 
             // Update free groups list (group size has changed)
-            for (WordGroup group : wordTreeRoot.children) {
-                if (group.children.size() < groupSize) {
-                    freeGroups.addFirst(group);
-                }
-            }
+            refreshFreeGroups();
 
             // Create new word group and link to tree hierarchy
             WordGroup newGroup = new WordGroup();
@@ -279,11 +291,11 @@ public class WordCloud {
     }
 
     // Removes a word, permanently deleting it from the word cloud.
-    public void removeWord(Word word) {
+    public synchronized void removeWord(Word word) {
         removeWord(word, true);
     }
 
-    protected void removeWord(Word word, boolean deleteFromList) {
+    protected synchronized void removeWord(Word word, boolean deleteFromList) {
         Log.d("WordCloud", word.getName() + ": removeWord");
 
         if (deleteFromList) {
@@ -323,22 +335,68 @@ public class WordCloud {
     }
 
     public String saveWordCloud() {
+        try {
+            JSONObject toSend = toJSON();
 
-        Log.d("wordCloud", "Saving word cloud");
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+            JSONObject result = transmitter.get();
+            String cloudID = result.getString("cloudid");
+
+            if (cloudID != "") return cloudID;
+            else return "none";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "none";
+    }
+
+    public synchronized boolean loadWordCloud(String cloudid) {
+        // Make request
+        Log.d("wordCloud", "Loading CLOUDID " + cloudid);
+
+        try {
+            // Create Master JSON Object
+            JSONObject toSend = new JSONObject();
+
+            toSend.put("cloudid", cloudid);
+
+            // Transmit object to web server
+            JSONTransmitter transmitter = new JSONTransmitter();
+            transmitter.execute(toSend);
+
+            // Ping API and get JSON object
+            JSONObject result = transmitter.get();
+            result = new JSONObject(result.getString("cloudid"));
+
+            return fromJSON(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public synchronized JSONObject toJSON() {
+        Log.d("WordCloud", "Saving word cloud");
 
         // Create Master JSON Object
-        JSONObject toSend = new JSONObject();
+        JSONObject saveObj = new JSONObject();
 
         // Create layout JSON Object
-        JSONObject layout = new JSONObject();
+        JSONObject cloud = new JSONObject();
         int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
         int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
         String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
-            layout.put("width", width);
-            layout.put("height", height);
-            layout.put("timestamp", timestamp);
+            cloud.put("width", width);
+            cloud.put("height", height);
+            cloud.put("timestamp", timestamp);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -356,29 +414,20 @@ public class WordCloud {
 
             // Put current word cloud data into json object
             try {
+                // Add all word properties
+                Log.d("wordCloud", "Group ID: " + currGroup.getId());
+                group.put("groupcloudid", currGroup.getId());
 
-                if (currGroup != null) {
-                    // Add all word properties
-                    Log.d("wordCloud", "Group ID: " + currGroup.getId());
-                    group.put("id", currGroup.getId());
+                group.put("centerx", currGroup.center.x);
+                group.put("centery", currGroup.center.y);
 
-                    // Center to JSON
-                    JSONObject center = new JSONObject();
-                    center.put("x", currGroup.center.x);
-                    center.put("y", currGroup.center.y);
-                    group.put("center", center);
+                group.put("bottom", currGroup.getBounds().bottom);
+                group.put("left", currGroup.getBounds().left);
+                group.put("right", currGroup.getBounds().right);
+                group.put("top", currGroup.getBounds().top);
 
-                    // Bounds to JSON
-                    JSONObject bounds = new JSONObject();
-                    bounds.put("bottom", currGroup.getBounds().bottom);
-                    bounds.put("left", currGroup.getBounds().left);
-                    bounds.put("right", currGroup.getBounds().right);
-                    bounds.put("top", currGroup.getBounds().top);
-                    group.put("bounds", bounds);
-
-                    // Add word json to words array
-                    groups.put(group);
-                }
+                // Add word json to words array
+                groups.put(group);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -399,86 +448,48 @@ public class WordCloud {
 
             // Put current word cloud data into json object
             try {
-                // Add all word properties
                 word.put("name", currWord.getName());
                 word.put("count", currWord.getCount());
                 word.put("timestamp", new Timestamp(currWord.getTimestamp()).toString());
                 word.put("attached", currWord.isAttached() ? 1 : 0);
-                word.put("group", currWord.parent.getId());
 
-                // Convert rect to JSON
-                JSONObject bounds = new JSONObject();
-                bounds.put("bottom", currWord.getBounds().bottom);
-                bounds.put("left", currWord.getBounds().left);
-                bounds.put("right", currWord.getBounds().right);
-                bounds.put("top", currWord.getBounds().top);
-                word.put("bounds", bounds);
+                // Put parent group if it exists
+                if (currWord.parent != null) word.put("group", currWord.parent.getId());
+                else word.put("group", -1);
+
+                word.put("bottom", currWord.getBounds().bottom);
+                word.put("left", currWord.getBounds().left);
+                word.put("right", currWord.getBounds().right);
+                word.put("top", currWord.getBounds().top);
 
                 // Add word json to words array
                 words.put(word);
 
+                // Add layout and words array to master json object
+                cloud.put("words", words);
+                cloud.put("groups", groups);
+                saveObj.put("cloud", cloud);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
 
-        try {
-
-            // Add layout and words array to master json object
-            toSend.put("layout", layout);
-            toSend.put("words", words);
-            toSend.put("groups", groups);
-
-            // Transmit object to web server
-            JSONTransmitter transmitter = new JSONTransmitter();
-            transmitter.execute(toSend);
-
-            JSONObject result = transmitter.get();
-            String cloudID = result.getString("id");
-
-            if (cloudID != "") return cloudID;
-            else return "none";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return "none";
+        return saveObj;
     }
 
-    public boolean loadWordCloud(String id) {
-
-        // Make request
-        Log.d("wordCloud", "Loading CLOUDID " + id);
-
-        // Create Master JSON Object
-        JSONObject toSend = new JSONObject();
+    public synchronized boolean fromJSON(JSONObject fromRecv) {
+        Log.d("WordCloud", "Loading word cloud");
 
         try {
-            toSend.put("id", id);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-        try {
-            // Transmit object to web server
-            JSONTransmitter transmitter = new JSONTransmitter();
-            transmitter.execute(toSend);
-
-            // Ping API and get JSON object
-            JSONObject result = transmitter.get();
-            result = new JSONObject(result.getString("id"));
-
             // Clear out current cloud
             this.clear();
+            treeSize = 0;
 
             // Create map for id to group instance
             Map<Integer, WordGroup> groupMap = new TreeMap<>();
 
             // Populate groups
-            JSONArray groupArray = result.getJSONObject("cloud").getJSONArray("groups");
+            JSONArray groupArray = fromRecv.getJSONObject("cloud").getJSONArray("groups");
 
             for (int i = 0; i < groupArray.length(); i++) {
                 JSONObject group = groupArray.getJSONObject(i);
@@ -498,7 +509,7 @@ public class WordCloud {
             }
 
             // Populate words
-            JSONArray wordArray = result.getJSONObject("cloud").getJSONArray("words");
+            JSONArray wordArray = fromRecv.getJSONObject("cloud").getJSONArray("words");
 
             for (int i = 0; i < wordArray.length(); i++) {
                 JSONObject word = wordArray.getJSONObject(i);
@@ -519,20 +530,27 @@ public class WordCloud {
                 Word newWord = new Word(name, count);
                 wordList.put(newWord.getName(), newWord);
 
-                // Get parent group
-                WordGroup parentGroup = groupMap.get(groupId);
-                parentGroup.addChild(newWord);
+                // Check if word is attached (groupId is valid)
+                if (groupId >= 0) {
+                    // Get parent group
+                    WordGroup parentGroup = groupMap.get(groupId);
+                    parentGroup.addChild(newWord);
 
-                // Add the word to the view
-                WordCloud.layout.addView(newWord.button, newWord.layoutParams);
+                    // Add the word to the view
+                    WordCloud.layout.addView(newWord.button, newWord.layoutParams);
 
-                newWord.moveTo(bounds.centerX(), bounds.centerY());
-                newWord.show();
+                    newWord.moveTo(bounds.centerX(), bounds.centerY());
+                    newWord.show();
+
+                    treeSize++;
+                }
             }
 
+            // Update group size and refresh free groups
+            groupSize = 1 + (int)Math.floor(Math.sqrt(treeSize - 1));
+            refreshFreeGroups();
 
             return true;
-
         } catch (Exception e) {
             e.printStackTrace();
         }

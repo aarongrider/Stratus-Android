@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.os.Build;
@@ -23,20 +22,20 @@ import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -85,43 +84,38 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     };
 
-    @Override
-    protected void onStart() {
-        Log.d("MainActivity", "onStart");
+    /*
+     * Activity Lifecycle
+     */
 
-        super.onStart();
-        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d("MainActivity", "onSaveInstanceState(" + outState + ")");
+
+        super.onSaveInstanceState(outState);
+
+        JSONObject obj = WordCloud.getInstance().toJSON();
+        outState.putString("JSON", obj.toString());
     }
 
     @Override
-    protected void onStop() {
-        Log.d("MainActivity", "onStop");
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.d("MainActivity", "onRestoreInstanceState(" + savedInstanceState + ")");
 
-        super.onStop();
-    }
+        super.onRestoreInstanceState(savedInstanceState);
 
-    @Override
-    protected void onDestroy() {
-        Log.d("MainActivity", "onDestroy");
-
-        super.onDestroy();
+        String json = savedInstanceState.getString("JSON");
 
         try {
-            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
-        }
-        catch (RemoteException e) {
+            WordCloud.getInstance().fromJSON(new JSONObject(json));
+        } catch (JSONException e) {
             e.printStackTrace();
-        }
-
-        if (mServiceMessenger != null) {
-            unbindService(mServiceConnection);
-            mServiceMessenger = null;
         }
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("MainActivity", "onCreate");
+        Log.d("MainActivity", "onCreate(" + savedInstanceState + ")");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -152,8 +146,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
 
         // Create new instances
-        Blacklist.createInstance();
         WordCloud.createInstance(context, cloudLayout);
+        ExclusionList.createInstance();
         Preprocessor.createInstance();
 
         // Start SpeechRecognitionService
@@ -229,26 +223,84 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
-        /* Tests for running on emulator
-        final String words[] = {
-                "voice", "cloud", "is", "an", "android", "application", "designed", "to",
-                "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
-                "this", "is", "an", "example", "of", "a", "word", "cloud",
-                "size", "based", "on", "count"
-        };
+        ///* Tests for running on emulator
+        if (savedInstanceState == null) {
+            final String words[] = {
+                    "voice", "cloud", "is", "an", "android", "application", "designed", "to",
+                    "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
+                    "this", "is", "an", "example", "of", "a", "word", "cloud",
+                    "size", "based", "on", "count"
+            };
 
-        for (int i = 0; i < words.length; i++) {
-            final String word = words[i];
+            for (int i = 0; i < words.length; i++) {
+                final String word = words[i];
 
-            cloudLayout.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
-                }
-            }, i);
+                cloudLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
+                    }
+                }, i);
+            }
+        }
+        //*/
+
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d("MainActivity", "onStart()");
+        super.onStart();
+    }
+
+    @Override
+    protected void onRestart() {
+        Log.d("MainActivity", "onRestart()");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("MainActivity", "onResume()");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.d("MainActivity", "onPause()");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d("MainActivity", "onStop()");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d("MainActivity", "onDestroy()");
+        super.onDestroy();
+
+        /*
+        try {
+            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
+        }
+        catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        if (mServiceMessenger != null) {
+            unbindService(mServiceConnection);
+            mServiceMessenger = null;
         }
         //*/
     }
+
+    /*
+     * Methods
+     */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -281,8 +333,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            Toast.makeText(this, "Settings", Toast.LENGTH_SHORT).show();
-            return true;
+            openSettings();
         } else if (id == R.id.save_cloud) {
 
             Toast.makeText(this, "Saving Cloud...", Toast.LENGTH_SHORT).show();
@@ -408,9 +459,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
             cloudLayout.invalidate();
-        } else if (id == R.id.view_exclude_list){
-            Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
-        }else if(id == R.id.action_about) {
+        } else if(id == R.id.action_about) {
            final TextView textView = new TextView(this);
             textView.setText(R.string.agreement);
             textView.setPadding(50, 50, 50, 0);
@@ -433,9 +482,24 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             });
 
             builder.show();
+        } else if (id == R.id.view_exclude_list) {
+            openExclusion();
         }
 
         return false;
+    }
+
+    public void openExclusion()
+    {
+        Intent intent = new Intent(this, ExclusionActivity.class);
+        startActivity(intent);
+
+    }
+
+    public void openSettings()
+    {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
 }

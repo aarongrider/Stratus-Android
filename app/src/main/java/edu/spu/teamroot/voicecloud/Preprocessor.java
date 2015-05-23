@@ -38,10 +38,14 @@ public class Preprocessor {
      */
 
     public static Preprocessor createInstance() {
-        if (instance == null) {
-            instance = new Preprocessor();
+        Log.d("Preprocessor", "createInstance()");
+
+        if (instance != null) {
+            Log.d("Preprocessor", "createInstance -- Existing instance destroyed");
+            deleteInstance();
         }
 
+        instance = new Preprocessor();
         return instance;
     }
 
@@ -50,6 +54,8 @@ public class Preprocessor {
     }
 
     public static void deleteInstance() {
+        Log.d("Preprocessor", "deleteInstance()");
+
         instance = null;
     }
 
@@ -99,70 +105,73 @@ public class Preprocessor {
             // Break string into separate words
             String[] currBuff = RESULT.toLowerCase().split(" ");
 
-            // TODO Check against blacklist
-            // TODO Part of speech identification
-
             // Make map of words
             for (String curPart : currBuff) {
                 final String word = curPart.trim();
 
                 if (!word.isEmpty()) {
-                    ProcWord wordObj = curMap.get(word);
+                    // TODO Part of speech identification
 
-                    if (wordObj == null) {
-                        curMap.put(word, new ProcWord());
-                    } else {
-                        wordObj.increment();
+                    if (!ExclusionList.getInstance().isWordExcluded(word)) {
+                        ProcWord wordObj = curMap.get(word);
+
+                        if (wordObj == null) {
+                            curMap.put(word, new ProcWord());
+                        } else {
+                            wordObj.increment();
+                        }
                     }
                 }
             }
 
-            // Update word counts
-            for (Map.Entry pair : curMap.entrySet()) {
-                final String word = (String)pair.getKey();
-                final int curCount = ((ProcWord)pair.getValue()).getCount();
+            synchronized (prevMap) {
+                // Update word counts
+                for (Map.Entry pair : curMap.entrySet()) {
+                    final String word = (String) pair.getKey();
+                    final int curCount = ((ProcWord) pair.getValue()).getCount();
 
-                ProcWord prevWord = prevMap.get(word);
+                    ProcWord prevWord = prevMap.get(word);
 
-                final int prevCount;
+                    final int prevCount;
 
-                if (prevWord != null) {
-                    prevCount = prevWord.getCount();
-                } else {
-                    prevCount = 0;
+                    if (prevWord != null) {
+                        prevCount = prevWord.getCount();
+                    } else {
+                        prevCount = 0;
+                    }
+
+                    if (curCount != prevCount) {
+                        // Increment the word
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                WordCloud.getInstance().addWord(word, (curCount - prevCount) * mWordWeight);
+                            }
+                        });
+                    }
                 }
 
-                if (curCount != prevCount) {
-                    // Increment the word
-                    mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            WordCloud.getInstance().addWord(word, (curCount - prevCount) * mWordWeight);
-                        }
-                    });
+                // Remove words that are no more
+                for (Map.Entry pair : prevMap.entrySet()) {
+                    final String word = (String)pair.getKey();
+                    final int count = ((ProcWord)pair.getValue()).getCount();
+
+                    if (!curMap.containsKey(word)) {
+                        // Decrement the word
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                WordCloud.getInstance().addWord(word, -1 * count * mWordWeight);
+                            }
+                        });
+                    }
                 }
-            }
 
-            // Remove words that are no more
-            for (Map.Entry pair : prevMap.entrySet()) {
-                final String word = (String)pair.getKey();
-                final int count = ((ProcWord)pair.getValue()).getCount();
-
-                if (!curMap.containsKey(word)) {
-                    // Decrement the word
-                    mainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            WordCloud.getInstance().addWord(word, -1 * count * mWordWeight);
-                        }
-                    });
+                if (TYPE == PARTIAL_RESULTS) {
+                    prevMap = curMap;
+                } else if (TYPE == FINAL_RESULTS) {
+                    prevMap.clear();
                 }
-            }
-
-            if (TYPE == PARTIAL_RESULTS) {
-                prevMap = curMap;
-            } else if (TYPE == FINAL_RESULTS) {
-                prevMap.clear();
             }
         }
     }
@@ -201,5 +210,11 @@ public class Preprocessor {
 
         // Add to queue
         taskHandler.post(new ProcTask(resultString, type));
+    }
+
+    public void clearPrevious() {
+        synchronized (prevMap) {
+            prevMap.clear();
+        }
     }
 }

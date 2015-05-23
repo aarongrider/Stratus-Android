@@ -1,32 +1,40 @@
 package edu.spu.teamroot.voicecloud;
 
+import android.util.Log;
+
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class Blacklist {
+public class ExclusionList {
     /*
      * Static members
      */
 
-    private static Blacklist instance;
+    private static ExclusionList instance;
 
     /*
      * Static methods
      */
 
-    public static Blacklist createInstance() {
-        if (instance == null) {
-            instance = new Blacklist();
+    public static ExclusionList createInstance() {
+        Log.d("ExclusionList", "createInstance()");
+
+        if (instance != null) {
+            Log.d("ExclusionList", "createInstance -- Existing instance destroyed");
+            deleteInstance();
         }
 
+        instance = new ExclusionList();
         return instance;
     }
 
-    public static Blacklist getInstance() {
+    public static ExclusionList getInstance() {
         return instance;
     }
     public static void deleteInstance() {
+        Log.d("ExclusionList", "deleteInstance()");
+
         instance = null;
     }
 
@@ -35,13 +43,13 @@ public class Blacklist {
      */
 
     // String -- word name, Integer -- hit count
-    private Map<String, Integer> excludeList;
+    public Map<String, Integer> excludeList;
 
     /*
      * Constructors
      */
 
-    private Blacklist() {
+    private ExclusionList() {
         excludeList = new TreeMap<>();
     }
 
@@ -56,17 +64,17 @@ public class Blacklist {
 
     // Adds a word to the exclusion list.
     public void addWord(String word) {
-
+        excludeList.put(word, 1);
     }
 
     // Removes a word from the exclusion list.
     public void removeWord(String word) {
-
+        excludeList.remove(word);
     }
 
     // Checks if a word is in the exclusion list.
     // Also increments the hit count if a word is found.
-    public boolean isWordBlacklisted(String word) {
+    public boolean isWordExcluded(String word) {
         return false;
     }
 }

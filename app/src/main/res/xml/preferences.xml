@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="My Account">
+
+        <Preference
+            android:title="Username"
+            android:summary="rishabhp"
+            android:key="username" />
+
+        <EditTextPreference
+            android:title="Email"
+            android:summary="rishabh.pugalia@gmail.com"
+            android:key="email" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Advanced">
+
+        <CheckBoxPreference
+            android:title="Receive Notifications"
+            android:summary="Want to receive Push Notifications ?"
+            android:key="receiveNotifications"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Sub Screens">
+
+        <PreferenceScreen
+            android:key="voicemail_category"
+            android:title="Voicemail"
+            android:persistent="false">
+
+            <Preference
+                android:title="Provider"
+                android:summary="Airtel"
+                android:key="provider" />
+
+            <!-- and other preference objects ... -->
+
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
