@@ -8,10 +8,10 @@
     <string name="action_settings">Settings</string>
     <string name="about">About</string>
     <string name="agreement">
-            \t\t Voice Cloud was created by:\n\n
-            \t\t Isaac Wang, Aaron Grider, Van Nguyen\n\n
-            \t\t By using this app, you agree to the <a href="http://voicecloudapp.com">End User License Agreement</a>\n\n
-            \t\t Copyright \u00A9 2015 Team Root
+            Voice Cloud was created by:\n\n
+            Isaac Wang, Aaron Grider, Van Nguyen\n\n
+            By using this app, you agree to the <a href="http://voicecloudapp.com">End User License Agreement</a>\n\n
+            Copyright \u00A9 2015 Team Root
 
 
 </string>

@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ScaleGestureDetector;
@@ -410,13 +411,16 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } else if (id == R.id.view_exclude_list){
             Toast.makeText(this, "View Exclusion List", Toast.LENGTH_SHORT).show();
         }else if(id == R.id.action_about) {
-            final TextView textView = new TextView(this);
+           final TextView textView = new TextView(this);
             textView.setText(R.string.agreement);
+            textView.setPadding(50,5,5,5);
+
             textView.setMovementMethod(LinkMovementMethod.getInstance());
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("About");
             builder.setIcon(R.drawable.ic_launcher);
             builder.setView(textView);
+
 
             // Set up the buttons
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
