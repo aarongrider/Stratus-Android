@@ -21,6 +21,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -457,6 +459,29 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } else if (id == R.id.toggle_outlines) {
             WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
             cloudLayout.invalidate();
+        } else if(id == R.id.action_about) {
+           final TextView textView = new TextView(this);
+            textView.setText(R.string.agreement);
+            textView.setPadding(50, 50, 50, 0);
+
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("About");
+            builder.setIcon(R.drawable.ic_launcher);
+            builder.setView(textView);
+
+
+            // Set up the buttons
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+
+                    dialog.cancel();
+                }
+            });
+
+            builder.show();
         } else if (id == R.id.view_exclude_list) {
             openExclusion();
         }
