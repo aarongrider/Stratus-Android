@@ -413,7 +413,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         }else if(id == R.id.action_about) {
            final TextView textView = new TextView(this);
             textView.setText(R.string.agreement);
-            textView.setPadding(50,5,5,5);
+            textView.setPadding(50, 50, 50, 0);
 
             textView.setMovementMethod(LinkMovementMethod.getInstance());
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
