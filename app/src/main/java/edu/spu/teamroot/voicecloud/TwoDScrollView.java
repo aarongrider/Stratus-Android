@@ -1291,4 +1291,16 @@ public class TwoDScrollView extends FrameLayout {
     private void initScaleDetector(Context context) {
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
     }
+
+    public float getScaleFactor() {
+        return mScaleFactor;
+    }
+
+    public void setScaleFactor(float scaleFactor) {
+        mScaleFactor = scaleFactor;
+
+        View child = TwoDScrollView.this.getChildAt(0);
+        child.setScaleX(mScaleFactor);
+        child.setScaleY(mScaleFactor);
+    }
 }

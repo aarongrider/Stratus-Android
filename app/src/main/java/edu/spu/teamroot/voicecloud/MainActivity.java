@@ -94,8 +94,19 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         super.onSaveInstanceState(outState);
 
+        // Store WordCloud
         JSONObject obj = WordCloud.getInstance().toJSON();
         outState.putString("JSON", obj.toString());
+
+        // Store layout positions
+        Log.d("onSaveInstanceState", "ScaleFactor: " + scrollView.getScaleFactor() + " Scroll: (" + scrollView.getScrollX() + "," + scrollView.getScrollY() + ")");
+        Log.d("onSaveInstanceState", "Pivot: " + cloudLayout.getPivotX() + "," + cloudLayout.getPivotY());
+
+        outState.putFloat("PivotX", cloudLayout.getPivotX());
+        outState.putFloat("PivotY", cloudLayout.getPivotY());
+        outState.putFloat("ScaleFactor", scrollView.getScaleFactor());
+        outState.putInt("ScrollX", scrollView.getScrollX());
+        outState.putInt("ScrollY", scrollView.getScrollY());
     }
 
     @Override
@@ -104,6 +115,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         super.onRestoreInstanceState(savedInstanceState);
 
+        // Load WordCloud
         String json = savedInstanceState.getString("JSON");
 
         try {
@@ -111,6 +123,14 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        // Load layout positions
+        cloudLayout.setPivotX(savedInstanceState.getFloat("PivotX"));
+        cloudLayout.setPivotY(savedInstanceState.getFloat("PivotY"));
+        scrollView.setScaleFactor(savedInstanceState.getFloat("ScaleFactor"));
+        scrollView.scrollToWhenReady(
+                savedInstanceState.getInt("ScrollX"),
+                savedInstanceState.getInt("ScrollY"));
     }
 
     @Override
@@ -141,9 +161,11 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         scrollView.addView(cloudLayout, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
 
         // Move to center of the ScrollView
-        scrollView.scrollToWhenReady(
-                UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
-                UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2) );
+        if (savedInstanceState == null) {
+            scrollView.scrollToWhenReady(
+                    UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
+                    UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2));
+        }
 
         // Create new instances
         WordCloud.createInstance(context, cloudLayout);
@@ -238,7 +260,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 cloudLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        WordCloud.getInstance().addWord(word, new Random().nextInt(10) + 2);
+                        WordCloud.getInstance().addWord(word, new Random().nextInt(5) + 1);
                     }
                 }, i);
             }
