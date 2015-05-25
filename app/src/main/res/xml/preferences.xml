@@ -2,47 +2,78 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="My Account">
-
-        <Preference
-            android:title="Username"
-            android:summary="rishabhp"
-            android:key="username" />
+        android:title="Cloud">
 
         <EditTextPreference
-            android:title="Email"
-            android:summary="rishabh.pugalia@gmail.com"
-            android:key="email" />
+            android:title="Cloud Name"
+            android:summary="Name your word cloud"
+            android:key="name" />
 
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Advanced">
+        android:title="Input">
 
-        <CheckBoxPreference
-            android:title="Receive Notifications"
-            android:summary="Want to receive Push Notifications ?"
-            android:key="receiveNotifications"
+        <SwitchPreference
+            android:title="Filter Words"
+            android:key="exculsionList"
             android:defaultValue="true" />
 
+        <Preference
+            android:title="Open Word Filter"
+            android:key="openExclusion"
+            android:persistent="false">
+
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="edu.spu.teamroot.voicecloud"
+                android:targetClass="edu.spu.teamroot.voicecloud.ExclusionActivity"
+                />
+
+        </Preference>
+
+        <Preference
+            android:title="Weighting"
+            android:summary="Default"
+            android:enabled="false"
+            android:key="weighting" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="Sub Screens">
+        android:title="Visuals">
 
-        <PreferenceScreen
-            android:key="voicemail_category"
-            android:title="Voicemail"
-            android:persistent="false">
+        <SwitchPreference
+            android:title="Outline"
+            android:summary="Toggle outlines for word cloud"
+            android:key="outline"
+            android:defaultValue="false" />
 
-            <Preference
-                android:title="Provider"
-                android:summary="Airtel"
-                android:key="provider" />
+        <ListPreference
+            android:title="Colors"
+            android:summary="Default"
+            android:entries="@array/Colors"
+            android:entryValues="@array/ColorsData"
+            android:key="themes" />
 
-            <!-- and other preference objects ... -->
+    </PreferenceCategory>
 
-        </PreferenceScreen>
+    <PreferenceCategory
+        android:title="More">
+
+        <Preference
+            android:title="Cloud Web"
+            android:summary="Voice Cloud on the web"
+            android:key="website">
+
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="http://voicecloudapp.com" />
+
+        </Preference>
+
+        <Preference
+            android:title="About"
+            android:key="about" />
 
     </PreferenceCategory>
 

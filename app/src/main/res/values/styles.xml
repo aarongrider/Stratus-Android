@@ -14,7 +14,7 @@
 
     <style name="SettingsTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/teal</item>
-        <item name="colorPrimaryDark">@color/cyan</item>
+        <item name="colorPrimaryDark">@color/tealDark</item>
         <!-- Customize your theme here. -->
     </style>
 

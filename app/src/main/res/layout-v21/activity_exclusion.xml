@@ -4,18 +4,23 @@
                 android:layout_height="match_parent"
                 tools:context="edu.spu.teamroot.voicecloud.ExclusionActivity">
 
-    <ImageButton
+    <Button
         android:id="@+id/add_button"
         android:layout_width="@dimen/round_button_diameter"
         android:layout_height="@dimen/round_button_diameter"
-        android:layout_gravity="end|bottom"
+        android:layout_gravity="right|bottom"
+        android:text="+"
+        android:textSize="40sp"
         android:layout_marginBottom="24dp"
         android:layout_marginRight="24dp"
         android:tint="@android:color/white"
         android:background="@drawable/oval_ripple_add"
+        android:fontFamily="sans-serif-light"
+        android:textColor="@color/accentWhite"
         android:scaleType="fitXY"
+        android:paddingBottom="5dp"
+        android:layout_alignParentEnd="true"
         android:elevation="@dimen/elevation_low"
-        android:src="@mipmap/add_icon"
         android:stateListAnimator="@anim/button_elevation"
         tools:ignore="RtlCompat"
         android:longClickable="true"/>

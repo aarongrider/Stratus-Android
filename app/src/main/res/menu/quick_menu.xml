@@ -1,27 +1,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
-    <item android:id="@+id/view_exclude_list"
-          android:title="@string/view_exclude_list"
-          android:orderInCategory="100"
-          app:showAsAction="never" />
     <item android:id="@+id/save_cloud" android:title="@string/save_cloud"
           android:orderInCategory="200"
           app:showAsAction="never" />
     <item android:id="@+id/load_cloud" android:title="@string/load_cloud"
           android:orderInCategory="300"
           app:showAsAction="never" />
-    <item android:id="@+id/save_screen" android:title="Save Screenshot"
+    <item android:id="@+id/save_screen" android:title="@string/screenshot"
         android:orderInCategory="400"
         app:showAsAction="never" />
-    <item android:id="@+id/toggle_outlines" android:title="Toggle Outlines"
+    <item android:id="@+id/view_exclude_list"
+          android:title="@string/exclusion_activity"
           android:orderInCategory="500"
           app:showAsAction="never" />
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+    <item android:id="@+id/action_settings" android:title="@string/settings"
         android:orderInCategory="600"
-        app:showAsAction="never" />
-    <item android:id="@+id/action_about" android:title="@string/about"
-        android:orderInCategory="700"
         app:showAsAction="never" />
 
 </menu>

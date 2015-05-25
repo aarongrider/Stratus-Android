@@ -239,7 +239,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             @Override
             public void onClick(View v) {
             PopupMenu popup = new PopupMenu(v.getContext(), v);
-            popup.inflate(R.menu.menu_main);
+            popup.inflate(R.menu.quick_menu);
             popup.show();
             popup.setOnMenuItemClickListener(MainActivity.this);
             }
@@ -327,7 +327,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.quick_menu, menu);
         return true;
     }
 
@@ -478,32 +478,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 }
             }.start();
 
-        } else if (id == R.id.toggle_outlines) {
-            WordCloud.getInstance().setShowOutline(!WordCloud.getInstance().getShowOutline());
-            cloudLayout.invalidate();
-        } else if(id == R.id.action_about) {
-           final TextView textView = new TextView(this);
-            textView.setText(R.string.agreement);
-            textView.setPadding(50, 50, 50, 0);
-
-            textView.setMovementMethod(LinkMovementMethod.getInstance());
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("About");
-            builder.setIcon(R.drawable.ic_launcher);
-            builder.setView(textView);
-
-
-            // Set up the buttons
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-
-                    dialog.cancel();
-                }
-            });
-
-            builder.show();
         } else if (id == R.id.view_exclude_list) {
             openExclusion();
         }

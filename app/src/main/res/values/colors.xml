@@ -8,6 +8,7 @@
     <color name="blue">#039be5</color>
     <color name="cyan">#00bcd4</color>
     <color name="teal">#009688</color>
+    <color name="tealDark">#ff006c61</color>
     <color name="green">#4caf50</color>
     <color name="greenLight">#8bc34a</color>
     <color name="lime">#cddc39</color>
