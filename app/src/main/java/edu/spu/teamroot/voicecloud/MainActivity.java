@@ -67,7 +67,10 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d("ServiceConnection", "onServiceConnected(" + name + "," + service + ")");
 
+            Log.d("MainActivity", "Old mServiceMessenger is " + ((mServiceMessenger == null) ? "null" : mServiceMessenger.toString()));
             mServiceMessenger = new Messenger(service);
+            Log.d("MainActivity", "New mServiceMessenger is " + mServiceMessenger.toString());
+
             Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
 
             try {
@@ -91,8 +94,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d("MainActivity", "onSaveInstanceState(" + outState + ")");
-
         super.onSaveInstanceState(outState);
 
         // Save play/pause state
@@ -113,6 +114,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         outState.putFloat("ScaleFactor", scrollView.getScaleFactor());
         outState.putInt("ScrollX", scrollView.getScrollX());
         outState.putInt("ScrollY", scrollView.getScrollY());
+
+        Log.d("MainActivity", "onSaveInstanceState(" + outState + ")");
 
         // Cache bundle in cloud instance for safe keeping
         WordCloud.getInstance().pushSavedBundle(outState);
@@ -187,11 +190,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         WordCloud.createInstance(context, cloudLayout);
         ExclusionList.createInstance();
         Preprocessor.createInstance();
-
-        // Start SpeechRecognitionService
-        final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
-        this.startService(speechRecognitionService);
-        mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
 
         mainButton = (ImageButton)findViewById(R.id.main_button);
         mainButton.setOnClickListener(new View.OnClickListener() {
@@ -292,7 +290,14 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         }
 
-        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
+        // Start SpeechRecognitionService
+        ///*
+        final Intent speechRecognitionService = new Intent(this, SpeechRecognitionService.class);
+        this.startService(speechRecognitionService);
+        //mBindFlag = Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH ? 0 : Context.BIND_ABOVE_CLIENT;
+        //*/
+
+        bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, BIND_AUTO_CREATE | BIND_ABOVE_CLIENT);
     }
 
     @Override
@@ -311,6 +316,15 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     protected void onResume() {
         Log.d("MainActivity", "onResume()");
         super.onResume();
+
+        if (mServiceMessenger != null) {
+            try {
+                mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING));
+                isRunning = true; // Now we are running
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -330,26 +344,25 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         Log.d("MainActivity", "onDestroy()");
         super.onDestroy();
 
-        ///*
+        /*
         if (mServiceMessenger != null) {
             Log.d("MainActivity", "mServiceMessenger is " + mServiceMessenger.toString());
 
             // Try to stop the service
             try {
                 mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
-            }
-            catch (RemoteException e) {
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
 
             mServiceMessenger = null;
         } else {
-            Log.d("MainActivity", "mServiceMessenger is null!");
+            Log.d("MainActivity", "mServiceMessenger is already null!");
         }
-
-        // Unbind our connection
-        unbindService(mServiceConnection);
         //*/
+
+        // Unbind our connection (must be done everytime--avoids leaks!)
+        unbindService(mServiceConnection);
 
         // Perform final cleanup
         if (isFinishing()) {
