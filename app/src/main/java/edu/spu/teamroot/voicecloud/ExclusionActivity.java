@@ -4,14 +4,18 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.InputType;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +28,7 @@ public class ExclusionActivity extends ActionBarActivity {
      */
 
     ListView mListView;
+    Button mAddButton;
     ArrayAdapter<String> adapter;
     List<String> wordArrayList;
 
@@ -49,6 +54,14 @@ public class ExclusionActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> arg0, View arg1,
                                     int position, long arg3) {
                 removeItemFromList(position);
+            }
+        });
+
+        mAddButton = (Button) findViewById(R.id.add_button);
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openAdd();
             }
         });
     }
@@ -96,35 +109,37 @@ public class ExclusionActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        //noinspection SimplifiableIfStatement
-        //if (id == R.id.action_add) {
-        //    openAdd();
-        //}
-
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                finish();
+                return true;
+        }
         return super.onOptionsItemSelected(item);
     }
     void openAdd()
     {
         AlertDialog.Builder addalert = new AlertDialog.Builder(ExclusionActivity.this);
-
         LayoutInflater inflater = this.getLayoutInflater();
 
-        final View v = inflater.inflate(R.layout.exclusion_add, null);
+        addalert.setTitle("Add Word");
 
-        final EditText et = (EditText)v.findViewById(R.id.add_item);
+        // Set up the input
+        final EditText et = new EditText(ExclusionActivity.this);
+        et.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 30);
+        et.setPadding(50, 50, 50, 50);
+        addalert.setView(et);
 
-        addalert.setView(v);
-        addalert.setTitle("Exclusion List");
         addalert.setPositiveButton("ADD", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
                 String input = et.getText().toString();
                 if(null!=input&&input.length()>0){
+                    // Add word to exclusion list
+                    ExclusionList.getInstance().addWord(input);
+                    
+                    // Add word to local list
                     wordArrayList.add(input);
                     adapter.notifyDataSetChanged();
                 }
@@ -133,7 +148,6 @@ public class ExclusionActivity extends ActionBarActivity {
         addalert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
                 dialog.dismiss();
 
             }

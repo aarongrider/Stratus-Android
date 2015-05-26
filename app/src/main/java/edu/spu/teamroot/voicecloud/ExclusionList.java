@@ -75,6 +75,6 @@ public class ExclusionList {
     // Checks if a word is in the exclusion list.
     // Also increments the hit count if a word is found.
     public boolean isWordExcluded(String word) {
-        return false;
+        return excludeList.containsKey(word);
     }
 }
