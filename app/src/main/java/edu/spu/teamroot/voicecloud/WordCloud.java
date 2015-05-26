@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
@@ -37,12 +38,13 @@ public class WordCloud {
     public static WordCloud createInstance(Context context, RelativeLayout layout) {
         Log.d("WordCloud", "createInstance(" + context + ", " + layout + ")");
 
-        if (instance != null) {
-            Log.d("WordCloud", "createInstance -- Existing instance destroyed");
-            deleteInstance();
+        if (instance == null) {
+            instance = new WordCloud(context, layout);
+        } else {
+            Log.d("WordCloud", "createInstance -- Existing instance found; reloading...");
+            instance.reloadInstance(context, layout);
         }
 
-        instance = new WordCloud(context, layout);
         return instance;
     }
 
@@ -74,6 +76,8 @@ public class WordCloud {
 
     private boolean showOutline = false;
 
+    private Bundle savedBundle = null;
+
     /*
      * Constructors
      */
@@ -104,6 +108,33 @@ public class WordCloud {
 
         wordTreeRoot.setBounds(new Rect(width / 2, height / 2, width / 2, height / 2));
         Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
+    }
+
+    /*
+     * Instance state helpers
+     */
+
+    public void reloadInstance(Context newContext, RelativeLayout newLayout) {
+        WordCloud.layout.removeAllViews();
+        WordCloud.layout = newLayout;
+
+        for (Word word : wordList.values()) {
+            if (word.isAttached()) {
+                WordCloud.layout.addView(word.button, word.layoutParams);
+            }
+        }
+    }
+
+    // Retrieves a saved bundle from the cloud instance.
+    public Bundle popSavedBundle() {
+        Bundle bundle = savedBundle;
+        savedBundle = null;
+        return bundle;
+    }
+
+    // Stores a bundle with the cloud instance.
+    public void pushSavedBundle(Bundle bundle) {
+        savedBundle = new Bundle(bundle);
     }
 
     /*

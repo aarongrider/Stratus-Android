@@ -65,6 +65,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d("ServiceConnection", "onServiceConnected(" + name + "," + service + ")");
 
             mServiceMessenger = new Messenger(service);
             Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
@@ -94,9 +95,14 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         super.onSaveInstanceState(outState);
 
+        // Save play/pause state
+        outState.putBoolean("isRunning", isRunning);
+
         // Store WordCloud
+        /*
         JSONObject obj = WordCloud.getInstance().toJSON();
         outState.putString("JSON", obj.toString());
+        */
 
         // Store layout positions
         Log.d("onSaveInstanceState", "ScaleFactor: " + scrollView.getScaleFactor() + " Scroll: (" + scrollView.getScrollX() + "," + scrollView.getScrollY() + ")");
@@ -107,6 +113,9 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         outState.putFloat("ScaleFactor", scrollView.getScaleFactor());
         outState.putInt("ScrollX", scrollView.getScrollX());
         outState.putInt("ScrollY", scrollView.getScrollY());
+
+        // Cache bundle in cloud instance for safe keeping
+        WordCloud.getInstance().pushSavedBundle(outState);
     }
 
     @Override
@@ -116,6 +125,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         super.onRestoreInstanceState(savedInstanceState);
 
         // Load WordCloud
+        /*
         String json = savedInstanceState.getString("JSON");
 
         try {
@@ -123,6 +133,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        */
 
         // Load layout positions
         cloudLayout.setPivotX(savedInstanceState.getFloat("PivotX"));
@@ -139,6 +150,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // TODO Refactor onCreate to be cleaner (organize by initialize views, save/load, SRS, etc.)
 
         // Get screen size
         Display display = getWindowManager().getDefaultDisplay();
@@ -166,6 +179,9 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                     UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
                     UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2));
         }
+
+        // Are we creating a new WordCloud instance?
+        boolean isNewCloud = (WordCloud.getInstance() == null);
 
         // Create new instances
         WordCloud.createInstance(context, cloudLayout);
@@ -246,7 +262,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         });
 
         ///* Tests for running on emulator
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && isNewCloud) {
             final String words[] = {
                     "voice", "cloud", "is", "an", "android", "application", "designed", "to",
                     "visualize", "conversation", "analyze", "communication", "and", "enhance", "learning",
@@ -266,6 +282,15 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         }
         //*/
+
+        // Load state from saved bundle
+        if (savedInstanceState == null && !isNewCloud) {
+            Bundle savedBundle = WordCloud.getInstance().popSavedBundle();
+
+            if (savedBundle != null) {
+                onRestoreInstanceState(savedBundle);
+            }
+        }
 
         bindService(new Intent(this, SpeechRecognitionService.class), mServiceConnection, mBindFlag);
     }
@@ -305,19 +330,40 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         Log.d("MainActivity", "onDestroy()");
         super.onDestroy();
 
-        /*
-        try {
-            mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
-        }
-        catch (RemoteException e) {
-            e.printStackTrace();
+        ///*
+        if (mServiceMessenger != null) {
+            Log.d("MainActivity", "mServiceMessenger is " + mServiceMessenger.toString());
+
+            // Try to stop the service
+            try {
+                mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_SERVICE_KILL));
+            }
+            catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            mServiceMessenger = null;
+        } else {
+            Log.d("MainActivity", "mServiceMessenger is null!");
         }
 
-        if (mServiceMessenger != null) {
-            unbindService(mServiceConnection);
-            mServiceMessenger = null;
-        }
+        // Unbind our connection
+        unbindService(mServiceConnection);
         //*/
+
+        // Perform final cleanup
+        if (isFinishing()) {
+            Log.d("MainActivity", "Performing final cleanup...");
+            Log.d("MainActivity", "Deleting singleton instances");
+
+            WordCloud.deleteInstance();
+            ExclusionList.deleteInstance();
+            UnitConverter.deleteInstance();
+            Preprocessor.deleteInstance();
+
+            Log.d("MainActivity", "Stopping service");
+            stopService(new Intent(this, SpeechRecognitionService.class));
+        }
     }
 
     /*

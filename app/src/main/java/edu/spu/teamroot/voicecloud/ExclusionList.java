@@ -20,12 +20,12 @@ public class ExclusionList {
     public static ExclusionList createInstance() {
         Log.d("ExclusionList", "createInstance()");
 
-        if (instance != null) {
-            Log.d("ExclusionList", "createInstance -- Existing instance destroyed");
-            deleteInstance();
+        if (instance == null) {
+            instance = new ExclusionList();
+        } else {
+            Log.d("ExclusionList", "createInstance -- Existing instance found");
         }
 
-        instance = new ExclusionList();
         return instance;
     }
 
