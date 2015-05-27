@@ -4,20 +4,28 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListPopupWindow;
 import android.widget.ListView;
+import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -336,56 +344,53 @@ public class Word extends WordGroup {
         return name;
     }
 
+
     private void wordActions(final Word word) {
 
-        // WordActions custom dialog
-        final Dialog dialog = new Dialog(WordCloud.context);
-        dialog.setContentView(R.layout.word_action_dialog);
-        String dialogTitle = word.getName().toUpperCase();
-        dialog.setTitle(dialogTitle);
+        final ListPopupWindow popupWindow = new ListPopupWindow(WordCloud.context);
+        //String wordName = word.getName().toUpperCase();
 
-        ListView listView = (ListView) dialog.findViewById(R.id.listView);
+        popupWindow.setHeight(450);
+        popupWindow.setWidth(500);
+        popupWindow.setAnchorView(button);
 
         ArrayList<HashMap<String, String>> dataList = new ArrayList<>();
         HashMap<String, String> curItemMap;
 
         curItemMap = new HashMap<>();
         curItemMap.put("id", "count");
-        curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
+        //curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
         curItemMap.put("iconText", Integer.toString(word.getCount()));
         curItemMap.put("label", word.getCount() == 1 ? "Occurrence" : "Occurrences");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-
-        // Find count per minute
-        double countPerMinute = word.getCount() / ((System.currentTimeMillis() - WordCloud.getInstance().getTimestamp()) / 60000.0);
-
-        curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
-        curItemMap.put("iconText", countPerMinute>=10?String.format("%d", (int)countPerMinute):String.format("%.1f", countPerMinute));
-        curItemMap.put("label", countPerMinute==1?"Occurrence Per Minute":"Occurrences Per Minute");
+        double countPerMinute = word.getCount() / ((System.currentTimeMillis() - WordCloud.getInstance().getTimestamp()) / 60000.0); // Find count per minute
+        //curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
+        curItemMap.put("iconText", countPerMinute >= 10 ? String.format("%d", (int) countPerMinute) : String.format("%.1f", countPerMinute));
+        curItemMap.put("label", countPerMinute == 1 ? "Occurrence Per Minute" : "Occurrences Per Minute");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
+        //curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
         curItemMap.put("iconText", "");
         curItemMap.put("label", "Search with Google");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
+        //curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
         curItemMap.put("iconText", "");
         curItemMap.put("label", "Lookup on Wikipedia");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.dictionary_icon));
+        //curItemMap.put("icon", String.valueOf(R.mipmap.dictionary_icon));
         curItemMap.put("iconText", "");
         curItemMap.put("label", "Define in Dictionary");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
+        //curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
         curItemMap.put("iconText", "");
         curItemMap.put("label", "Remove from Word Cloud");
         dataList.add(curItemMap);
@@ -433,16 +438,16 @@ public class Word extends WordGroup {
                     // Add word to exclusion list
                     ExclusionList.getInstance().addWord(word.getName());
 
-                    dialog.dismiss();
+                    popupWindow.dismiss();
 
                 }
             }
         };
 
-        listView.setAdapter(simpleAdapter);
-        listView.setOnItemClickListener(listener);
+        popupWindow.setAdapter(simpleAdapter);
+        popupWindow.setOnItemClickListener(listener);
 
-        dialog.show();
+        popupWindow.show();
     }
 
 }

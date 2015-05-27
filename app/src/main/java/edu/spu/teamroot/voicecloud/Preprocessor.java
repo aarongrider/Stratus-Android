@@ -5,12 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import java.util.Map;
-import java.util.Queue;
 import java.util.TreeMap;
-
-/**
- * Created by aarongrider on 5/2/15.
- */
 
 public class Preprocessor {
     public static class ResultTask {

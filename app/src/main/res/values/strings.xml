@@ -4,7 +4,7 @@
     <string name="app_name">Voice Cloud</string>
     <string name="save_cloud">Save</string>
     <string name="load_cloud">Load</string>
-    <string name="exclusion_activity">Word Filter</string>
+    <string name="exclusion_activity">Exclusion List</string>
     <string name="screenshot">Screenshot</string>
     <string name="settings">Settings</string>
 
