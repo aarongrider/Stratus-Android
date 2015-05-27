@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/action_count"
+        android:title="Count"/>
+
+    <item
+        android:id="@+id/action_count_per_min"
+        android:title="Count Per Minute"/>
+
+    <item
+        android:id="@+id/action_google"
+        android:title="Google"/>
+
+    <item
+        android:id="@+id/action_wiki"
+        android:title="Wikipedia"/>
+
+    <item
+        android:id="@+id/action_dict"
+        android:title="Dictionary"/>
+
+    <item
+        android:id="@+id/action_remove"
+        android:title="Remove"/>
+
+</menu>

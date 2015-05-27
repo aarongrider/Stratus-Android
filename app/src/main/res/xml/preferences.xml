@@ -53,6 +53,7 @@
             android:title="Colors"
             android:summary="Default"
             android:entries="@array/Colors"
+            android:enabled="false"
             android:entryValues="@array/ColorsData"
             android:key="themes" />
 
