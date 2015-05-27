@@ -19,12 +19,13 @@
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="@dimen/main_button_margin"
         android:tint="@android:color/white"
-        android:background="@drawable/oval"
+        android:background="@drawable/oval_primary_selector"
         android:src="@drawable/vc_pause"
         android:scaleType="fitXY"
         tools:ignore="RtlCompat"
         android:longClickable="true"
-        android:padding="20dp" />
+        android:padding="20dp"
+        />
 
     <ImageButton
         android:id="@+id/reset_button"

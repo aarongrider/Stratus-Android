@@ -20,7 +20,7 @@
         android:layout_marginBottom="24dp"
         android:layout_marginRight="24dp"
         android:tint="@android:color/white"
-        android:background="@drawable/oval_add"
+        android:background="@drawable/oval_add_selector"
         android:fontFamily="sans-serif-light"
         android:textColor="@color/accentWhite"
         android:scaleType="fitXY"

@@ -16,7 +16,7 @@
               android:src="@drawable/ic_launcher"
               android:layout_marginBottom="10dp"
               android:orientation="horizontal"
-              android:background="@drawable/oval"/>
+              android:background="@drawable/oval_primary_selector"/>
 
         <ImageView
             android:id="@+id/icon"

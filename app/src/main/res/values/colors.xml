@@ -5,6 +5,7 @@
     <color name="accentBlackTransparent">#7f141414</color>
     <color name="accentBlack">#ff141414</color>
     <color name="button">#ff2765e5</color>
+    <color name="buttonDark">#ff1d4bab</color>
     <color name="blue">#ff039be5</color>
     <color name="cyan">#ff00bcd4</color>
     <color name="teal">#ff009688</color>

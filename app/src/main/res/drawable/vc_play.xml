@@ -5,4 +5,4 @@
     android:width="48dp"
     android:antialias="true"
     android:gravity="center"
-    android:src="@android:drawable/ic_media_play" />
+    android:src="@drawable/vc_play_icon" />
