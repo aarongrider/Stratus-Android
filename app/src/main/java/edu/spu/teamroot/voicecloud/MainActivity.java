@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -71,10 +72,12 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             mServiceMessenger = new Messenger(service);
             Log.d("MainActivity", "New mServiceMessenger is " + mServiceMessenger.toString());
 
-            Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
-
             try {
-                mServiceMessenger.send(startMessage);
+                if (isRunning) {
+                    mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING));
+                } else {
+                    mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_STOP_LISTENING));
+                }
             }
             catch (RemoteException e) {
                 e.printStackTrace();
@@ -126,6 +129,9 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         Log.d("MainActivity", "onRestoreInstanceState(" + savedInstanceState + ")");
 
         super.onRestoreInstanceState(savedInstanceState);
+
+        // Load play/pause state (do not animate when loading state)
+        setRunning(savedInstanceState.getBoolean("isRunning"), false);
 
         // Load WordCloud
         /*
@@ -195,40 +201,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImageButton button = (ImageButton)v;
-                if (isRunning) {
-                    isRunning = false; // Now we are paused
-
-                    // Stop listening
-                    Message stopMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_STOP_LISTENING);
-                    try {
-                        mServiceMessenger.send(stopMessage);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                    button.setImageResource(R.drawable.avd_pause2play);
-
-                    Animatable anim = (Animatable)button.getDrawable();
-                    if (anim != null) {
-                        anim.start();
-                    }
-                } else {
-                    isRunning = true; // Now we are running
-                    Message startMessage = Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING);
-                    try {
-                        mServiceMessenger.send(startMessage);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-
-                    button.setImageResource(R.drawable.avd_play2pause);
-
-                    Animatable anim = (Animatable)button.getDrawable();
-                    if (anim != null) {
-                        anim.start();
-                    }
-                }
+                MainActivity.this.setRunning(!isRunning);
             }
         });
 
@@ -236,15 +209,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 WordCloud.getInstance().clear();
-                //WordCloud.deleteInstance();
-                //Blacklist.deleteInstance();
-                //UnitConverter.deleteInstance();
-
-                //Intent intent = getIntent();
-                //finish();
-                //startActivity(intent);
             }
         });
 
@@ -252,10 +217,10 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            PopupMenu popup = new PopupMenu(v.getContext(), v);
-            popup.inflate(R.menu.quick_menu);
-            popup.show();
-            popup.setOnMenuItemClickListener(MainActivity.this);
+                PopupMenu popup = new PopupMenu(v.getContext(), v);
+                popup.inflate(R.menu.quick_menu);
+                popup.setOnMenuItemClickListener(MainActivity.this);
+                popup.show();
             }
         });
 
@@ -317,14 +282,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         Log.d("MainActivity", "onResume()");
         super.onResume();
 
-        if (mServiceMessenger != null) {
-            try {
-                mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING));
-                isRunning = true; // Now we are running
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
+        // Restore running state (sometimes can get out of sync)
+        setRunning(isRunning, false);
     }
 
     @Override
@@ -557,4 +516,53 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         startActivity(intent);
     }
 
+    public void setRunning(boolean running) {
+        setRunning(running, true);
+    }
+
+    public void setRunning(boolean running, boolean animate) {
+        isRunning = running;
+
+        if (isRunning) {
+            // Start SRS
+            if (mServiceMessenger != null) {
+                try {
+                    mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_START_LISTENING));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (animate) {
+                mainButton.setImageResource(R.drawable.avd_play2pause);
+
+                Animatable anim = (Animatable) mainButton.getDrawable();
+                if (anim != null) {
+                    anim.start();
+                }
+            } else {
+                mainButton.setImageResource(R.drawable.vc_pause);
+            }
+        } else {
+            // Stop SRS
+            if (mServiceMessenger != null) {
+                try {
+                    mServiceMessenger.send(Message.obtain(null, SpeechRecognitionService.MSG_RECOGNIZER_STOP_LISTENING));
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if (animate) {
+                mainButton.setImageResource(R.drawable.avd_pause2play);
+
+                Animatable anim = (Animatable) mainButton.getDrawable();
+                if (anim != null) {
+                    anim.start();
+                }
+            } else {
+                mainButton.setImageResource(R.drawable.vc_play);
+            }
+        }
+    }
 }
