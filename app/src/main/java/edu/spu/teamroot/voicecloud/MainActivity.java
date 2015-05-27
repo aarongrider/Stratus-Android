@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ShapeDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -46,6 +47,7 @@ import java.util.Random;
 
 public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuItemClickListener {
     public static final String VC_PATH = Environment.getExternalStorageDirectory() + "/VoiceCloud/";
+    public static final String VC_SCREENSHOTS_PATH = VC_PATH + "/Screenshots/";
 
     private static Toast lastToast;
 
@@ -472,22 +474,28 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                         final String filename = "Cloud_" + date + ".png";
 
                         // Try to create directory
-                        File folder = new File(VC_PATH);
-                        folder.mkdir();
+                        File folder = new File(VC_SCREENSHOTS_PATH);
+                        folder.mkdirs();
 
                         // Try to create file
-                        File file = new File(VC_PATH + "Cloud-" + date + ".png");
+                        File file = new File(VC_SCREENSHOTS_PATH + "Cloud-" + date + ".png");
                         file.createNewFile();
 
                         FileOutputStream outStream = new FileOutputStream(file);
                         bmp.compress(Bitmap.CompressFormat.PNG, 100, outStream);
                         outStream.close();
 
+                        // Add screenshot to gallery
+                        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                        Uri contentUri = Uri.fromFile(file);
+                        mediaScanIntent.setData(contentUri);
+                        sendBroadcast(mediaScanIntent);
+
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 saveToast.cancel();
-                                Toast.makeText(MainActivity.this, "Saved screenshot to:\n" + VC_PATH + filename, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(MainActivity.this, "Saved screenshot to photo gallery:\n" + filename, Toast.LENGTH_LONG).show();
                             }
                         });
                     } catch (Exception e) {
