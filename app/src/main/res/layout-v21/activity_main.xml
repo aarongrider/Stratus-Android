@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
+    <edu.spu.teamroot.voicecloud.TwoDScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/WordCloudScrollView"
+        android:layout_gravity="center_horizontal" />
+
     <ImageButton
         android:id="@+id/main_button"
         android:layout_width="@dimen/round_button_diameter"
@@ -49,11 +55,5 @@
         android:elevation="@dimen/elevation_low"
         android:stateListAnimator="@anim/button_elevation"
         tools:ignore="RtlCompat" />
-
-    <edu.spu.teamroot.voicecloud.TwoDScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/WordCloudScrollView"
-        android:layout_gravity="center_horizontal" />
 
 </FrameLayout>

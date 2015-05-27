@@ -230,7 +230,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
-        /* Tests for running on emulator
+        ///* Tests for running on emulator
         if (savedInstanceState == null && isNewCloud) {
             final String words[] = {
                     "voice", "cloud", "is", "an", "android", "application", "designed", "to",
@@ -245,7 +245,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 cloudLayout.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        WordCloud.getInstance().addWord(word, new Random().nextInt(5) + 1);
+                        WordCloud.getInstance().addWord(word, new Random().nextInt(1) + 1);
                     }
                 }, i);
             }
@@ -527,6 +527,12 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     }
 
     public void setRunning(boolean running, boolean animate) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            // Vector transformation animations not supported!
+            Log.d("setRunning", "Vector animations not supported by SDK version!");
+            animate = false;
+        }
+
         isRunning = running;
 
         if (isRunning) {

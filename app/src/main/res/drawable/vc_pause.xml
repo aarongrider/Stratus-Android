@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bitmap
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="48dp"
+    android:width="48dp"
+    android:antialias="true"
+    android:gravity="center"
+    android:src="@android:drawable/ic_media_pause" />

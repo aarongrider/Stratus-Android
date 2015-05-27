@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -86,9 +87,14 @@ public class Word extends WordGroup {
             button = new Button(WordCloud.context);
             button.setVisibility(View.INVISIBLE);
 
-            button.setText(name);
+            button.setText(name.toUpperCase());
             button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
-            button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
+            } else {
+                button.setBackgroundColor(WordCloud.getInstance().weighter.getWordColor(this));
+            }
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override

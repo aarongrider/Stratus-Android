@@ -20,14 +20,11 @@
         android:layout_marginBottom="24dp"
         android:layout_marginRight="24dp"
         android:tint="@android:color/white"
-        android:background="@drawable/oval_ripple_add"
+        android:background="@drawable/oval_add"
         android:fontFamily="sans-serif-light"
         android:textColor="@color/accentWhite"
         android:scaleType="fitXY"
         android:paddingBottom="5dp"
-        android:layout_alignParentEnd="true"
-        android:elevation="@dimen/elevation_low"
-        android:stateListAnimator="@anim/button_elevation"
         tools:ignore="RtlCompat"
         android:longClickable="true"/>
 </FrameLayout>
