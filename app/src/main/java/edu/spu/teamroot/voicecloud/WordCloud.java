@@ -31,6 +31,8 @@ public class WordCloud {
     public static Context context;
     public static RelativeLayout layout; // The layout containing all word views
 
+    public static final int PADDING = 20;
+
     /*
      * Static methods
      */
@@ -94,20 +96,7 @@ public class WordCloud {
         wordTreeRoot = new WordGroup();
         timestamp = System.currentTimeMillis();
 
-        int width, height;
-
-        if (layout.getWidth() == 0 && layout.getHeight() == 0) {
-            // The layout does not have a size... it likely has not been drawn yet.
-            // We can use the layout params to get the initial size at least
-            width = UnitConverter.getInstance().toDp(layout.getLayoutParams().width);
-            height = UnitConverter.getInstance().toDp(layout.getLayoutParams().height);
-        } else {
-            width = UnitConverter.getInstance().toDp(layout.getWidth());
-            height = UnitConverter.getInstance().toDp(layout.getHeight());
-        }
-
-        wordTreeRoot.setBounds(new Rect(width / 2, height / 2, width / 2, height / 2));
-        Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
+        initRootBounds();
     }
 
     /*
@@ -140,6 +129,18 @@ public class WordCloud {
     /*
      * Methods
      */
+
+    public void initRootBounds() {
+        int width, height;
+
+        // The layout does not have a size... it likely has not been drawn yet.
+        // We can use the layout params to get the initial size at least
+        width = UnitConverter.getInstance().toDp(layout.getLayoutParams().width);
+        height = UnitConverter.getInstance().toDp(layout.getLayoutParams().height);
+
+        wordTreeRoot.setBounds(new Rect(width / 2, height / 2, width / 2, height / 2));
+        Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
+    }
 
     public void addWord(String word) {
         addWord(word, 1);
@@ -317,8 +318,19 @@ public class WordCloud {
         word.parent.repositionChild(word, initialPlacement);
 
         // Now, reposition parent group within the root.
-        // If size <= 1, give it an initial position (once we get more children, we cannot move around as much)
+        // If size <= 1, give it an initial position
         wordTreeRoot.repositionChild(word.parent, word.parent.children.size() <= 1);
+
+        // Check if words are too close to edge
+        boolean leftOffscreen = wordTreeRoot.bounds.left < PADDING;
+        boolean topOffscreen = wordTreeRoot.bounds.top < PADDING;
+
+        if (leftOffscreen || topOffscreen) {
+            int dx = leftOffscreen ? (-wordTreeRoot.bounds.left + PADDING) : 0;
+            int dy = topOffscreen ? (-wordTreeRoot.bounds.top + PADDING) : 0;
+
+            wordTreeRoot.moveBy(dx, dy);
+        }
     }
 
     // Removes a word, permanently deleting it from the word cloud.
@@ -359,6 +371,9 @@ public class WordCloud {
 
         // Update timestamp
         timestamp = System.currentTimeMillis();
+
+        // Reset bounds for cloud to original layout
+        initRootBounds();
     }
 
     public boolean isWordInCloud(String name) {

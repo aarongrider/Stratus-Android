@@ -115,6 +115,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         outState.putFloat("PivotX", cloudLayout.getPivotX());
         outState.putFloat("PivotY", cloudLayout.getPivotY());
         outState.putFloat("ScaleFactor", scrollView.getScaleFactor());
+
+        // Save scroll position relative to center
         outState.putInt("ScrollX", scrollView.getScrollX());
         outState.putInt("ScrollY", scrollView.getScrollY());
 
@@ -148,6 +150,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         cloudLayout.setPivotX(savedInstanceState.getFloat("PivotX"));
         cloudLayout.setPivotY(savedInstanceState.getFloat("PivotY"));
         scrollView.setScaleFactor(savedInstanceState.getFloat("ScaleFactor"));
+
         scrollView.scrollToWhenReady(
                 savedInstanceState.getInt("ScrollX"),
                 savedInstanceState.getInt("ScrollY"));
@@ -176,17 +179,20 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         // Create a RelativeLayout element
         cloudLayout = new WordCloudLayout(this);
+        // Add extra padding along the bottom and right so words are not squished
+        cloudLayout.setPadding(0, 0, UnitConverter.getInstance().toPx(WordCloud.PADDING), UnitConverter.getInstance().toPx(WordCloud.PADDING * 4));
 
         // Add the RelativeLayout element to the ScrollView
-        int scrollViewWidth = 3000;
-        int scrollViewHeight = 3000;
-        scrollView.addView(cloudLayout, UnitConverter.getInstance().toPx(scrollViewWidth), UnitConverter.getInstance().toPx(scrollViewHeight));
+        int sideLength = Math.max(size.x, size.y);
+        int scrollViewWidth = (int)(sideLength * 1.5);
+        int scrollViewHeight = (int)(sideLength * 1.5);
+        scrollView.addView(cloudLayout, scrollViewWidth, scrollViewHeight);
 
         // Move to center of the ScrollView
         if (savedInstanceState == null) {
             scrollView.scrollToWhenReady(
-                    UnitConverter.getInstance().toPx(scrollViewWidth / 2) - (size.x / 2),
-                    UnitConverter.getInstance().toPx(scrollViewHeight / 2) - (size.y / 2));
+                    (scrollViewWidth / 2) - (size.x / 2),
+                    (scrollViewHeight / 2) - (size.y / 2));
         }
 
         // Are we creating a new WordCloud instance?
@@ -224,7 +230,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
-        ///* Tests for running on emulator
+        /* Tests for running on emulator
         if (savedInstanceState == null && isNewCloud) {
             final String words[] = {
                     "voice", "cloud", "is", "an", "android", "application", "designed", "to",

@@ -471,7 +471,7 @@ public class TwoDScrollView extends FrameLayout {
                         deltaX = 0;
                     }
                 } else if (deltaX > 0) {
-                    final int rightEdge = (int)(mScaleFactor * getWidth()) - getPaddingRight();
+                    final int rightEdge = getWidth() - getPaddingRight();
                     final int availableToScroll = getChildAt(0).getRight() - getScrollX() - rightEdge;
                     if (availableToScroll > 0) {
                         deltaX = Math.min(availableToScroll, deltaX);
@@ -484,7 +484,7 @@ public class TwoDScrollView extends FrameLayout {
                         deltaY = 0;
                     }
                 } else if (deltaY > 0) {
-                    final int bottomEdge = (int)(mScaleFactor * getHeight()) - getPaddingBottom();
+                    final int bottomEdge = getHeight() - getPaddingBottom();
                     final int availableToScroll = getChildAt(0).getBottom() - getScrollY() - bottomEdge;
                     if (availableToScroll > 0) {
                         deltaY = Math.min(availableToScroll, deltaY);
