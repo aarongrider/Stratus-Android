@@ -2,18 +2,14 @@ package edu.spu.teamroot.voicecloud;
 
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
-import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.LightingColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.LinearInterpolator;
@@ -21,12 +17,8 @@ import android.view.animation.ScaleAnimation;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListPopupWindow;
-import android.widget.ListView;
-import android.widget.PopupMenu;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,11 +82,13 @@ public class Word extends WordGroup {
             button.setText(name.toUpperCase());
             button.setTextColor(WordCloud.context.getResources().getColor(android.R.color.white));
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
-            } else {
-                button.setBackgroundColor(WordCloud.getInstance().weighter.getWordColor(this));
+            // If older than Lollipop, use custom button Drawable
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                button.setTypeface(null, Typeface.BOLD);
+                button.setBackground(WordCloud.context.getResources().getDrawable(R.drawable.word_drawable));
             }
+
+            setColor(WordCloud.getInstance().weighter.getWordColor(this));
 
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -241,7 +235,7 @@ public class Word extends WordGroup {
         Log.d(name, "Count: " + count + " Size: " + WordCloud.getInstance().weighter.getTextSize(this));
 
         // Calculate new color based on count (or part of speech)
-        button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, WordCloud.getInstance().weighter.getWordColor(this)));
+        setColor(WordCloud.getInstance().weighter.getWordColor(this));
 
         // Update bounds with new button size
         button.measure(WordCloud.layout.getWidth(), WordCloud.layout.getHeight());
@@ -285,6 +279,15 @@ public class Word extends WordGroup {
             button.clearAnimation();
             button.setAnimation(anim);
             button.animate();
+        }
+    }
+
+    private void setColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, color));
+        } else {
+            // Compatible buttons are solid white, so multiply color
+            button.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         }
     }
 

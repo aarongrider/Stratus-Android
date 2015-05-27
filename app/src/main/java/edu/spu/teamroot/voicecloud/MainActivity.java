@@ -230,7 +230,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             }
         });
 
-        ///* Tests for running on emulator
+        /* Tests for running on emulator
         if (savedInstanceState == null && isNewCloud) {
             final String words[] = {
                     "voice", "cloud", "is", "an", "android", "application", "designed", "to",
