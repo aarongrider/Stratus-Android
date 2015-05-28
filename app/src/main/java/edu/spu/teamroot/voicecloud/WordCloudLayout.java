@@ -3,11 +3,7 @@ package edu.spu.teamroot.voicecloud;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 
 public class WordCloudLayout extends RelativeLayout {
     public WordCloudLayout(Context context) {

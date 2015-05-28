@@ -25,7 +25,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
     @Override
     protected JSONObject doInBackground(JSONObject... data) {
 
-        String url = baseURL;
+        String url;
 
         if (data[0].has("cloud")) url = baseURL + "/save";
         else url = baseURL + "/load.json";
@@ -38,7 +38,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
         HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), 100000);
 
         // Initialize return data object
-        InputStream inputStream = null;
+        InputStream inputStream;
         String result = "";
 
         HttpPost httpPost = new HttpPost(url);
@@ -85,7 +85,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
+        String line;
         String result = "";
         while((line = bufferedReader.readLine()) != null)
             result += line;

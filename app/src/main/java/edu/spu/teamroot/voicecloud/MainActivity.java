@@ -58,7 +58,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     private boolean isRunning = true;
 
-    private int mBindFlag;
     private Messenger mServiceMessenger;
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 

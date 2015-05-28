@@ -14,7 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.acl.Group;
 import java.sql.Timestamp;
 import java.util.Deque;
 import java.util.Iterator;
@@ -80,6 +79,8 @@ public class WordCloud {
 
     private Bundle savedBundle = null;
 
+    private Paint paint;
+
     /*
      * Constructors
      */
@@ -95,6 +96,9 @@ public class WordCloud {
         groupSize = 0;
         wordTreeRoot = new WordGroup();
         timestamp = System.currentTimeMillis();
+
+        paint = new Paint();
+        paint.setStyle(Paint.Style.STROKE);
 
         initRootBounds();
     }
@@ -393,7 +397,7 @@ public class WordCloud {
             JSONObject result = transmitter.get();
             String cloudID = result.getString("cloudid");
 
-            if (cloudID != "") return cloudID;
+            if (cloudID.length() > 0) return cloudID;
             else return "none";
 
         } catch (Exception e) {
@@ -455,7 +459,7 @@ public class WordCloud {
         // Iterate through WordList and add to Json object
         for (int i = 0; i < wordTreeRoot.children.size(); i++) {
             // Get current word
-            WordGroup currGroup = (WordGroup) wordTreeRoot.children.get(i);
+            WordGroup currGroup = wordTreeRoot.children.get(i);
 
             // Create JSON Object for word
             JSONObject group = new JSONObject();
@@ -621,9 +625,7 @@ public class WordCloud {
     public void onDraw(Canvas canvas) {
         if (!showOutline) return;
 
-        Paint paint = new Paint();
         paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(4.0f);
 
         for (WordGroup group : wordTreeRoot.children) {

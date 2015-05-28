@@ -48,7 +48,7 @@ public class SettingsActivity extends ActionBarActivity {
             // Load the preferences from an XML resource
             addPreferencesFromResource(R.xml.preferences);
 
-            Preference about = (Preference) findPreference("about");
+            Preference about = findPreference("about");
             about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {

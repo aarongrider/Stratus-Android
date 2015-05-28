@@ -91,15 +91,15 @@ public class SpeechRecognitionService extends Service {
     }
 
     public static class VoiceHandler extends Handler {
-        private WeakReference<SpeechRecognitionService> mtarget;
+        private WeakReference<SpeechRecognitionService> mTarget;
 
         VoiceHandler(SpeechRecognitionService target) {
-            mtarget = new WeakReference<>(target);
+            mTarget = new WeakReference<>(target);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            final SpeechRecognitionService target = mtarget.get();
+            final SpeechRecognitionService target = mTarget.get();
 
             switch (msg.what) {
                 case MSG_RECOGNIZER_START_LISTENING:
@@ -122,7 +122,7 @@ public class SpeechRecognitionService extends Service {
                     Log.d(TAG, "Stopped Recognizer");
 
                     // Clear previous results
-                    mtarget.get().mPreprocessor.clearPrevious();
+                    mTarget.get().mPreprocessor.clearPrevious();
 
                     target.mSpeechRecognizer.cancel();
                     target.mIsListening = false;

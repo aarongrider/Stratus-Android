@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 

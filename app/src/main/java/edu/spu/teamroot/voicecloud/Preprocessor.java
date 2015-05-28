@@ -8,16 +8,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Preprocessor {
-    public static class ResultTask {
-        protected String result;
-        protected int type;
-
-        public ResultTask(String result, int type) {
-            this.result = result;
-            this.type = type;
-        }
-    }
-
     /*
      * Static members
      */
@@ -80,8 +70,6 @@ public class Preprocessor {
 
     private Handler mainHandler = new Handler();
     private Handler taskHandler;
-
-    private Thread taskThread;
 
     private class ProcTask implements Runnable {
 
@@ -184,7 +172,7 @@ public class Preprocessor {
 
         Log.d("Preprocessor", "Preprocessor created");
 
-        taskThread = new Thread() {
+        Thread taskThread = new Thread() {
             @Override
             public void run() {
                 Looper.prepare();

@@ -43,8 +43,8 @@ public class ExclusionActivity extends ActionBarActivity {
 
         mListView = (ListView) findViewById(R.id.exclusionList);
 
-        wordArrayList = new ArrayList<String>(ExclusionList.getInstance().excludeList.keySet());
-        adapter = new ArrayAdapter<String>(this, R.layout.exclusion_row, wordArrayList);
+        wordArrayList = new ArrayList<>(ExclusionList.getInstance().excludeList.keySet());
+        adapter = new ArrayAdapter<>(this, R.layout.exclusion_row, wordArrayList);
         mListView.setAdapter(adapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
