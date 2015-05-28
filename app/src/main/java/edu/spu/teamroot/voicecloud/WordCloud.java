@@ -517,13 +517,19 @@ public class WordCloud {
                 // Add word json to words array
                 words.put(word);
 
-                // Add layout and words array to master json object
-                cloud.put("words", words);
-                cloud.put("groups", groups);
-                saveObj.put("cloud", cloud);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+        }
+
+        // Add layout and words array to master json object
+        try {
+            saveObj.put("cloud", cloud);
+            cloud.put("words", words);
+            cloud.put("groups", groups);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
 
         return saveObj;
