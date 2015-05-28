@@ -19,15 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExclusionActivity extends ActionBarActivity {
-
     /*
      * Member variables
      */
 
-    ListView mListView;
-    Button mAddButton;
-    ArrayAdapter<String> adapter;
-    List<String> wordArrayList;
+    private ListView mListView;
+    private Button mAddButton;
+    private ArrayAdapter<String> adapter;
+    private List<String> wordArrayList;
 
     /*
      * Methods
@@ -35,10 +34,12 @@ public class ExclusionActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         this.setTheme(R.style.ExclusionTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exclusion);
+
+        // Don't load here... will wipe out hit counts. Instead, only load on creation of MainActivity
+        //ExclusionList.getInstance().load();
 
         mListView = (ListView) findViewById(R.id.exclusionList);
 
@@ -61,6 +62,12 @@ public class ExclusionActivity extends ActionBarActivity {
                 openAdd();
             }
         });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        ExclusionList.getInstance().save();
     }
 
     protected void removeItemFromList(final int position) {
@@ -86,16 +93,12 @@ public class ExclusionActivity extends ActionBarActivity {
         alert.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
                 dialog.dismiss();
             }
         });
 
         alert.show();
-
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -114,7 +117,8 @@ public class ExclusionActivity extends ActionBarActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-    void openAdd()
+
+    private void openAdd()
     {
         AlertDialog.Builder addalert = new AlertDialog.Builder(ExclusionActivity.this);
         final LayoutInflater inflater = this.getLayoutInflater();

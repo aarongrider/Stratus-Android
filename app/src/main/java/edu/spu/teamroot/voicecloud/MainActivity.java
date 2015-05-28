@@ -11,7 +11,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +22,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.text.InputType;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
@@ -33,23 +31,21 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Random;
 
 public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuItemClickListener {
-    public static final String VC_PATH = Environment.getExternalStorageDirectory() + "/VoiceCloud/";
-    public static final String VC_SCREENSHOTS_PATH = VC_PATH + "/Screenshots/";
+    public static final String VC_EXT_PATH = Environment.getExternalStorageDirectory() + "/VoiceCloud/";
+    public static final String VC_SCREENSHOTS_PATH = VC_EXT_PATH + "/Screenshots/";
 
     private static Toast lastToast;
+
+    private static final int EXIT_DELAY = 3000;
+    private boolean exitPressed = false;
 
     private ImageButton mainButton;
     private ImageButton resetButton;
@@ -202,9 +198,13 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
         // Create new instances
         WordCloud.createInstance(context, cloudLayout);
-        ExclusionList.createInstance();
-        Preprocessor.createInstance();
+        ExclusionList.createInstance(context);
 
+        if (savedInstanceState == null && isNewCloud) {
+            ExclusionList.getInstance().load();
+        }
+
+        // Set button onClick handlers
         mainButton = (ImageButton)findViewById(R.id.main_button);
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,10 +225,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         menuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popup = new PopupMenu(v.getContext(), v);
-                popup.inflate(R.menu.quick_menu);
-                popup.setOnMenuItemClickListener(MainActivity.this);
-                popup.show();
+                showMenu();
             }
         });
 
@@ -304,6 +301,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     protected void onStop() {
         Log.d("MainActivity", "onStop()");
         super.onStop();
+
+        ExclusionList.getInstance().save();
     }
 
     @Override
@@ -339,7 +338,6 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             WordCloud.deleteInstance();
             ExclusionList.deleteInstance();
             UnitConverter.deleteInstance();
-            Preprocessor.deleteInstance();
 
             Log.d("MainActivity", "Stopping service");
             stopService(new Intent(this, SpeechRecognitionService.class));
@@ -351,25 +349,34 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
      */
 
     @Override
+    public void onBackPressed() {
+        if (exitPressed) {
+            lastToast.cancel();
+            super.onBackPressed();
+        } else {
+            exitPressed = true;
+            showToast("Press again to exit", Toast.LENGTH_LONG);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    exitPressed = false;
+                }
+            }, EXIT_DELAY);
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.quick_menu, menu);
+        //getMenuInflater().inflate(R.menu.quick_menu, menu);
+        showMenu();
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        // Pass selected items to menu item click listener
+        return onMenuItemClick(item);
     }
 
     @Override
@@ -383,8 +390,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         if (id == R.id.action_settings) {
             openSettings();
         } else if (id == R.id.save_cloud) {
-
-            Toast.makeText(this, "Saving Cloud...", Toast.LENGTH_SHORT).show();
+            showToast("Saving Cloud...", Toast.LENGTH_SHORT);
 
             String title;
             String message;
@@ -432,9 +438,11 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                 public void onClick(DialogInterface dialog, int which) {
 
                     // Load cloud
-                    Toast.makeText(MainActivity.this, "Loading Cloud...", Toast.LENGTH_SHORT).show();
-                    if (!WordCloud.getInstance().loadWordCloud(input.getText().toString()))
-                        Toast.makeText(MainActivity.this, "Loading Cloud Failed", Toast.LENGTH_SHORT).show();
+                    showToast("Loading Cloud...", Toast.LENGTH_SHORT);
+
+                    if (!WordCloud.getInstance().loadWordCloud(input.getText().toString())) {
+                        showToast("Loading Cloud Failed", Toast.LENGTH_SHORT);
+                    }
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -446,8 +454,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
             builder.show();
         } else if (id == R.id.save_screen) {
-            final Toast saveToast = Toast.makeText(this, "Saving screenshot...", Toast.LENGTH_LONG);
-            saveToast.show();
+            showToast("Saving screenshot...", Toast.LENGTH_LONG);
 
             final Handler mainHandler = new Handler();
 
@@ -494,16 +501,14 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                saveToast.cancel();
-                                Toast.makeText(MainActivity.this, "Saved screenshot to photo gallery:\n" + filename, Toast.LENGTH_LONG).show();
+                                showToast("Saved screenshot to photo gallery:\n" + filename, Toast.LENGTH_LONG);
                             }
                         });
                     } catch (Exception e) {
                         mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                saveToast.cancel();
-                                Toast.makeText(MainActivity.this, "Error saving screenshot!", Toast.LENGTH_SHORT).show();
+                                showToast("Error saving screenshot!", Toast.LENGTH_SHORT);
                             }
                         });
                     }
@@ -517,15 +522,28 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         return false;
     }
 
-    public void openExclusion()
-    {
-        Intent intent = new Intent(this, ExclusionActivity.class);
-        startActivity(intent);
+    // Shows a toast message, removing old toasts if needed.
+    public Toast showToast(String message, int duration) {
+        if (lastToast != null) lastToast.cancel();
+        lastToast = Toast.makeText(this, message, duration);
+        lastToast.show();
 
+        return lastToast;
     }
 
-    public void openSettings()
-    {
+    public void showMenu() {
+        PopupMenu popup = new PopupMenu(menuButton.getContext(), menuButton);
+        popup.inflate(R.menu.quick_menu);
+        popup.setOnMenuItemClickListener(MainActivity.this);
+        popup.show();
+    }
+
+    public void openExclusion() {
+        Intent intent = new Intent(this, ExclusionActivity.class);
+        startActivity(intent);
+    }
+
+    public void openSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
