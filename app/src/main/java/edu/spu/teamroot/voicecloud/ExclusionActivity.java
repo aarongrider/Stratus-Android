@@ -121,9 +121,9 @@ public class ExclusionActivity extends ActionBarActivity {
     private void openAdd()
     {
         AlertDialog.Builder addalert = new AlertDialog.Builder(ExclusionActivity.this);
-        LayoutInflater inflater = this.getLayoutInflater();
+        final LayoutInflater inflater = this.getLayoutInflater();
 
-        addalert.setTitle("Add Word");
+        addalert.setTitle("Add Words");
 
         // Set up the input
         final EditText et = new EditText(ExclusionActivity.this);
@@ -136,12 +136,21 @@ public class ExclusionActivity extends ActionBarActivity {
             public void onClick(DialogInterface dialog, int which) {
 
                 String input = et.getText().toString();
-                if(null!=input&&input.length()>0){
-                    // Add word to exclusion list
-                    ExclusionList.getInstance().addWord(input);
-                    
-                    // Add word to local list
-                    wordArrayList.add(input);
+                if (null != input && input.length() > 0) {
+
+                    // Split up input string into words
+                    String[] words = input.toLowerCase().split(" ");
+
+                    // Add words entered to exclusion list
+                    for (String word : words) {
+                        // Clean up words and remove punctuation
+                        word = word.replaceAll("[,.!\n ]", "");
+                        if (!word.isEmpty()) {
+                            ExclusionList.getInstance().addWord(word);
+                            wordArrayList.add(word);
+                        }
+                    }
+
                     adapter.notifyDataSetChanged();
                 }
             }

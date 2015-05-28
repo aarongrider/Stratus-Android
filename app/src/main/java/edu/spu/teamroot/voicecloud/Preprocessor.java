@@ -102,7 +102,7 @@ public class Preprocessor {
 
             // Make map of words
             for (String curPart : currBuff) {
-                final String word = curPart.trim();
+                final String word = curPart.replaceAll("[,.!\n ]", "");
 
                 if (!word.isEmpty()) {
                     // TODO Part of speech identification
