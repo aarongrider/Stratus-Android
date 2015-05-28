@@ -359,8 +359,15 @@ public class Word extends WordGroup {
         final ListPopupWindow popupWindow = new ListPopupWindow(WordCloud.context);
         //String wordName = word.getName().toUpperCase();
 
-        popupWindow.setHeight(450);
-        popupWindow.setWidth(500);
+        // ListPopupWindow Dimensions
+        // DP to Pixel
+        int dpsHeight = 230;
+        int dpsWidth = 200;
+        float scale = WordCloud.context.getResources().getDisplayMetrics().density;
+
+        // Set Dimensions
+        popupWindow.setHeight((int)(dpsHeight * scale + 0.5f));
+        popupWindow.setWidth((int) (dpsWidth * scale + 0.5f));
         popupWindow.setAnchorView(button);
 
         ArrayList<HashMap<String, String>> dataList = new ArrayList<>();

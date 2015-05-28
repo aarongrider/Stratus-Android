@@ -53,6 +53,7 @@
         android:layout_height="fill_parent"
         android:text="@+id/label"
         android:gravity="center_vertical"
+        android:paddingRight="15dp"
         android:textColor="#99000000">
     </TextView>
 
