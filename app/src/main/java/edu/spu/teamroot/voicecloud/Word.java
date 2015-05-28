@@ -447,7 +447,6 @@ public class Word extends WordGroup {
 
                 // Remove from Word Cloud
                 if (position == 5) {
-
                     // Remove word from cloud
                     WordCloud.getInstance().removeWord(word);
 
@@ -455,7 +454,6 @@ public class Word extends WordGroup {
                     ExclusionList.getInstance().addWord(word.getName());
 
                     popupWindow.dismiss();
-
                 }
             }
         };

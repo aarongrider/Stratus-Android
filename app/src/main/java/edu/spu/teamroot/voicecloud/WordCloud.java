@@ -192,8 +192,6 @@ public class WordCloud {
         attachWord(word);
         repositionWord(word, true);
         word.show();
-
-        treeSize++;
     }
 
     private void hideWord(Word word) {
@@ -201,8 +199,6 @@ public class WordCloud {
 
         word.hide();
         detachWord(word);
-
-        treeSize--;
     }
 
     private void evaluateAllWords() {
@@ -285,6 +281,8 @@ public class WordCloud {
         if (group.children.size() < groupSize) {
             freeGroups.addFirst(group);
         }
+
+        treeSize++;
     }
 
     protected void detachWord(Word word) {
@@ -308,6 +306,8 @@ public class WordCloud {
         if (group.children.size() < groupSize && !freeGroups.contains(group)) {
             freeGroups.addFirst(group);
         }
+
+        treeSize--;
     }
 
     // Repositions a word inside a group.
@@ -437,8 +437,8 @@ public class WordCloud {
 
         // Create layout JSON Object
         JSONObject cloud = new JSONObject();
-        int width = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().width);
-        int height = UnitConverter.getInstance().toDp(this.layout.getLayoutParams().height);
+        int width = UnitConverter.getInstance().toDp(layout.getLayoutParams().width);
+        int height = UnitConverter.getInstance().toDp(layout.getLayoutParams().height);
         String timestamp = new Timestamp(this.getTimestamp()).toString();
 
         try {
