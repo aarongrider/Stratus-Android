@@ -71,8 +71,6 @@ public class ExclusionActivity extends ActionBarActivity {
     }
 
     protected void removeItemFromList(final int position) {
-        final int deletePosition = position;
-
         AlertDialog.Builder alert = new AlertDialog.Builder(
                 ExclusionActivity.this);
 
@@ -82,7 +80,7 @@ public class ExclusionActivity extends ActionBarActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                String word = wordArrayList.get(deletePosition);
+                String word = wordArrayList.get(position);
                 wordArrayList.remove(word);
                 ExclusionList.getInstance().removeWord(word);
                 adapter.notifyDataSetChanged();
@@ -136,7 +134,7 @@ public class ExclusionActivity extends ActionBarActivity {
             public void onClick(DialogInterface dialog, int which) {
 
                 String input = et.getText().toString();
-                if (null != input && input.length() > 0) {
+                if (input.length() > 0) {
 
                     // Split up input string into words
                     String[] words = input.toLowerCase().split(" ");
@@ -144,10 +142,21 @@ public class ExclusionActivity extends ActionBarActivity {
                     // Add words entered to exclusion list
                     for (String word : words) {
                         // Clean up words and remove punctuation
-                        word = word.replaceAll("[,.!\n ]", "");
-                        if (!word.isEmpty()) {
-                            ExclusionList.getInstance().addWord(word);
-                            wordArrayList.add(word);
+                        word = word.replaceAll("[^\\w\\d'-]", "");
+
+                        boolean hasChars = word.replaceAll("['-]", "").length() > 0;
+
+                        if (hasChars) {
+                            if (ExclusionList.getInstance().addWord(word)) {
+                                // If word is not already in the list
+                                wordArrayList.add(word);
+
+                                // Dynamically remove word from cloud
+                                Word wordObj = WordCloud.getInstance().getWord(word);
+                                if (wordObj != null) {
+                                    WordCloud.getInstance().removeWord(wordObj);
+                                }
+                            }
                         }
                     }
 

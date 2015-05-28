@@ -138,9 +138,14 @@ public class ExclusionList {
         return excludeList.entrySet().iterator();
     }
 
-    // Adds a word to the exclusion list.
-    public void addWord(String word) {
+    // Adds a word to the exclusion list. Returns false if word was already in the list.
+    public boolean addWord(String word) {
+        if (excludeList.containsKey(word)) {
+            return false;
+        }
+
         excludeList.put(word, 1);
+        return true;
     }
 
     // Removes a word from the exclusion list.

@@ -102,9 +102,12 @@ public class Preprocessor {
 
             // Make map of words
             for (String curPart : currBuff) {
-                final String word = curPart.replaceAll("[,.!\n ]", "");
+                final String word = curPart.replaceAll("[^\\w\\d'-]", "");
 
-                if (!word.isEmpty()) {
+                // Now, replace the special characters we are keeping and make sure it's not *just* special characters.
+                boolean hasChars = word.replaceAll("['-]", "").length() > 0;
+
+                if (hasChars) {
                     // TODO Part of speech identification
 
                     if (!ExclusionList.getInstance().isWordExcluded(word)) {
