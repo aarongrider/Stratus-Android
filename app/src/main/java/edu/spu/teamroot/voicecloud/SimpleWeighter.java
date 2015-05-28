@@ -17,8 +17,8 @@ public class SimpleWeighter implements WordWeighter {
 
     @Override
     public int getTextSize(Word word) {
-        // Minimum size of word is 20
-        return (int) (20 + Math.pow(word.getCount(), 2));
+        // Minimum size of word is 20 + our weighting
+        return (int) (20 + (Math.log10(word.getCount()) * 80));
     }
 
     @Override
