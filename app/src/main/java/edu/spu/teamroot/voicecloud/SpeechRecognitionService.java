@@ -57,7 +57,7 @@ public class SpeechRecognitionService extends Service {
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
         mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 
-        mPreprocessor = Preprocessor.getInstance();
+        mPreprocessor = Preprocessor.createInstance();
 
         // Create notification
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
@@ -94,7 +94,7 @@ public class SpeechRecognitionService extends Service {
         private WeakReference<SpeechRecognitionService> mtarget;
 
         VoiceHandler(SpeechRecognitionService target) {
-            mtarget = new WeakReference<SpeechRecognitionService>(target);
+            mtarget = new WeakReference<>(target);
         }
 
         @Override
@@ -156,6 +156,11 @@ public class SpeechRecognitionService extends Service {
 
         if (mSpeechRecognizer != null) {
             mSpeechRecognizer.destroy();
+        }
+
+        if (mPreprocessor != null) {
+            mPreprocessor = null;
+            Preprocessor.deleteInstance();
         }
     }
 

@@ -104,6 +104,8 @@ public class WordCloud {
      */
 
     public void reloadInstance(Context newContext, RelativeLayout newLayout) {
+        context = newContext;
+
         WordCloud.layout.removeAllViews();
         WordCloud.layout = newLayout;
 
