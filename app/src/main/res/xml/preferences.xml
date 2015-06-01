@@ -64,11 +64,21 @@
 
         <Preference
             android:title="Cloud Web"
-            android:summary="Voice Cloud on the web"
+            android:summary="View your word cloud on the web"
             android:key="website">
 
             <intent android:action="android.intent.action.VIEW"
                     android:data="http://voicecloudapp.com" />
+
+        </Preference>
+
+        <Preference
+            android:title="Getting Started"
+            android:summary="Learn the basics of Voice Cloud"
+            android:key="website">
+
+            <intent android:action="android.intent.action.VIEW"
+                    android:data="https://youtu.be/_PdIatjV2E8" />
 
         </Preference>
 

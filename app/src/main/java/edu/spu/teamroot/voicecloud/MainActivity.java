@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -392,29 +393,42 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             showToast("Saving Cloud...", Toast.LENGTH_SHORT);
 
             String title;
-            String message;
-            String cloudID = WordCloud.getInstance().saveWordCloud();
+            String message = "Save Word Cloud";
+            final String cloudID = WordCloud.getInstance().saveWordCloud();
 
             if (cloudID.equals("none")) {
                 title = "Not Saved :(";
-                message = "Your word cloud could not be saved. We couldn't talk with the server. Do you have an internet connection?";
+                message = "We couldn't talk with the server. Do you have an internet connection?";
             }
             else {
                 title = "Saved Successfully!";
-                message = "CLOUDID: " + cloudID;
+                message = cloudID;
             }
 
             AlertDialog.Builder builder = new AlertDialog.Builder(WordCloud.context);
             builder.setMessage(message)
                     .setTitle(title)
-                    .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setNegativeButton("Dismiss", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            //do things
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("View on Web", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            String url = "http://voicecloudapp.com/WordCloud/cloudview/" + cloudID;
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                            dialog.dismiss();
                         }
                     });
+
             AlertDialog alert = builder.create();
             alert.show();
+
+            // Set text size
+            TextView textView = (TextView) alert.findViewById(android.R.id.message);
+            textView.setTextSize(40);
 
             return true;
         } else if (id == R.id.load_cloud) {
