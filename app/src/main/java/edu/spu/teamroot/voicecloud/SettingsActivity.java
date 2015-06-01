@@ -87,6 +87,17 @@ public class SettingsActivity extends ActionBarActivity {
                     return value;
                 }
             });
+
+            final SwitchPreference exclusionList = (SwitchPreference) findPreference("exclusionList");
+            exclusionList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    boolean value = !Preprocessor.getInstance().exclusionEnabled;
+                    exclusionList.setChecked(value);
+                    Preprocessor.getInstance().exclusionEnabled = value;
+                    return value;
+                }
+            });
         }
 
         @Override

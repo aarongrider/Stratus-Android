@@ -16,11 +16,11 @@
 
         <SwitchPreference
             android:title="Filter Words"
-            android:key="exculsionList"
+            android:key="exclusionList"
             android:defaultValue="true" />
 
         <Preference
-            android:title="Open Word Filter"
+            android:title="Open Exclusion List"
             android:key="openExclusion"
             android:persistent="false">
 

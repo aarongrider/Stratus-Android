@@ -2,6 +2,7 @@ package edu.spu.teamroot.voicecloud;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Preprocessor {
     static final int PARTIAL_RESULTS = 0;
     static final int FINAL_RESULTS = 1;
 
+    protected static boolean exclusionEnabled;
 
     /*
      * Static methods
@@ -29,6 +31,9 @@ public class Preprocessor {
             Log.d("Preprocessor", "createInstance -- Existing instance destroyed");
             deleteInstance();
         }
+
+        // Get and set exclusionEnabled from preferences
+        exclusionEnabled = PreferenceManager.getDefaultSharedPreferences(WordCloud.context).getBoolean("exclusionList", true);
 
         instance = new Preprocessor();
         return instance;
@@ -96,9 +101,10 @@ public class Preprocessor {
                 boolean hasChars = word.replaceAll("['-]", "").length() > 0;
 
                 if (hasChars) {
+
                     // TODO Part of speech identification
 
-                    if (!ExclusionList.getInstance().isWordExcluded(word)) {
+                    if (!exclusionEnabled | !ExclusionList.getInstance().isWordExcluded(word)) {
                         ProcWord wordObj = curMap.get(word);
 
                         if (wordObj == null) {

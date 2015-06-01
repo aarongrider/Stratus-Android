@@ -1,12 +1,14 @@
 package edu.spu.teamroot.voicecloud;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.RelativeLayout;
 
@@ -75,7 +77,7 @@ public class WordCloud {
 
     private long timestamp;
 
-    private boolean showOutline = false;
+    private boolean showOutline;
 
     private Bundle savedBundle = null;
 
@@ -96,6 +98,9 @@ public class WordCloud {
         groupSize = 0;
         wordTreeRoot = new WordGroup();
         timestamp = System.currentTimeMillis();
+
+        // Get and set outline state
+        showOutline = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("outline", true);
 
         paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
