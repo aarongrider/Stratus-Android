@@ -18,7 +18,7 @@ public class SimpleWeighter implements WordWeighter {
     @Override
     public int getTextSize(Word word) {
 
-        // Word weighting
+        // Word Growth
         int wordWeight = 20; // Initial word size
         int n = 10; // Vertical stretch
         int m = 10; // Horizontal stretch
