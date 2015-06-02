@@ -35,13 +35,16 @@ public class SpeechRecognitionService extends Service {
     public boolean mIsListening = false;
 
     static final int MSG_RECOGNIZER_START_LISTENING = 1;
-    static final int MSG_RECOGNIZER_STOP_LISTENING = 2;
-    static final int MSG_SERVICE_KILL = 3;
+    static final int MSG_RECOGNIZER_PAUSE_LISTENING = 2;
+    static final int MSG_RECOGNIZER_STOP_LISTENING = 3;
+    static final int MSG_SERVICE_KILL = 4;
 
     static final int PARTIAL_RESULTS = 0;
     static final int FINAL_RESULTS = 1;
 
-    protected int mId;
+    private static final int NOTIFY_ID = 1;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
 
     private static final String TAG = "SRS";
 
@@ -60,11 +63,12 @@ public class SpeechRecognitionService extends Service {
         mPreprocessor = Preprocessor.createInstance();
 
         // Create notification
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+        mBuilder = new NotificationCompat.Builder(this)
+                        .setOngoing(true)
                         .setSmallIcon(R.drawable.vc_icon_solid)
                         .setColor(getResources().getColor(R.color.button))
-                        .setContentTitle("Voice Cloud")
-                        .setContentText("Voice Cloud Started!");
+                        .setContentTitle("Voice Cloud is running")
+                        .setContentText("Touch to open app");
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MainActivity.class);
@@ -85,10 +89,7 @@ public class SpeechRecognitionService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT
             );
         mBuilder.setContentIntent(resultPendingIntent);
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // mId allows you to update the notification later on.
-        mNotificationManager.notify(mId, mBuilder.build());
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     public static class VoiceHandler extends Handler {
@@ -104,22 +105,23 @@ public class SpeechRecognitionService extends Service {
 
             switch (msg.what) {
                 case MSG_RECOGNIZER_START_LISTENING:
-                    target.mIsListening = false;
-
                     Log.d(TAG, "Start Recognizer");
+                    target.showNotification();
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         // Turn off beep sound
                         mAudioManager.setStreamMute(AudioManager.STREAM_VOICE_CALL, true);
                         mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
                     }
-                    if (!target.mIsListening) {
-                        Log.d(TAG, "Start listening");
-                        target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
-                        target.mIsListening = true;
-                    }
+
+                    Log.d(TAG, "Start listening");
+                    target.mSpeechRecognizer.startListening(target.mSpeechRecognizerIntent);
+                    target.mIsListening = true;
+
                     break;
                 case MSG_RECOGNIZER_STOP_LISTENING:
+                    target.hideNotification();
+                case MSG_RECOGNIZER_PAUSE_LISTENING:
                     Log.d(TAG, "Stopped Recognizer");
 
                     // Clear previous results
@@ -144,8 +146,8 @@ public class SpeechRecognitionService extends Service {
 
     @Override
     public void onDestroy() {
-
         Log.d(TAG, "SRS destroy");
+        hideNotification();
 
         // Turn sounds back on
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -178,9 +180,7 @@ public class SpeechRecognitionService extends Service {
 
         @Override
         public void onReadyForSpeech(Bundle params) {
-            
             Log.d(TAG, "onReadyForSpeech");
-
         }
 
         @Override
@@ -241,7 +241,7 @@ public class SpeechRecognitionService extends Service {
 
             // Cancel any current recognition processes and start over
             try {
-                mServerMessenger.send(Message.obtain(null, MSG_RECOGNIZER_STOP_LISTENING));
+                mServerMessenger.send(Message.obtain(null, MSG_RECOGNIZER_PAUSE_LISTENING));
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
@@ -271,12 +271,10 @@ public class SpeechRecognitionService extends Service {
             } else {
                 Log.d(TAG, "onPartialResults failed to convert");
             }
-
         }
 
         @Override
         public void onResults(Bundle results) {
-
             Log.d(TAG,"onResults: " + results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION));
 
             // Return to the container activity dictation results
@@ -290,21 +288,27 @@ public class SpeechRecognitionService extends Service {
 
             // Restart new dictation cycle
             startVoiceRecognitionCycle();
-
         }
 
         @Override
         public void onRmsChanged(float rmsdB) {
 
         }
-
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-
         Log.d("speech", "onBind");
 
         return mServerMessenger.getBinder();
+    }
+
+    public void showNotification() {
+        // mId allows you to update the notification later on.
+        mNotificationManager.notify(NOTIFY_ID, mBuilder.build());
+    }
+
+    public void hideNotification() {
+        mNotificationManager.cancel(NOTIFY_ID);
     }
 }
