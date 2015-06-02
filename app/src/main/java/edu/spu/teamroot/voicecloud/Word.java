@@ -377,38 +377,38 @@ public class Word extends WordGroup {
         curItemMap.put("id", "count");
         //curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
         curItemMap.put("iconText", Integer.toString(word.getCount()));
-        curItemMap.put("label", word.getCount() == 1 ? "Occurrence" : "Occurrences");
+        curItemMap.put("label", "Count");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
         double countPerMinute = word.getCount() / ((System.currentTimeMillis() - WordCloud.getInstance().getTimestamp()) / 60000.0); // Find count per minute
         //curItemMap.put("icon", String.valueOf(R.mipmap.green_icon));
         curItemMap.put("iconText", countPerMinute >= 10 ? String.format("%d", (int) countPerMinute) : String.format("%.1f", countPerMinute));
-        curItemMap.put("label", countPerMinute == 1 ? "Occurrence Per Minute" : "Occurrences Per Minute");
+        curItemMap.put("label", "Per Minute");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        //curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.google_icon));
         curItemMap.put("iconText", "");
-        curItemMap.put("label", "Search with Google");
+        curItemMap.put("label", "Google");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        //curItemMap.put("icon", String.valueOf(R.mipmap.wiki_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.wikipedia_icon));
         curItemMap.put("iconText", "");
-        curItemMap.put("label", "Lookup on Wikipedia");
+        curItemMap.put("label", "Wikipedia");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        //curItemMap.put("icon", String.valueOf(R.mipmap.dictionary_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.dictionary_icon));
         curItemMap.put("iconText", "");
-        curItemMap.put("label", "Define in Dictionary");
+        curItemMap.put("label", "Define");
         dataList.add(curItemMap);
 
         curItemMap = new HashMap<>();
-        //curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
+        curItemMap.put("icon", String.valueOf(R.mipmap.remove_icon));
         curItemMap.put("iconText", "");
-        curItemMap.put("label", "Remove from Word Cloud");
+        curItemMap.put("label", "Remove/Exclude");
         dataList.add(curItemMap);
 
         SimpleAdapter simpleAdapter = new SimpleAdapter(WordCloud.context, dataList, R.layout.word_action_row, new String[]{"icon", "iconText", "label"}, new int[]{R.id.icon, R.id.iconText, R.id.label});

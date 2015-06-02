@@ -4,6 +4,7 @@
     <color name="accentWhite">#fff9f9f9</color>
     <color name="accentBlackTransparent">#7f141414</color>
     <color name="accentBlack">#ff141414</color>
+    <color name="voiceCloud">#303a9b</color>
     <color name="button">#ff2765e5</color>
     <color name="buttonDark">#ff1d4bab</color>
     <color name="blue">#ff039be5</color>

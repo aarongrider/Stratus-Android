@@ -61,7 +61,8 @@ public class SpeechRecognitionService extends Service {
 
         // Create notification
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.vc_play_icon)
+                        .setSmallIcon(R.drawable.vc_icon_solid)
+                        .setColor(getResources().getColor(R.color.button))
                         .setContentTitle("Voice Cloud")
                         .setContentText("Voice Cloud Started!");
 
