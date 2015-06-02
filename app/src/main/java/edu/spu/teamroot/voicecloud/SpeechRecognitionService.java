@@ -68,7 +68,7 @@ public class SpeechRecognitionService extends Service {
                         .setSmallIcon(R.drawable.vc_icon_solid)
                         .setColor(getResources().getColor(R.color.button))
                         .setContentTitle("Voice Cloud is running")
-                        .setContentText("Touch to open app");
+                        .setContentText("Touch to open app.");
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, MainActivity.class);
