@@ -57,6 +57,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
     private TwoDScrollView scrollView;
     private WordCloudLayout cloudLayout;
 
+    private static boolean destroyInstances = false;
     private boolean isRunning = true;
 
     private Messenger mServiceMessenger;
@@ -156,9 +157,10 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("MainActivity", "onCreate(" + savedInstanceState + ")");
-
+        Log.d("MainActivity", "onCreate(" + savedInstanceState + "):" + destroyInstances);
+        destroyInstances = false;
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         // TODO Refactor onCreate to be cleaner (organize by initialize views, save/load, SRS, etc.)
@@ -184,6 +186,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         int sideLength = Math.max(size.x, size.y);
         int scrollViewWidth = (int)(sideLength * 1.5);
         int scrollViewHeight = (int)(sideLength * 1.5);
+
+        scrollView.removeAllViews();
         scrollView.addView(cloudLayout, scrollViewWidth, scrollViewHeight);
 
         // Move to center of the ScrollView
@@ -272,19 +276,22 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onStart() {
-        Log.d("MainActivity", "onStart()");
+        Log.d("MainActivity", "onStart():" + destroyInstances);
+        destroyInstances = false;
         super.onStart();
     }
 
     @Override
     protected void onRestart() {
-        Log.d("MainActivity", "onRestart()");
+        Log.d("MainActivity", "onRestart():" + destroyInstances);
+        destroyInstances = false;
         super.onRestart();
     }
 
     @Override
     protected void onResume() {
-        Log.d("MainActivity", "onResume()");
+        Log.d("MainActivity", "onResume():" + destroyInstances);
+        destroyInstances = false;
         super.onResume();
 
         // Restore running state (sometimes can get out of sync)
@@ -293,22 +300,30 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
 
     @Override
     protected void onPause() {
-        Log.d("MainActivity", "onPause()");
+        Log.d("MainActivity", "onPause():" + destroyInstances);
+
+        // Set destroyInstances to true... this will allow onDestroy to destroy instances
+        destroyInstances = true;
+
         super.onPause();
     }
 
     @Override
     protected void onStop() {
-        Log.d("MainActivity", "onStop()");
-        super.onStop();
+        Log.d("MainActivity", "onStop():" + destroyInstances);
 
-        ExclusionList.getInstance().save();
+        if (ExclusionList.getInstance() != null) {
+            ExclusionList.getInstance().save();
+        } else {
+            Log.d("MainActivity", "Exclusion list instance was destroyed!!!");
+        }
+
+        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        Log.d("MainActivity", "onDestroy()");
-        super.onDestroy();
+        Log.d("MainActivity", "onDestroy():" + destroyInstances);
 
         /*
         if (mServiceMessenger != null) {
@@ -331,7 +346,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         unbindService(mServiceConnection);
 
         // Perform final cleanup
-        if (isFinishing()) {
+        if (isFinishing() && destroyInstances) {
             Log.d("MainActivity", "Performing final cleanup...");
             Log.d("MainActivity", "Deleting singleton instances");
 
@@ -342,6 +357,8 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
             Log.d("MainActivity", "Stopping service");
             stopService(new Intent(this, SpeechRecognitionService.class));
         }
+
+        super.onDestroy();
     }
 
     /*
