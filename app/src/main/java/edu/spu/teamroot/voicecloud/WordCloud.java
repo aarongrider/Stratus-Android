@@ -100,7 +100,7 @@ public class WordCloud {
         timestamp = System.currentTimeMillis();
 
         // Get and set outline state
-        showOutline = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("outline", true);
+        showOutline = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("outline", false);
 
         paint = new Paint();
         paint.setStyle(Paint.Style.STROKE);
@@ -636,7 +636,7 @@ public class WordCloud {
     public void onDraw(Canvas canvas) {
         if (!showOutline) return;
 
-        paint.setColor(Color.BLACK);
+        paint.setColor(context.getResources().getColor(R.color.accentBlackTransparent));
         paint.setStrokeWidth(4.0f);
 
         for (WordGroup group : wordTreeRoot.children) {
@@ -649,7 +649,7 @@ public class WordCloud {
             );
         }
 
-        paint.setColor(Color.BLUE);
+        paint.setColor(context.getResources().getColor(R.color.button));
         paint.setStrokeWidth(8.0f);
 
         canvas.drawRect(
@@ -660,7 +660,7 @@ public class WordCloud {
                 paint
         );
 
-        paint.setColor(Color.RED);
+        paint.setColor(context.getResources().getColor(R.color.red));
         paint.setStrokeWidth(16.0f);
 
         canvas.drawRect(
