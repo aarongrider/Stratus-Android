@@ -167,6 +167,7 @@ public class SpeechRecognitionService extends Service {
         }
     }
 
+    // Sends a start message to the service.
     public void startVoiceRecognitionCycle() {
         try {
             mServerMessenger.send(Message.obtain(null, MSG_RECOGNIZER_START_LISTENING));
@@ -303,11 +304,13 @@ public class SpeechRecognitionService extends Service {
         return mServerMessenger.getBinder();
     }
 
+    // Shows the Voice Cloud notification in the notification bar.
     public void showNotification() {
         // mId allows you to update the notification later on.
         mNotificationManager.notify(NOTIFY_ID, mBuilder.build());
     }
 
+    // Removes the Voice Cloud notification from the notification bar.
     public void hideNotification() {
         mNotificationManager.cancel(NOTIFY_ID);
     }

@@ -38,6 +38,7 @@ public class WordCloud {
      * Static methods
      */
 
+    // Creates a static instance of the class.
     public static WordCloud createInstance(Context context, RelativeLayout layout) {
         Log.d("WordCloud", "createInstance(" + context + ", " + layout + ")");
 
@@ -51,10 +52,12 @@ public class WordCloud {
         return instance;
     }
 
+    // Returns a static instance of the class.
     public static WordCloud getInstance() {
         return instance;
     }
 
+    // Deletes a static instance of the class.
     public static void deleteInstance() {
         Log.d("WordCloud", "deleteInstance()");
 
@@ -112,6 +115,7 @@ public class WordCloud {
      * Instance state helpers
      */
 
+    // Reloads a static instance of the class based on a new context and layout.
     public void reloadInstance(Context newContext, RelativeLayout newLayout) {
         context = newContext;
 
@@ -141,6 +145,7 @@ public class WordCloud {
      * Methods
      */
 
+    // Initializes the initial bounds of the root group.
     public void initRootBounds() {
         int width, height;
 
@@ -153,10 +158,12 @@ public class WordCloud {
         Log.d("wordTreeRoot", "Width: " + width + " Height: " + height);
     }
 
+    // Adds a word to the cloud.
     public void addWord(String word) {
         addWord(word, 1);
     }
 
+    // Adds a word with specified count to the cloud.
     public synchronized void addWord(String name, int count) {
         // Get the word from the list
         Word word = wordList.get(name);
@@ -195,6 +202,7 @@ public class WordCloud {
         }
     }
 
+    // Attaches and shows a word in the cloud.
     private void showWord(Word word) {
         Log.d("WordCloud", word.getName() + ": showWord");
 
@@ -203,6 +211,7 @@ public class WordCloud {
         word.show();
     }
 
+    // Detaches and hides a word from the cloud.
     private void hideWord(Word word) {
         Log.d("WordCloud", word.getName() + ": hideWord");
 
@@ -210,6 +219,7 @@ public class WordCloud {
         detachWord(word);
     }
 
+    // Re-evaluates all words based on updated size and weighting.
     private void evaluateAllWords() {
         for (Map.Entry pair : wordList.entrySet()) {
             Word word = (Word)pair.getValue();
@@ -227,14 +237,17 @@ public class WordCloud {
         }
     }
 
+    // Returns a word from the word list.
     public Word getWord(String name) {
         return wordList.get(name);
     }
 
+    // Returns the timestamp of the word cloud.
     public long getTimestamp() {
         return this.timestamp;
     }
 
+    // Updates the list of free groups.
     private void refreshFreeGroups() {
         freeGroups.clear();
 
@@ -245,6 +258,7 @@ public class WordCloud {
         }
     }
 
+    // Returns a free group from the list. Updates max group size if count changes.
     protected WordGroup getFreeGroup() {
         // Calculate new group size ( 1 + floor( sqrt( n-1 ) ) )
         // e.g. n=4, size = 2 groups of 2; n=8, size = 3 groups of 3
@@ -294,6 +308,7 @@ public class WordCloud {
         treeSize++;
     }
 
+    // Detaches a word from the word cloud, leaving it in the list.
     protected void detachWord(Word word) {
         Log.d("WordCloud", word.getName() + ": detachWord");
 
@@ -349,6 +364,8 @@ public class WordCloud {
         removeWord(word, true);
     }
 
+    // Removes a word from the cloud. The flag determines if it is kept in the list.
+    // (This is done to avoid problems when deleting during an iteration)
     protected synchronized void removeWord(Word word, boolean deleteFromList) {
         Log.d("WordCloud", word.getName() + ": removeWord");
 
@@ -387,10 +404,12 @@ public class WordCloud {
         initRootBounds();
     }
 
+    // Returns true if the word is in the cloud.
     public boolean isWordInCloud(String name) {
         return wordList.containsKey(name);
     }
 
+    // Saves the word cloud to the web, returning the cloudid.
     public String saveWordCloud() {
         try {
             JSONObject toSend = toJSON();
@@ -412,6 +431,7 @@ public class WordCloud {
         return "none";
     }
 
+    // Loads the word cloud from the web, given the cloudid.
     public synchronized boolean loadWordCloud(String cloudid) {
         // Make request
         Log.d("wordCloud", "Loading CLOUDID " + cloudid);
@@ -438,6 +458,7 @@ public class WordCloud {
         return false;
     }
 
+    // Saves the word cloud to a JSON representation.
     public synchronized JSONObject toJSON() {
         Log.d("WordCloud", "Saving word cloud");
 
@@ -540,6 +561,7 @@ public class WordCloud {
         return saveObj;
     }
 
+    // Loads the word cloud from a JSON representation.
     public synchronized boolean fromJSON(JSONObject fromRecv) {
         Log.d("WordCloud", "Loading word cloud");
 
@@ -625,14 +647,17 @@ public class WordCloud {
      * Drawing
      */
 
+    // Returns the showOutline flag.
     public boolean getShowOutline() {
         return showOutline;
     }
 
+    // Sets the showOutline flag.
     public void setShowOutline(boolean showOutline) {
         this.showOutline = showOutline;
     }
 
+    // Called to draw outlines on the canvas.
     public void onDraw(Canvas canvas) {
         if (!showOutline) return;
 

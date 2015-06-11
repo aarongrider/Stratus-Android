@@ -108,15 +108,18 @@ public class WordGroup {
         return new Point(center);
     }
 
+    // Returns the ID of this group. Needed to identify groups when saving.
     public int getId() {
         return GROUP_ID;
     }
 
+    // Adds a child to the group.
     public void addChild(WordGroup child) {
         children.add(child);
         child.parent = this;
     }
 
+    // Removes a child from the group.
     public boolean removeChild(WordGroup child) {
         int index = children.indexOf(child);
 
@@ -129,6 +132,8 @@ public class WordGroup {
         return false;
     }
 
+    // Repositions a child in the group with respect to the other children.
+    // Uses a spiral algorithm to position children; ensures that no two children overlap.
     public void repositionChild(WordGroup child, boolean relativeToGroup) {
         if (!relativeToGroup && child.center.x == 0 && child.center.y == 0) {
             // Safety check: do not set relativeToGroup=false if positioning for the first time!

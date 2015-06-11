@@ -83,6 +83,7 @@ public class JSONTransmitter extends AsyncTask<JSONObject, JSONObject, JSONObjec
         return returnObject;
     }
 
+    // Converts an input stream to a string.
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
         String line;

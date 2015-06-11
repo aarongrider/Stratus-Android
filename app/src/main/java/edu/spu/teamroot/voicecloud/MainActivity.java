@@ -561,6 +561,7 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         return lastToast;
     }
 
+    // Shows the settings menu.
     public void showMenu() {
         PopupMenu popup = new PopupMenu(menuButton.getContext(), menuButton);
         popup.inflate(R.menu.quick_menu);
@@ -568,20 +569,24 @@ public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuI
         popup.show();
     }
 
+    // Opens the exclusion list activity.
     public void openExclusion() {
         Intent intent = new Intent(this, ExclusionActivity.class);
         startActivity(intent);
     }
 
+    // Opens the settings activity.
     public void openSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
+    // Sets the running state of the app. Defaults to show button animation.
     public void setRunning(boolean running) {
         setRunning(running, true);
     }
 
+    // Sets the running state of the app. The animate flag determines if the button will animate.
     public void setRunning(boolean running, boolean animate) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             // Vector transformation animations not supported!

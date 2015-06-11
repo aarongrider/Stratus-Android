@@ -137,11 +137,12 @@ public class Word extends WordGroup {
         }
     }
 
-    // Shows the word on the view.
+    // Shows the word on the view. Animation depends on if the button is already visible.
     public void show() {
         show(button.getVisibility() == View.INVISIBLE);
     }
 
+    // Shows the word on the view.
     public void show(boolean animate) {
         Log.d(name, "show(" + count + ")");
 
@@ -161,11 +162,12 @@ public class Word extends WordGroup {
         }
     }
 
-    // Hides the word from the view.
+    // Hides the word from the view. Animation depends on if the button is already invisible.
     public void hide() {
         hide(button.getVisibility() == View.VISIBLE);
     }
 
+    // Hides the word from the view.
     public void hide(boolean animate) {
         Log.d(name, "hide(" + count + ")");
 
@@ -185,26 +187,32 @@ public class Word extends WordGroup {
         }
     }
 
+    // Returns true if the button has been created.
     public boolean isCreated() {
         return button != null;
     }
 
+    // Returns true if the button is attached to the word cloud.
     public boolean isAttached() {
         return parent != null;
     }
 
+    // Returns the name of the word.
     public String getName() {
         return name;
     }
 
+    // Returns the occurrence count.
     public int getCount() {
         return count;
     }
 
+    // Returns the timestamp of the last occurrence.
     public long getTimestamp() {
         return timestamp;
     }
 
+    // Increments the count by the value, and updates the size.
     public boolean incrementCount(int value) {
         // Increment count
         count += value;
@@ -222,6 +230,7 @@ public class Word extends WordGroup {
         return true;
     }
 
+    // Refreshes the size of the word based on the current count and weighting.
     private void refreshSize(boolean animate) {
         if (!isCreated()) return;
 
@@ -282,6 +291,7 @@ public class Word extends WordGroup {
         }
     }
 
+    // Sets the color of the word button.
     private void setColor(int color) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             button.getBackground().setColorFilter(new LightingColorFilter(0xFF000000, color));
@@ -297,6 +307,7 @@ public class Word extends WordGroup {
         moveBy(dx, dy, button.getVisibility() == View.VISIBLE);
     }
 
+    // Moves the word by a specified delta.
     private void moveBy(int dx, int dy, boolean animate) {
         center.offset(dx, dy);
         bounds.offset(dx, dy);
@@ -341,6 +352,7 @@ public class Word extends WordGroup {
         moveTo(x, y, button.getVisibility() == View.VISIBLE);
     }
 
+    // Moves the word to a specified point.
     private void moveTo(int x, int y, boolean animate) {
         int dx = x - center.x;
         int dy = y - center.y;
@@ -353,7 +365,7 @@ public class Word extends WordGroup {
         return name;
     }
 
-
+    // Shows the list of word actions.
     private void wordActions(final Word word) {
 
         final ListPopupWindow popupWindow = new ListPopupWindow(WordCloud.context);

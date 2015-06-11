@@ -24,6 +24,7 @@ public class Preprocessor {
      * Static methods
      */
 
+    // Creates a static instance of the class.
     public static Preprocessor createInstance() {
         Log.d("Preprocessor", "createInstance()");
 
@@ -39,10 +40,12 @@ public class Preprocessor {
         return instance;
     }
 
+    // Returns a static instance of the class.
     public static Preprocessor getInstance() {
         return instance;
     }
 
+    // Deletes a static instance of the class.
     public static void deleteInstance() {
         Log.d("Preprocessor", "deleteInstance()");
 
@@ -53,17 +56,21 @@ public class Preprocessor {
      * Member variables
      */
 
+    // A temporary word, representing an aggregate count before the word is processed.
     private class ProcWord {
         private int count = 1;
 
+        // Increments the count of the word
         public void increment() {
             count++;
         }
 
+        // Sets the count to a value.
         public void setCount(int count) {
             this.count = count;
         }
 
+        // Returns the current count.
         public int getCount() {
             return count;
         }
@@ -194,6 +201,7 @@ public class Preprocessor {
      * Methods
      */
 
+    // Posts a string result to be processed. Type specifies partial or final results.
     public void processString(String resultString, int type) {
         if (taskHandler == null) {
             Log.d("Preprocessor", "Null taskHandler!");
@@ -204,6 +212,7 @@ public class Preprocessor {
         taskHandler.post(new ProcTask(resultString, type));
     }
 
+    // Clears the previous results, preventing them from being revoked.
     public void clearPrevious() {
         synchronized (prevMap) {
             prevMap.clear();

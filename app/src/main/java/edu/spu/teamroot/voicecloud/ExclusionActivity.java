@@ -70,6 +70,7 @@ public class ExclusionActivity extends ActionBarActivity {
         ExclusionList.getInstance().save();
     }
 
+    // Prompts the user to remove an item from the exclusion list.
     protected void removeItemFromList(final int position) {
         AlertDialog.Builder alert = new AlertDialog.Builder(
                 ExclusionActivity.this);
@@ -116,6 +117,7 @@ public class ExclusionActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // Opens a dialog to add words to the exclusion list.
     private void openAdd()
     {
         AlertDialog.Builder addalert = new AlertDialog.Builder(ExclusionActivity.this);

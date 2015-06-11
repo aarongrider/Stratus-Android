@@ -92,9 +92,9 @@ public class SettingsActivity extends ActionBarActivity {
             exclusionList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o) {
-                    boolean value = !Preprocessor.getInstance().exclusionEnabled;
+                    boolean value = !Preprocessor.exclusionEnabled;
                     exclusionList.setChecked(value);
-                    Preprocessor.getInstance().exclusionEnabled = value;
+                    Preprocessor.exclusionEnabled = value;
                     return value;
                 }
             });
@@ -105,10 +105,12 @@ public class SettingsActivity extends ActionBarActivity {
             updatePreference(findPreference(key));
         }
 
+        // Updates the preference.
         private void updatePreference(Preference preference) {
                 preference.setSummary("Test");
         }
 
+        // Toggles the word group outlines.
         void toggleOutlines(boolean value) {
             WordCloud.getInstance().setShowOutline(value);
         }

@@ -26,6 +26,7 @@ public class ExclusionList {
      * Static methods
      */
 
+    // Creates a static instance of the class.
     public static ExclusionList createInstance(Context context) {
         Log.d("ExclusionList", "createInstance(" + context + ")");
 
@@ -39,9 +40,12 @@ public class ExclusionList {
         return instance;
     }
 
+    // Returns a static instance of the class.
     public static ExclusionList getInstance() {
         return instance;
     }
+
+    // Deletes a static instance of the class.
     public static void deleteInstance() {
         Log.d("ExclusionList", "deleteInstance()");
         instance = null;
@@ -68,6 +72,7 @@ public class ExclusionList {
      * Instance state helpers
      */
 
+    // Reloads a static instance of the class.
     public void reloadInstance(Context newContext) {
         context = newContext;
     }

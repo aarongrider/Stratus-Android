@@ -1284,18 +1284,22 @@ public class TwoDScrollView extends FrameLayout {
         }
     };
 
+    // Stores the screen size.
     public void setScreenSize(Point screenSize) {
         mScreenSize = new Point(screenSize);
     }
 
+    // Initializes the detector for scale gestures.
     private void initScaleDetector(Context context) {
         mScaleGestureDetector = new ScaleGestureDetector(context, mScaleGestureListener);
     }
 
+    // Returns the current scale factor.
     public float getScaleFactor() {
         return mScaleFactor;
     }
 
+    // Sets the scale factor and scales the child view.
     public void setScaleFactor(float scaleFactor) {
         mScaleFactor = scaleFactor;
 

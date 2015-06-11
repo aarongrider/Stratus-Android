@@ -53,6 +53,8 @@ public class MarginAnimationListener implements AnimatorUpdateListener, Animator
         mToValue = toValue;
     }
 
+    // Returns a ValueAnimator configured to use this MarginAnimationListener.
+    // Use this animator to animate the margins of views.
     public ValueAnimator getValueAnimator() {
         ValueAnimator animator = ValueAnimator.ofInt(0, mToValue - mFromValue);
         animator.addUpdateListener(this);
@@ -61,6 +63,7 @@ public class MarginAnimationListener implements AnimatorUpdateListener, Animator
         return animator;
     }
 
+    // Sets the value of a margin based on the animation direction.
     private void setValue(int value) {
         switch (mDirection) {
             default:
