@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <edu.spu.teamroot.voicecloud.TwoDScrollView
+    <edu.spu.teamroot.speechcloud.TwoDScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/WordCloudScrollView"

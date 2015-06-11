@@ -1,4 +1,4 @@
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -67,7 +67,7 @@ public class SpeechRecognitionService extends Service {
                         .setOngoing(true)
                         .setSmallIcon(R.drawable.vc_icon_solid)
                         .setColor(getResources().getColor(R.color.button))
-                        .setContentTitle("Voice Cloud is running")
+                        .setContentTitle("Speech Cloud is running")
                         .setContentText("Touch to open app.");
 
         // Creates an explicit intent for an Activity in your app
@@ -304,13 +304,13 @@ public class SpeechRecognitionService extends Service {
         return mServerMessenger.getBinder();
     }
 
-    // Shows the Voice Cloud notification in the notification bar.
+    // Shows the cloud notification in the notification bar.
     public void showNotification() {
         // mId allows you to update the notification later on.
         mNotificationManager.notify(NOTIFY_ID, mBuilder.build());
     }
 
-    // Removes the Voice Cloud notification from the notification bar.
+    // Removes the cloud notification from the notification bar.
     public void hideNotification() {
         mNotificationManager.cancel(NOTIFY_ID);
     }

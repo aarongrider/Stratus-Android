@@ -19,18 +19,14 @@
  * http://GORGES.us
  */
 
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Display;
 import android.view.FocusFinder;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -41,7 +37,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;

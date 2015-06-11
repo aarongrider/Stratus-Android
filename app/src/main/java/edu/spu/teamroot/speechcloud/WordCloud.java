@@ -1,9 +1,7 @@
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;

@@ -26,8 +26,8 @@
 
             <intent
                 android:action="android.intent.action.VIEW"
-                android:targetPackage="edu.spu.teamroot.voicecloud"
-                android:targetClass="edu.spu.teamroot.voicecloud.ExclusionActivity"
+                android:targetPackage="edu.spu.teamroot.speechcloud"
+                android:targetClass="edu.spu.teamroot.speechcloud.ExclusionActivity"
                 />
 
         </Preference>
@@ -74,7 +74,7 @@
 
         <Preference
             android:title="Getting Started"
-            android:summary="Learn the basics of Voice Cloud"
+            android:summary="Learn the basics of Speech Cloud"
             android:key="website">
 
             <intent android:action="android.intent.action.VIEW"

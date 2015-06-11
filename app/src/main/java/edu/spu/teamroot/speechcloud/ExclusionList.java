@@ -1,4 +1,4 @@
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import android.content.Context;
 import android.util.Log;

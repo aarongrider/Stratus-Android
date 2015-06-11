@@ -1,4 +1,4 @@
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;

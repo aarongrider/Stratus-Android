@@ -1,4 +1,4 @@
-package edu.spu.teamroot.voicecloud;
+package edu.spu.teamroot.speechcloud;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
