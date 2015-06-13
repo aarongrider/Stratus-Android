@@ -1,4 +1,4 @@
-package edu.spu.teamroot.speechcloud;
+package edu.spu.teamroot.stratus;
 
 import android.content.Context;
 import android.content.res.Resources;

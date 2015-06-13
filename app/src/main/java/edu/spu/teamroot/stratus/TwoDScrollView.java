@@ -19,7 +19,7 @@
  * http://GORGES.us
  */
 
-package edu.spu.teamroot.speechcloud;
+package edu.spu.teamroot.stratus;
 
 import java.util.List;
 

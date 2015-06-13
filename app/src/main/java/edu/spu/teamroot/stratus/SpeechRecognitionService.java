@@ -1,4 +1,4 @@
-package edu.spu.teamroot.speechcloud;
+package edu.spu.teamroot.stratus;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -67,7 +67,7 @@ public class SpeechRecognitionService extends Service {
                         .setOngoing(true)
                         .setSmallIcon(R.drawable.vc_icon_solid)
                         .setColor(getResources().getColor(R.color.button))
-                        .setContentTitle("Speech Cloud is running")
+                        .setContentTitle("Stratus is running")
                         .setContentText("Touch to open app.");
 
         // Creates an explicit intent for an Activity in your app

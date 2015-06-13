@@ -74,7 +74,7 @@
 
         <Preference
             android:title="Getting Started"
-            android:summary="Learn the basics of Speech Cloud"
+            android:summary="Learn the basics of Stratus"
             android:key="website">
 
             <intent android:action="android.intent.action.VIEW"

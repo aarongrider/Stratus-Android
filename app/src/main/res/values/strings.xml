@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Speech Cloud</string>
+    <string name="app_name">Stratus</string>
     <string name="save_cloud">Save</string>
     <string name="load_cloud">Load</string>
     <string name="exclusion_activity">Exclusion List</string>
@@ -9,7 +9,7 @@
     <string name="settings">Settings</string>
 
     <string name="agreement">
-            Speech Cloud was created by:\n
+            Stratus was created by:\n
             Isaac Wang, Aaron Grider, Van Nguyen\n\n
             By using this app, you agree to the\n
             <a href="http://voicecloudapp.com">End User License Agreement</a>\n\n

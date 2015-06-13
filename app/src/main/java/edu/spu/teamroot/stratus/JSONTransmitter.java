@@ -1,4 +1,4 @@
-package edu.spu.teamroot.speechcloud;
+package edu.spu.teamroot.stratus;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
