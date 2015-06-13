@@ -1,4 +1,4 @@
-package edu.spu.teamroot.stratus;
+package edu.spu.teamroot.voicecloud;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;

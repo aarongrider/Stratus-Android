@@ -1,4 +1,4 @@
-package edu.spu.teamroot.stratus;
+package edu.spu.teamroot.voicecloud;
 
 public class SimpleWeighter implements WordWeighter {
     private static final int[] accentColors = {

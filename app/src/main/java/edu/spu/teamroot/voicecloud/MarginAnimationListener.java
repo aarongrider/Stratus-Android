@@ -1,4 +1,4 @@
-package edu.spu.teamroot.stratus;
+package edu.spu.teamroot.voicecloud;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;

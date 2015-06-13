@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.spu.teamroot.stratus" >
+    package="edu.spu.teamroot.voicecloud" >
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -15,10 +15,10 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <service android:name="edu.spu.teamroot.stratus.SpeechRecognitionService" />
+        <service android:name="edu.spu.teamroot.voicecloud.SpeechRecognitionService" />
 
         <activity
-            android:name="edu.spu.teamroot.stratus.MainActivity"
+            android:name="edu.spu.teamroot.voicecloud.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,21 +26,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.spu.teamroot.stratus.ExclusionActivity"
+            android:name="edu.spu.teamroot.voicecloud.ExclusionActivity"
             android:label="@string/exclusion_activity"
-            android:parentActivityName="edu.spu.teamroot.stratus.MainActivity" >
+            android:parentActivityName="edu.spu.teamroot.voicecloud.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="edu.spu.teamroot.stratus.MainActivity" />
+                android:value="edu.spu.teamroot.voicecloud.MainActivity" />
         </activity>
 
         <activity
-            android:name="edu.spu.teamroot.stratus.SettingsActivity"
+            android:name="edu.spu.teamroot.voicecloud.SettingsActivity"
             android:label="Settings"
-            android:parentActivityName="edu.spu.teamroot.stratus.MainActivity" >
+            android:parentActivityName="edu.spu.teamroot.voicecloud.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="edu.spu.teamroot.stratus.MainActivity" />
+                android:value="edu.spu.teamroot.voicecloud.MainActivity" />
         </activity>
 
     </application>

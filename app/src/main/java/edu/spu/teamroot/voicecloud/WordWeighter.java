@@ -1,4 +1,4 @@
-package edu.spu.teamroot.stratus;
+package edu.spu.teamroot.voicecloud;
 
 public interface WordWeighter {
     // Returns the text size for a button, in sp.

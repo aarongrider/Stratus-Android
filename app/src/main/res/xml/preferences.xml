@@ -26,8 +26,8 @@
 
             <intent
                 android:action="android.intent.action.VIEW"
-                android:targetPackage="edu.spu.teamroot.stratus"
-                android:targetClass="edu.spu.teamroot.stratus.ExclusionActivity"
+                android:targetPackage="edu.spu.teamroot.voicecloud"
+                android:targetClass="edu.spu.teamroot.voicecloud.ExclusionActivity"
                 />
 
         </Preference>
