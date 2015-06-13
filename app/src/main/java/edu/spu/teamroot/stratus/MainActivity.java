@@ -40,7 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends ActionBarActivity implements PopupMenu.OnMenuItemClickListener {
-    public static final String VC_EXT_PATH = Environment.getExternalStorageDirectory() + "/SpeechCloud/";
+    public static final String VC_EXT_PATH = Environment.getExternalStorageDirectory() + "/Stratus/";
     public static final String VC_SCREENSHOTS_PATH = VC_EXT_PATH + "/Screenshots/";
 
     private static Toast lastToast;
